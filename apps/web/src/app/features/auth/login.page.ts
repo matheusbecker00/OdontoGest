@@ -7,7 +7,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthStore } from '../../core/auth/auth.store';
-import { EmailVerificationRequiredError } from '../../core/auth/firebase-auth.service';
 
 @Component({
   selector: 'og-login-page',
@@ -52,12 +51,8 @@ export class LoginPage {
       const returnUrl =
         candidate?.startsWith('/') && !candidate.startsWith('//') ? candidate : '/app/dashboard';
       await this.router.navigateByUrl(returnUrl);
-    } catch (error) {
-      this.errorMessage.set(
-        error instanceof EmailVerificationRequiredError
-          ? 'Confirme seu e-mail antes de entrar. Reenviamos o link de confirmação.'
-          : 'Não foi possível entrar. Verifique os dados e tente novamente.',
-      );
+    } catch {
+      this.errorMessage.set('Não foi possível entrar. Verifique os dados e tente novamente.');
     } finally {
       this.pending.set(false);
     }

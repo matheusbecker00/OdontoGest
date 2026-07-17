@@ -1,4 +1,4 @@
-query GetMyContext @auth(level: USER_EMAIL_VERIFIED) {
+query GetMyContext @auth(level: USER) {
   users(where: { id: { eq_expr: "auth.uid" } }, limit: 1) {
     id
     name
@@ -30,8 +30,7 @@ query GetMyContext @auth(level: USER_EMAIL_VERIFIED) {
   }
 }
 
-query ListMyPatients($clinicId: UUID!, $limit: Int = 500)
-@auth(level: USER_EMAIL_VERIFIED) {
+query ListMyPatients($clinicId: UUID!, $limit: Int = 500) @auth(level: USER) {
   clinicMemberships(
     where: {
       clinicId: { eq: $clinicId }

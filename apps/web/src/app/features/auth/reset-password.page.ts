@@ -14,7 +14,7 @@ import { AuthApiService } from '../../core/auth/auth-api.service';
     <main>
       <form [formGroup]="form" (ngSubmit)="submit()">
         <h1>Definir nova senha</h1>
-        <p>Use pelo menos 12 caracteres e não inclua seu e-mail.</p>
+        <p>Use pelo menos 6 caracteres e não inclua seu e-mail.</p>
         <mat-form-field appearance="outline">
           <mat-label>Nova senha</mat-label>
           <input matInput type="password" formControlName="password" autocomplete="new-password" />
@@ -71,7 +71,7 @@ export class ResetPasswordPage {
   private readonly formBuilder = inject(FormBuilder);
   protected readonly message = signal<string | null>(null);
   protected readonly form = this.formBuilder.nonNullable.group({
-    password: ['', [Validators.required, Validators.minLength(12), Validators.maxLength(128)]],
+    password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(128)]],
     confirmation: ['', [Validators.required, Validators.maxLength(128)]],
   });
 

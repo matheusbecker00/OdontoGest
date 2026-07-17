@@ -107,7 +107,7 @@ mutation CreateMyPatient(
   $administrativeNotes: String
   $auditId: UUID!
   $requestId: String!
-) @auth(level: USER_EMAIL_VERIFIED) @transaction {
+) @auth(level: USER) @transaction {
   query
     @check(
       expr: "response.query.clinicMemberships.size() == 1"
@@ -168,7 +168,7 @@ mutation UpdateMyPatient(
   $administrativeNotes: String
   $auditId: UUID!
   $requestId: String!
-) @auth(level: USER_EMAIL_VERIFIED) @transaction {
+) @auth(level: USER) @transaction {
   query
     @check(
       expr: "response.query.clinicMemberships.size() == 1"
@@ -224,7 +224,7 @@ mutation InactivateMyPatient(
   $clinicId: UUID!
   $auditId: UUID!
   $requestId: String!
-) @auth(level: USER_EMAIL_VERIFIED) @transaction {
+) @auth(level: USER) @transaction {
   query
     @check(
       expr: "response.query.clinicMemberships.size() == 1"

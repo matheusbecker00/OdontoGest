@@ -74,6 +74,7 @@ describe('AuthStore', () => {
       clinicName: 'Clínica Sorriso',
       email: 'marina@example.test',
     });
-    expect(firebase.sendVerificationAndSignOut).toHaveBeenCalled();
+    expect(data.getMyContext).toHaveBeenCalledOnce();
+    expect(store.isAuthenticated()).toBe(true);
   });
 });

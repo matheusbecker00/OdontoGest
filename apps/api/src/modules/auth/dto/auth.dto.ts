@@ -21,9 +21,9 @@ export class SignUpDto {
   @MaxLength(320)
   email!: string;
 
-  @ApiProperty({ minLength: 12, maxLength: 128, writeOnly: true })
+  @ApiProperty({ minLength: 6, maxLength: 128, writeOnly: true })
   @IsString()
-  @MinLength(12)
+  @MinLength(6)
   @MaxLength(128)
   password!: string;
 }
@@ -90,9 +90,9 @@ export class ForgotPasswordDto {
 }
 
 export class ResetPasswordDto extends TokenDto {
-  @ApiProperty({ minLength: 12, maxLength: 128, writeOnly: true })
+  @ApiProperty({ minLength: 6, maxLength: 128, writeOnly: true })
   @IsString()
-  @MinLength(12)
+  @MinLength(6)
   @MaxLength(128)
   password!: string;
 }

@@ -82,7 +82,7 @@ export class AuthStore {
         clinicName: normalized.clinicName,
         email: normalized.email,
       });
-      await this.firebase.sendVerificationAndSignOut();
+      await this.loadContext();
     } catch (error) {
       await this.firebase.signOut().catch(() => undefined);
       throw error;

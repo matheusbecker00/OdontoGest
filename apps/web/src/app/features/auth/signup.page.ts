@@ -39,7 +39,7 @@ export class SignupPage {
     ],
     clinicName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(180)]],
     email: ['', [Validators.required, Validators.email, Validators.maxLength(320)]],
-    password: ['', [Validators.required, Validators.minLength(12), Validators.maxLength(128)]],
+    password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(128)]],
     confirmation: ['', [Validators.required, Validators.maxLength(128)]],
     acceptTerms: [false, Validators.requiredTrue],
   });
@@ -64,9 +64,7 @@ export class SignupPage {
         email: value.email,
         password: value.password,
       });
-      await this.router.navigate(['/verificar-email'], {
-        queryParams: { sent: 'true' },
-      });
+      await this.router.navigateByUrl('/app/dashboard');
     } catch {
       this.errorMessage.set(
         'Não foi possível concluir o cadastro. Confira os dados e tente novamente.',

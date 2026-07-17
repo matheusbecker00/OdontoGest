@@ -61,6 +61,7 @@ Pré-requisitos: Node.js 24.15 ou superior, Corepack e Docker Compose.
 corepack enable
 corepack install
 pnpm install --frozen-lockfile
+pnpm db:generate
 pnpm firebase:sdk:generate
 ```
 

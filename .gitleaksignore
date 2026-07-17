@@ -1,0 +1,3 @@
+# Firebase Web API keys are public client configuration. Keep this exception
+# pinned to the exact historical finding instead of disabling the detector.
+da99c87698e369378a4c17dd7c9ed6ff8b466211:apps/web/src/environments/firebase.options.ts:gcp-api-key:6

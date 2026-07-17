@@ -25,7 +25,7 @@
     "openapi:generate": "corepack pnpm --filter @odontogest/api openapi:generate && corepack pnpm --filter @odontogest/contracts generate"
   },
   "devDependencies": {
-    "markdownlint-cli2": "0.20.0",
+    "markdownlint-cli2": "0.23.1",
     "prettier": "3.9.5",
     "turbo": "2.10.5"
   }

@@ -9,4 +9,4 @@ schema:
       cloudSql:
         instanceId: "odontogest-spark"
         schemaValidation: "STRICT"
-connectorDirs: ["./api"]
+connectorDirs: ["./api", "./client"]

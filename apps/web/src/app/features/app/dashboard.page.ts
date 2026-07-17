@@ -22,7 +22,7 @@ import { AuthStore } from '../../core/auth/auth.store';
       <section class="cards" aria-label="Estado da fundação">
         <mat-card appearance="outlined">
           <mat-card-header><mat-card-title>Sessão</mat-card-title></mat-card-header>
-          <mat-card-content>Access token mantido somente em memória.</mat-card-content>
+          <mat-card-content>Autenticação protegida pelo Firebase.</mat-card-content>
         </mat-card>
         <mat-card appearance="outlined">
           <mat-card-header><mat-card-title>Tenant</mat-card-title></mat-card-header>

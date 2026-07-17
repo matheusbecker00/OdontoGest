@@ -1,0 +1,65 @@
+query GetMyContext @auth(level: USER_EMAIL_VERIFIED) {
+  users(where: { id: { eq_expr: "auth.uid" } }, limit: 1) {
+    id
+    name
+    email
+    status
+    authorizationVersion
+  }
+  clinicMemberships(
+    where: {
+      userId: { eq_expr: "auth.uid" }
+      status: { eq: ACTIVE }
+      deletedAt: { eq: null }
+    }
+    orderBy: { createdAt: ASC }
+  ) {
+    authorizationVersion
+    clinic {
+      id
+      tradeName
+      status
+      timezone
+      locale
+      currency
+    }
+    role {
+      code
+      name
+    }
+  }
+}
+
+query ListMyPatients($clinicId: UUID!, $limit: Int = 500)
+@auth(level: USER_EMAIL_VERIFIED) {
+  clinicMemberships(
+    where: {
+      clinicId: { eq: $clinicId }
+      userId: { eq_expr: "auth.uid" }
+      status: { eq: ACTIVE }
+      deletedAt: { eq: null }
+    }
+    limit: 1
+  ) {
+    clinic {
+      patients_on_clinic(
+        where: { deletedAt: { eq: null } }
+        orderBy: [{ fullName: ASC }, { id: ASC }]
+        limit: $limit
+      ) {
+        id
+        fullName
+        cpf
+        birthDate
+        phone
+        whatsapp
+        email
+        addressLine
+        administrativeNotes
+        registrationStatus
+        createdAt
+        updatedAt
+      }
+    }
+  }
+}

@@ -1,21 +1,19 @@
 import { Injectable } from '@angular/core';
-import { getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import {
+  browserLocalPersistence,
   connectAuthEmulator,
   createUserWithEmailAndPassword,
   getAuth,
-  inMemoryPersistence,
   setPersistence,
   sendEmailVerification,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
   type Auth,
 } from 'firebase/auth';
 import { environment } from '../../../environments/environment';
-import { firebaseOptions } from '../../../environments/firebase.options';
-
-const FIREBASE_APP_NAME = 'odontogest-web';
+import { getOdontoGestFirebaseApp } from '../firebase-app';
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseAuthService {
@@ -23,10 +21,7 @@ export class FirebaseAuthService {
   private readonly ready: Promise<void>;
 
   constructor() {
-    const app: FirebaseApp =
-      getApps().find((candidate) => candidate.name === FIREBASE_APP_NAME) ??
-      initializeApp(firebaseOptions, FIREBASE_APP_NAME);
-    this.auth = getAuth(app);
+    this.auth = getAuth(getOdontoGestFirebaseApp());
 
     if (environment.useFirebaseAuthEmulator) {
       connectAuthEmulator(this.auth, 'http://127.0.0.1:9099', {
@@ -34,16 +29,15 @@ export class FirebaseAuthService {
       });
     }
 
-    this.ready = setPersistence(this.auth, inMemoryPersistence);
+    this.ready = setPersistence(this.auth, browserLocalPersistence);
   }
 
-  async signIn(email: string, password: string): Promise<string> {
+  async signIn(email: string, password: string): Promise<void> {
     await this.ready;
-    const credential = await signInWithEmailAndPassword(this.auth, email.trim(), password);
-    return credential.user.getIdToken(true);
+    await signInWithEmailAndPassword(this.auth, email.trim(), password);
   }
 
-  async createAccount(email: string, password: string, displayName: string): Promise<string> {
+  async createAccount(email: string, password: string, displayName: string): Promise<void> {
     await this.ready;
     let credential;
     try {
@@ -60,7 +54,12 @@ export class FirebaseAuthService {
       credential = await signInWithEmailAndPassword(this.auth, email.trim(), password);
     }
     await updateProfile(credential.user, { displayName: displayName.trim() });
-    return credential.user.getIdToken(true);
+  }
+
+  async waitUntilReady(): Promise<boolean> {
+    await this.ready;
+    await this.auth.authStateReady();
+    return this.auth.currentUser !== null;
   }
 
   async sendVerificationAndSignOut(): Promise<void> {
@@ -75,6 +74,13 @@ export class FirebaseAuthService {
     } finally {
       await signOut(this.auth);
     }
+  }
+
+  async sendPasswordReset(email: string): Promise<void> {
+    await this.ready;
+    await sendPasswordResetEmail(this.auth, email.trim().toLowerCase(), {
+      url: `${globalThis.location.origin}/login?passwordReset=success`,
+    });
   }
 
   async signOut(): Promise<void> {

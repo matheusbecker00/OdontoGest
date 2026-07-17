@@ -1,46 +1,63 @@
 import { computed, Injectable, signal, inject } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
-import { AuthApiService } from './auth-api.service';
+import { FirebaseDataService } from '../firebase-data.service';
 import { FirebaseAuthService } from './firebase-auth.service';
 import type { AuthenticatedUser, ClinicSummary, TenantContext } from './auth.models';
 
+const OWNER_PERMISSIONS = [
+  'patient.read',
+  'patient.create',
+  'patient.update',
+  'patient.inactivate',
+] as const;
+
 @Injectable({ providedIn: 'root' })
 export class AuthStore {
-  private readonly api = inject(AuthApiService);
   private readonly firebase = inject(FirebaseAuthService);
-  private readonly accessTokenState = signal<string | null>(null);
+  private readonly data = inject(FirebaseDataService);
   private readonly userState = signal<AuthenticatedUser | null>(null);
   private readonly clinicsState = signal<readonly ClinicSummary[]>([]);
   private readonly tenantContextState = signal<TenantContext | null>(null);
-  private refreshInFlight: Promise<string> | null = null;
 
   readonly user = this.userState.asReadonly();
   readonly clinics = this.clinicsState.asReadonly();
   readonly tenantContext = this.tenantContextState.asReadonly();
-  readonly isAuthenticated = computed(() => this.accessTokenState() !== null);
+  readonly isAuthenticated = computed(() => this.userState() !== null);
   readonly permissions = computed(() => new Set(this.tenantContextState()?.permissions ?? []));
-
-  accessToken(): string | null {
-    return this.accessTokenState();
-  }
 
   hasEveryPermission(required: readonly string[]): boolean {
     const available = this.permissions();
     return required.every((permission) => available.has(permission));
   }
 
-  private async loadTenantContext(): Promise<void> {
-    this.tenantContextState.set(await firstValueFrom(this.api.context()));
+  private async loadContext(): Promise<void> {
+    const context = await this.data.getMyContext();
+    const user = context.users[0];
+    if (!user) throw new Error('Authenticated user has no OdontoGest profile.');
+
+    const clinics: ClinicSummary[] = context.clinicMemberships.map((membership) => ({
+      id: membership.clinic.id,
+      name: membership.clinic.tradeName,
+      role: membership.role.code as ClinicSummary['role'],
+    }));
+    this.userState.set({ id: user.id, name: user.name, email: user.email });
+    this.clinicsState.set(clinics);
+
+    const activeClinicId = this.tenantContextState()?.activeClinicId ?? clinics[0]?.id ?? null;
+    const membership = context.clinicMemberships.find(
+      (candidate) => candidate.clinic.id === activeClinicId,
+    );
+    this.tenantContextState.set({
+      activeClinicId,
+      roleCode: (membership?.role.code as TenantContext['roleCode']) ?? null,
+      authorizationVersion: membership?.authorizationVersion ?? null,
+      permissions: membership?.role.code === 'OWNER' ? [...OWNER_PERMISSIONS] : [],
+    });
   }
 
   async login(email: string, password: string): Promise<void> {
-    const idToken = await this.firebase.signIn(email, password);
+    await this.firebase.signIn(email, password);
     try {
-      const response = await firstValueFrom(this.api.exchangeFirebaseToken(idToken));
-      this.accessTokenState.set(response.accessToken);
-      this.userState.set(response.user);
-      this.clinicsState.set(response.clinics);
-      if (response.activeClinicId) await this.loadTenantContext();
+      await this.loadContext();
     } catch (error) {
       await this.firebase.signOut().catch(() => undefined);
       throw error;
@@ -53,20 +70,18 @@ export class AuthStore {
     email: string;
     password: string;
   }): Promise<void> {
-    const idToken = await this.firebase.createAccount(
-      input.email,
-      input.password,
-      input.responsibleName,
+    const normalized = { ...input, email: input.email.trim().toLowerCase() };
+    await this.firebase.createAccount(
+      normalized.email,
+      normalized.password,
+      normalized.responsibleName,
     );
     try {
-      await firstValueFrom(
-        this.api.createOnboarding({
-          idToken,
-          responsibleName: input.responsibleName,
-          clinicName: input.clinicName,
-          acceptTerms: true,
-        }),
-      );
+      await this.data.createOwnerClinic({
+        responsibleName: normalized.responsibleName,
+        clinicName: normalized.clinicName,
+        email: normalized.email,
+      });
       await this.firebase.sendVerificationAndSignOut();
     } catch (error) {
       await this.firebase.signOut().catch(() => undefined);
@@ -74,28 +89,11 @@ export class AuthStore {
     }
   }
 
-  refreshAccessToken(): Promise<string> {
-    if (this.refreshInFlight) return this.refreshInFlight;
-    this.refreshInFlight = firstValueFrom(this.api.refresh())
-      .then(async (response) => {
-        this.accessTokenState.set(response.accessToken);
-        if (response.activeClinicId) await this.loadTenantContext();
-        return response.accessToken;
-      })
-      .catch((error: unknown) => {
-        this.clear();
-        throw error;
-      })
-      .finally(() => {
-        this.refreshInFlight = null;
-      });
-    return this.refreshInFlight;
-  }
-
   async restoreSession(): Promise<boolean> {
     if (this.isAuthenticated()) return true;
     try {
-      await this.refreshAccessToken();
+      if (!(await this.firebase.waitUntilReady())) return false;
+      await this.loadContext();
       return true;
     } catch {
       return false;
@@ -103,22 +101,22 @@ export class AuthStore {
   }
 
   async selectClinic(clinicId: string): Promise<void> {
-    const response = await firstValueFrom(this.api.selectClinic(clinicId));
-    this.accessTokenState.set(response.accessToken);
-    await this.loadTenantContext();
+    const clinic = this.clinicsState().find((candidate) => candidate.id === clinicId);
+    if (!clinic) throw new Error('Clinic is not available to this user.');
+    this.tenantContextState.set({
+      activeClinicId: clinic.id,
+      roleCode: clinic.role,
+      authorizationVersion: 1,
+      permissions: clinic.role === 'OWNER' ? [...OWNER_PERMISSIONS] : [],
+    });
   }
 
   async logout(): Promise<void> {
-    try {
-      await firstValueFrom(this.api.logout());
-    } finally {
-      await this.firebase.signOut().catch(() => undefined);
-      this.clear();
-    }
+    await this.firebase.signOut().catch(() => undefined);
+    this.clear();
   }
 
   clear(): void {
-    this.accessTokenState.set(null);
     this.userState.set(null);
     this.clinicsState.set([]);
     this.tenantContextState.set(null);

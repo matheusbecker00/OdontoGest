@@ -1,0 +1,270 @@
+mutation CreateOwnerClinic(
+  $clinicId: UUID!
+  $settingsId: UUID!
+  $membershipId: UUID!
+  $ownerRoleId: UUID!
+  $termsId: UUID!
+  $privacyId: UUID!
+  $auditId: UUID!
+  $responsibleName: String!
+  $clinicName: String!
+  $email: String!
+  $emailCanonical: String!
+  $termsEvidenceDigest: String!
+  $privacyEvidenceDigest: String!
+  $requestId: String!
+) @auth(expr: "auth.token.email == vars.email") @transaction {
+  user_upsert(
+    data: {
+      id_expr: "auth.uid"
+      name: $responsibleName
+      email: $email
+      emailCanonical: $emailCanonical
+      status: ACTIVE
+      updatedAt_expr: "request.time"
+    }
+  )
+  role_upsert(
+    data: {
+      id: $ownerRoleId
+      code: OWNER
+      name: "Proprietário"
+      description: "Acesso total à clínica"
+      isSystem: true
+      updatedAt_expr: "request.time"
+    }
+  )
+  clinic_insert(
+    data: {
+      id: $clinicId
+      legalName: $clinicName
+      tradeName: $clinicName
+      status: ACTIVE
+    }
+  )
+  clinicSettings_insert(
+    data: {
+      id: $settingsId
+      clinicId: $clinicId
+      createdBy_expr: "auth.uid"
+      updatedBy_expr: "auth.uid"
+    }
+  )
+  clinicMembership_insert(
+    data: {
+      id: $membershipId
+      clinicId: $clinicId
+      userId_expr: "auth.uid"
+      roleId: $ownerRoleId
+      status: ACTIVE
+      acceptedAt_expr: "request.time"
+    }
+  )
+  termsAcceptance_insert(
+    data: {
+      id: $termsId
+      clinicId: $clinicId
+      userId_expr: "auth.uid"
+      documentType: "TERMS_OF_USE"
+      documentVersion: "1.0.0"
+      evidenceDigest: $termsEvidenceDigest
+    }
+  )
+  privacyAcceptance: termsAcceptance_insert(
+    data: {
+      id: $privacyId
+      clinicId: $clinicId
+      userId_expr: "auth.uid"
+      documentType: "PRIVACY_POLICY"
+      documentVersion: "1.0.0"
+      evidenceDigest: $privacyEvidenceDigest
+    }
+  )
+  auditLog_insert(
+    data: {
+      id: $auditId
+      clinicId: $clinicId
+      actorUserId_expr: "auth.uid"
+      action: "CLINIC_ONBOARDING_COMPLETED"
+      entityType: "Clinic"
+      entityId: $clinicId
+      outcome: SUCCESS
+      requestId: $requestId
+    }
+  )
+}
+
+mutation CreateMyPatient(
+  $id: UUID!
+  $clinicId: UUID!
+  $fullName: String!
+  $cpf: String!
+  $birthDate: Date
+  $phone: String
+  $whatsapp: String
+  $email: String
+  $addressLine: String
+  $administrativeNotes: String
+  $auditId: UUID!
+  $requestId: String!
+) @auth(level: USER_EMAIL_VERIFIED) @transaction {
+  query
+    @check(
+      expr: "response.query.clinicMemberships.size() == 1"
+      message: "Active clinic membership required"
+    )
+    @redact {
+    clinicMemberships(
+      where: {
+        clinicId: { eq: $clinicId }
+        userId: { eq_expr: "auth.uid" }
+        status: { eq: ACTIVE }
+        deletedAt: { eq: null }
+      }
+      limit: 1
+    ) {
+      id
+    }
+  }
+  patient_insert(
+    data: {
+      id: $id
+      clinicId: $clinicId
+      fullName: $fullName
+      cpf: $cpf
+      birthDate: $birthDate
+      phone: $phone
+      whatsapp: $whatsapp
+      email: $email
+      addressLine: $addressLine
+      administrativeNotes: $administrativeNotes
+      createdBy_expr: "auth.uid"
+      updatedBy_expr: "auth.uid"
+    }
+  )
+  auditLog_insert(
+    data: {
+      id: $auditId
+      clinicId: $clinicId
+      actorUserId_expr: "auth.uid"
+      action: "PATIENT_CREATED"
+      entityType: "Patient"
+      entityId: $id
+      outcome: SUCCESS
+      requestId: $requestId
+    }
+  )
+}
+
+mutation UpdateMyPatient(
+  $id: UUID!
+  $clinicId: UUID!
+  $fullName: String!
+  $birthDate: Date
+  $phone: String
+  $whatsapp: String
+  $email: String
+  $addressLine: String
+  $administrativeNotes: String
+  $auditId: UUID!
+  $requestId: String!
+) @auth(level: USER_EMAIL_VERIFIED) @transaction {
+  query
+    @check(
+      expr: "response.query.clinicMemberships.size() == 1"
+      message: "Active clinic membership required"
+    )
+    @redact {
+    clinicMemberships(
+      where: {
+        clinicId: { eq: $clinicId }
+        userId: { eq_expr: "auth.uid" }
+        status: { eq: ACTIVE }
+        deletedAt: { eq: null }
+      }
+      limit: 1
+    ) {
+      id
+    }
+  }
+  patient_updateMany(
+    where: {
+      id: { eq: $id }
+      clinicId: { eq: $clinicId }
+      deletedAt: { eq: null }
+    }
+    data: {
+      fullName: $fullName
+      birthDate: $birthDate
+      phone: $phone
+      whatsapp: $whatsapp
+      email: $email
+      addressLine: $addressLine
+      administrativeNotes: $administrativeNotes
+      updatedBy_expr: "auth.uid"
+      updatedAt_expr: "request.time"
+    }
+  ) @check(expr: "this == 1", message: "Patient not found")
+  auditLog_insert(
+    data: {
+      id: $auditId
+      clinicId: $clinicId
+      actorUserId_expr: "auth.uid"
+      action: "PATIENT_UPDATED"
+      entityType: "Patient"
+      entityId: $id
+      outcome: SUCCESS
+      requestId: $requestId
+    }
+  )
+}
+
+mutation InactivateMyPatient(
+  $id: UUID!
+  $clinicId: UUID!
+  $auditId: UUID!
+  $requestId: String!
+) @auth(level: USER_EMAIL_VERIFIED) @transaction {
+  query
+    @check(
+      expr: "response.query.clinicMemberships.size() == 1"
+      message: "Active clinic membership required"
+    )
+    @redact {
+    clinicMemberships(
+      where: {
+        clinicId: { eq: $clinicId }
+        userId: { eq_expr: "auth.uid" }
+        status: { eq: ACTIVE }
+        deletedAt: { eq: null }
+      }
+      limit: 1
+    ) {
+      id
+    }
+  }
+  patient_updateMany(
+    where: {
+      id: { eq: $id }
+      clinicId: { eq: $clinicId }
+      deletedAt: { eq: null }
+    }
+    data: {
+      registrationStatus: INACTIVE
+      updatedBy_expr: "auth.uid"
+      updatedAt_expr: "request.time"
+    }
+  ) @check(expr: "this == 1", message: "Patient not found")
+  auditLog_insert(
+    data: {
+      id: $auditId
+      clinicId: $clinicId
+      actorUserId_expr: "auth.uid"
+      action: "PATIENT_INACTIVATED"
+      entityType: "Patient"
+      entityId: $id
+      outcome: SUCCESS
+      requestId: $requestId
+    }
+  )
+}

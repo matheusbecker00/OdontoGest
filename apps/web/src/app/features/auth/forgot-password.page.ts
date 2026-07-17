@@ -4,8 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { RouterLink } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
-import { AuthApiService } from '../../core/auth/auth-api.service';
+import { FirebaseAuthService } from '../../core/auth/firebase-auth.service';
 
 @Component({
   selector: 'og-forgot-password-page',
@@ -58,7 +57,7 @@ import { AuthApiService } from '../../core/auth/auth-api.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ForgotPasswordPage {
-  private readonly api = inject(AuthApiService);
+  private readonly firebase = inject(FirebaseAuthService);
   protected readonly email = new FormControl('', {
     nonNullable: true,
     validators: [Validators.required, Validators.email, Validators.maxLength(320)],
@@ -67,7 +66,7 @@ export class ForgotPasswordPage {
 
   protected async submit(): Promise<void> {
     if (this.email.invalid) return;
-    const result = await firstValueFrom(this.api.forgotPassword(this.email.value));
-    this.message.set(result.message);
+    await this.firebase.sendPasswordReset(this.email.value).catch(() => undefined);
+    this.message.set('Se a conta existir, você receberá as instruções por e-mail.');
   }
 }

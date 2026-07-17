@@ -1,0 +1,45 @@
+{
+  "name": "@odontogest/web",
+  "version": "0.1.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve --proxy-config proxy.conf.json",
+    "build": "ng build",
+    "dev": "ng serve",
+    "lint": "eslint .",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test --watch=false",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit"
+  },
+  "private": true,
+  "dependencies": {
+    "@odontogest/contracts": "workspace:*",
+    "@angular/cdk": "22.0.5",
+    "@angular/common": "^22.0.0",
+    "@angular/compiler": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/forms": "^22.0.0",
+    "@angular/material": "22.0.5",
+    "@angular/platform-browser": "^22.0.0",
+    "@angular/router": "^22.0.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular-eslint/eslint-plugin": "22.1.0",
+    "@angular-eslint/eslint-plugin-template": "22.1.0",
+    "@angular-eslint/template-parser": "22.1.0",
+    "@angular/build": "^22.0.7",
+    "@angular/cli": "^22.0.7",
+    "@angular/compiler-cli": "^22.0.0",
+    "@eslint/js": "10.0.1",
+    "angular-eslint": "22.1.0",
+    "eslint": "10.7.0",
+    "jsdom": "^28.0.0",
+    "globals": "17.3.0",
+    "prettier": "3.9.5",
+    "typescript": "~6.0.2",
+    "typescript-eslint": "8.64.0",
+    "vitest": "^4.0.8"
+  }
+}

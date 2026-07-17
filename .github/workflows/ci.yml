@@ -1,0 +1,126 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Qualidade, testes e build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.15.0
+          package-manager-cache: false
+      - name: Ativar pnpm versionado
+        run: |
+          corepack enable
+          corepack install
+      - name: Instalar dependências imutavelmente
+        run: pnpm install --frozen-lockfile
+      - name: Validar peers e schema
+        run: |
+          pnpm peers check
+          pnpm db:validate
+      - name: Verificar formatação e lint
+        run: |
+          pnpm format:check
+          pnpm lint
+      - name: Verificar tipos e testes unitários
+        run: |
+          pnpm typecheck
+          pnpm test
+      - name: Compilar aplicações
+        run: pnpm build
+      - name: Verificar contrato OpenAPI versionado
+        run: |
+          pnpm openapi:generate
+          git diff --exit-code -- apps/api/openapi/openapi.json packages/contracts/src/generated.ts
+      - name: Auditar dependências conhecidas
+        run: pnpm audit --audit-level high
+
+  integration:
+    name: PostgreSQL, Redis, migrations e E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: odontogest_test
+          POSTGRES_USER: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d odontogest_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+      redis:
+        image: redis:8-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+    env:
+      MIGRATION_DATABASE_URL: postgresql://postgres@localhost:5432/odontogest_test?sslmode=disable
+      TEST_DB_APP_USER: odontogest_test_app
+      REDIS_URL: redis://localhost:6379/0
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.15.0
+          package-manager-cache: false
+      - name: Ativar pnpm versionado
+        run: |
+          corepack enable
+          corepack install
+      - run: pnpm install --frozen-lockfile
+      - name: Criar credencial efêmera do papel restrito
+        shell: bash
+        run: |
+          password="$(openssl rand -hex 32)"
+          echo "TEST_DB_APP_PASSWORD=${password}" >> "$GITHUB_ENV"
+          echo "DATABASE_URL=postgresql://odontogest_test_app:${password}@localhost:5432/odontogest_test?sslmode=disable" >> "$GITHUB_ENV"
+      - name: Executar migrations, seed seguro e testes E2E
+        run: pnpm test:e2e
+
+  secrets:
+    name: Detecção de segredos
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Gitleaks
+        run: >-
+          docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.24.2
+          git --redact --verbose /repo
+
+  dependency-review:
+    name: Revisão de dependências do PR
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high

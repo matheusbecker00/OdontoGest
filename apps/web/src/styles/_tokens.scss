@@ -1,0 +1,119 @@
+// OdontoGest — tokens de design da Fase 0.
+// A integração com o tema do Angular Material será feita na Fase 1.
+
+@use 'sass:map';
+
+$og-colors: (
+  primary-50: #eff6ff,
+  primary-100: #dbeafe,
+  primary-500: #2563eb,
+  primary-600: #1d4ed8,
+  primary-700: #1e40af,
+  accent-50: #ecfdf5,
+  accent-500: #10b981,
+  accent-700: #047857,
+  ink-950: #0f172a,
+  ink-800: #1e293b,
+  ink-600: #475569,
+  ink-500: #64748b,
+  ink-400: #94a3b8,
+  canvas: #f1f5f9,
+  surface: #ffffff,
+  border: #e2e8f0,
+  sidebar: #0f172a,
+  sidebar-hover: #1e293b,
+  success: #15803d,
+  success-surface: #dcfce7,
+  warning: #c2410c,
+  warning-surface: #ffedd5,
+  danger: #b91c1c,
+  danger-surface: #fee2e2,
+  info: #1d4ed8,
+  info-surface: #dbeafe,
+);
+
+$og-spacing: (
+  0: 0,
+  1: 0.25rem,
+  2: 0.5rem,
+  3: 0.75rem,
+  4: 1rem,
+  5: 1.25rem,
+  6: 1.5rem,
+  8: 2rem,
+  10: 2.5rem,
+  12: 3rem,
+);
+
+$og-radii: (
+  sm: 0.5rem,
+  md: 0.75rem,
+  lg: 1rem,
+  card: 1.375rem,
+  pill: 9999px,
+);
+
+$og-shadows: (
+  card: 0 1px 2px rgb(15 23 42 / 3%),
+  raised: 0 12px 32px rgb(15 23 42 / 10%),
+  dialog: 0 24px 64px rgb(15 23 42 / 18%),
+);
+
+$og-layout: (
+  sidebar-width: 17rem,
+  sidebar-rail-width: 5rem,
+  navbar-height-desktop: 4.5rem,
+  navbar-height-mobile: 4rem,
+  content-max-width: 100rem,
+  touch-target: 2.75rem,
+);
+
+$og-breakpoints: (
+  mobile: 47.9375rem,
+  tablet: 74.9375rem,
+  desktop: 75rem,
+);
+
+@function og-color($token) {
+  @return map.get($og-colors, $token);
+}
+
+@function og-space($token) {
+  @return map.get($og-spacing, $token);
+}
+
+@function og-radius($token) {
+  @return map.get($og-radii, $token);
+}
+
+@function og-shadow($token) {
+  @return map.get($og-shadows, $token);
+}
+
+@function og-layout($token) {
+  @return map.get($og-layout, $token);
+}
+
+@mixin og-focus-ring {
+  outline: 3px solid rgb(37 99 235 / 35%);
+  outline-offset: 2px;
+}
+
+@mixin og-surface-card {
+  background: og-color(surface);
+  border: 1px solid og-color(border);
+  border-radius: og-radius(card);
+  box-shadow: og-shadow(card);
+}
+
+:root {
+  --og-font-family: Inter, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --og-color-primary: #{og-color(primary-500)};
+  --og-color-text: #{og-color(ink-950)};
+  --og-color-muted: #{og-color(ink-500)};
+  --og-color-canvas: #{og-color(canvas)};
+  --og-color-surface: #{og-color(surface)};
+  --og-color-border: #{og-color(border)};
+  --og-sidebar-width: #{og-layout(sidebar-width)};
+  --og-navbar-height: #{og-layout(navbar-height-desktop)};
+}

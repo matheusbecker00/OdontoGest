@@ -1,0 +1,32 @@
+@use './styles/tokens' as tokens;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+  font-family: var(--og-font-family);
+  background: tokens.og-color(canvas);
+}
+
+body {
+  min-width: 20rem;
+  min-height: 100dvh;
+  margin: 0;
+  color: tokens.og-color(ink-950);
+  background: tokens.og-color(canvas);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+:focus-visible {
+  @include tokens.og-focus-ring;
+}

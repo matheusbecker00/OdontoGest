@@ -1,0 +1,713 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v1/audit": {
+      "get": {
+        "operationId": "list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Audit"
+        ]
+      }
+    },
+    "/api/v1/auth/signup": {
+      "post": {
+        "operationId": "signUp",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignUpDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Solicitação recebida sem enumerar contas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Solicita a criação de uma conta de usuário",
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
+    "/api/v1/auth/email/verify": {
+      "post": {
+        "operationId": "verifyEmail",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "operationId": "refresh",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "logout",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
+    "/api/v1/auth/logout-all": {
+      "post": {
+        "operationId": "logoutAll",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
+    "/api/v1/auth/password/forgot": {
+      "post": {
+        "operationId": "forgotPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
+    "/api/v1/auth/password/reset": {
+      "post": {
+        "operationId": "resetPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
+    "/api/v1/auth/active-clinic": {
+      "post": {
+        "operationId": "selectActiveClinic",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectActiveClinicDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActiveClinicResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
+    "/api/v1/auth/sessions": {
+      "get": {
+        "operationId": "sessions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
+    "/api/v1/tenancy/clinics": {
+      "get": {
+        "operationId": "clinics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Tenancy"
+        ]
+      }
+    },
+    "/api/v1/tenancy/context": {
+      "get": {
+        "operationId": "context",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantContextResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Tenancy"
+        ]
+      }
+    },
+    "/api/v1/health/live": {
+      "get": {
+        "operationId": "live",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Saúde"
+        ]
+      }
+    },
+    "/api/v1/health/ready": {
+      "get": {
+        "operationId": "ready",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Saúde"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "OdontoGest API",
+    "description": "API REST versionada do OdontoGest. Não contém dados reais.",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      },
+      "cookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "__Secure-odontogest_refresh"
+      }
+    },
+    "schemas": {
+      "SignUpDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Marina Souza"
+          },
+          "email": {
+            "type": "string",
+            "example": "marina@exemplo.com.br"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 128,
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "password"
+        ]
+      },
+      "MessageResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "TokenDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "minLength": 40,
+            "maxLength": 128,
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "marina@exemplo.com.br"
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "AuthenticatedUserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email"
+        ]
+      },
+      "ClinicSummaryResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "OWNER",
+              "ADMIN",
+              "DENTIST",
+              "RECEPTIONIST",
+              "FINANCE"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "role"
+        ]
+      },
+      "LoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/AuthenticatedUserResponseDto"
+          },
+          "clinics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClinicSummaryResponseDto"
+            }
+          },
+          "activeClinicId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "accessToken",
+          "user",
+          "clinics",
+          "activeClinicId"
+        ]
+      },
+      "RefreshResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "activeClinicId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "accessToken",
+          "activeClinicId"
+        ]
+      },
+      "ForgotPasswordDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "marina@exemplo.com.br"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "ResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "minLength": 40,
+            "maxLength": 128,
+            "writeOnly": true
+          },
+          "password": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 128,
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "token",
+          "password"
+        ]
+      },
+      "SelectActiveClinicDto": {
+        "type": "object",
+        "properties": {
+          "clinicId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "clinicId"
+        ]
+      },
+      "ActiveClinicResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "activeClinicId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "accessToken",
+          "activeClinicId"
+        ]
+      },
+      "SessionResponseDto": {
+        "type": "object",
+        "properties": {
+          "familyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "activeClinicId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "issuedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastUsedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "idleExpiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "absoluteExpiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "ipPrefix": {
+            "type": "string",
+            "nullable": true
+          },
+          "userAgentSummary": {
+            "type": "string",
+            "nullable": true
+          },
+          "current": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "familyId",
+          "activeClinicId",
+          "issuedAt",
+          "lastUsedAt",
+          "idleExpiresAt",
+          "absoluteExpiresAt",
+          "ipPrefix",
+          "userAgentSummary",
+          "current"
+        ]
+      },
+      "SessionsResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SessionResponseDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "TenantContextResponseDto": {
+        "type": "object",
+        "properties": {
+          "activeClinicId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "roleCode": {
+            "type": "string",
+            "enum": [
+              "OWNER",
+              "ADMIN",
+              "DENTIST",
+              "RECEPTIONIST",
+              "FINANCE"
+            ],
+            "nullable": true
+          },
+          "authorizationVersion": {
+            "type": "number",
+            "nullable": true
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "activeClinicId",
+          "roleCode",
+          "authorizationVersion",
+          "permissions"
+        ]
+      }
+    }
+  }
+}

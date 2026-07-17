@@ -1,0 +1,14 @@
+process.env.NODE_ENV ??= 'test';
+process.env.APP_ORIGINS ??= 'http://localhost:4200';
+process.env.ORIGIN_CHECK_REQUIRED ??= 'true';
+process.env.REDIS_URL ??= 'memory://e2e';
+process.env.ACCESS_TOKEN_SECRET ??= 'not-a-secret-'.repeat(3);
+process.env.ACCESS_TOKEN_TTL_SECONDS ??= '300';
+process.env.REFRESH_TOKEN_IDLE_TTL_SECONDS ??= '3600';
+process.env.REFRESH_TOKEN_ABSOLUTE_TTL_SECONDS ??= '86400';
+process.env.COOKIE_SECURE ??= 'false';
+process.env.COOKIE_NAME ??= 'odontogest_refresh';
+process.env.EMAIL_PROVIDER ??= 'fake';
+process.env.EMAIL_FROM ??= 'no-reply@localhost.invalid';
+process.env.SWAGGER_ENABLED ??= 'false';
+process.env.LOG_LEVEL ??= 'silent';

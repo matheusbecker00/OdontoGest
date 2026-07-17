@@ -1,0 +1,32 @@
+{
+  "name": "odontogest",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Fundação segura do micro SaaS OdontoGest",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@11.13.1",
+  "engines": {
+    "node": ">=24.15.0",
+    "pnpm": ">=11.13.1"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "turbo run lint && markdownlint-cli2 \"README.md\" \"docs/**/*.md\"",
+    "test": "turbo run test",
+    "test:e2e": "corepack pnpm --filter @odontogest/api test:e2e",
+    "typecheck": "turbo run typecheck",
+    "db:generate": "corepack pnpm --filter @odontogest/api prisma:generate",
+    "db:validate": "corepack pnpm --filter @odontogest/api prisma:validate",
+    "db:migrate:deploy": "corepack pnpm --filter @odontogest/api prisma:migrate:deploy",
+    "db:seed": "corepack pnpm --filter @odontogest/api exec prisma db seed",
+    "openapi:generate": "corepack pnpm --filter @odontogest/api openapi:generate && corepack pnpm --filter @odontogest/contracts generate"
+  },
+  "devDependencies": {
+    "markdownlint-cli2": "0.20.0",
+    "prettier": "3.9.5",
+    "turbo": "2.10.5"
+  }
+}

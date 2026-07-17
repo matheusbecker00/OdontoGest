@@ -1,0 +1,9 @@
+node_modules/
+.turbo/
+.angular/
+dist/
+coverage/
+apps/api/src/generated/prisma/
+apps/api/openapi/openapi.json
+docs/referencias/
+pnpm-lock.yaml

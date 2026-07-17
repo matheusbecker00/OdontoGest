@@ -27,6 +27,10 @@ const environmentSchema = z
       .regex(/^[a-z_][a-z0-9_]{2,62}$/)
       .optional(),
     REDIS_URL: z.string().min(1),
+    FIREBASE_PROJECT_ID: z.string().min(1),
+    FIREBASE_CLIENT_EMAIL: z.email().optional(),
+    FIREBASE_PRIVATE_KEY: z.string().min(1).optional(),
+    FIREBASE_AUTH_CHECK_REVOKED: booleanString.default(true),
     ACCESS_TOKEN_SECRET: z.string().min(32),
     ACCESS_TOKEN_TTL_SECONDS: z.coerce
       .number()
@@ -56,6 +60,29 @@ const environmentSchema = z
       .default('info'),
   })
   .superRefine((value, context) => {
+    if (
+      (value.FIREBASE_CLIENT_EMAIL === undefined) !==
+      (value.FIREBASE_PRIVATE_KEY === undefined)
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['FIREBASE_CLIENT_EMAIL'],
+        message:
+          'FIREBASE_CLIENT_EMAIL e FIREBASE_PRIVATE_KEY devem ser configuradas juntas.',
+      });
+    }
+
+    if (
+      value.NODE_ENV === 'production' &&
+      (!value.FIREBASE_CLIENT_EMAIL || !value.FIREBASE_PRIVATE_KEY)
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['FIREBASE_CLIENT_EMAIL'],
+        message: 'Credenciais do Firebase Admin são obrigatórias na Vercel.',
+      });
+    }
+
     if (
       value.REFRESH_TOKEN_ABSOLUTE_TTL_SECONDS <
       value.REFRESH_TOKEN_IDLE_TTL_SECONDS

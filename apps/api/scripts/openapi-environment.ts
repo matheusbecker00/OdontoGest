@@ -4,6 +4,8 @@ process.env.ORIGIN_CHECK_REQUIRED ??= 'false';
 process.env.DATABASE_URL ??=
   'postgresql://odontogest_app:local-placeholder@localhost:5432/odontogest';
 process.env.REDIS_URL ??= 'memory://openapi';
+process.env.FIREBASE_PROJECT_ID ??= 'demo-odontogest';
+process.env.FIREBASE_AUTH_CHECK_REVOKED ??= 'false';
 process.env.ACCESS_TOKEN_SECRET ??= 'not-a-secret-'.repeat(3);
 process.env.COOKIE_SECURE ??= 'false';
 process.env.COOKIE_NAME ??= 'odontogest_refresh';

@@ -8,10 +8,12 @@ const API_ROOT = '/api/v1';
 export class AuthApiService {
   private readonly http = inject(HttpClient);
 
-  login(input: { email: string; password: string }) {
-    return this.http.post<LoginResponse>(`${API_ROOT}/auth/login`, input, {
-      withCredentials: true,
-    });
+  exchangeFirebaseToken(idToken: string) {
+    return this.http.post<LoginResponse>(
+      `${API_ROOT}/auth/firebase/session`,
+      { idToken },
+      { withCredentials: true },
+    );
   }
 
   refresh() {

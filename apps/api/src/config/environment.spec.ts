@@ -6,6 +6,8 @@ const baseEnvironment = {
   ORIGIN_CHECK_REQUIRED: 'true',
   DATABASE_URL: 'postgresql://runtime@localhost:5432/odontogest',
   REDIS_URL: 'redis://localhost:6379/0',
+  FIREBASE_PROJECT_ID: 'demo-odontogest',
+  FIREBASE_AUTH_CHECK_REVOKED: 'false',
   ACCESS_TOKEN_SECRET: 'not-a-secret-'.repeat(3),
   COOKIE_SECURE: 'false',
   COOKIE_NAME: 'odontogest_refresh',
@@ -36,6 +38,15 @@ describe('validateEnvironment', () => {
       validateEnvironment({
         ...baseEnvironment,
         TEST_DATABASE_RUNTIME_ROLE: 'odontogest_test_app',
+      }),
+    ).toThrow();
+  });
+
+  it('rejeita credenciais Firebase Admin incompletas', () => {
+    expect(() =>
+      validateEnvironment({
+        ...baseEnvironment,
+        FIREBASE_CLIENT_EMAIL: 'firebase-admin@example.test',
       }),
     ).toThrow();
   });

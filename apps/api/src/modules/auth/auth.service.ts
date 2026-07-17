@@ -22,6 +22,7 @@ import { EmailService } from '../../platform/email/email.service';
 import { RateLimitService } from '../../platform/rate-limit/rate-limit.service';
 import { AccessTokenService } from './access-token.service';
 import { CryptoService } from './crypto.service';
+import { FirebaseIdentityService } from './firebase-identity.service';
 import type {
   ForgotPasswordDto,
   LoginDto,
@@ -86,6 +87,13 @@ export interface RefreshResult {
   activeClinicId: string | null;
 }
 
+interface SessionUser {
+  id: string;
+  name: string;
+  email: string;
+  sessionVersion: number;
+}
+
 @Injectable()
 export class AuthService {
   private readonly refreshIdleTtlMs: number;
@@ -98,6 +106,7 @@ export class AuthService {
     private readonly rateLimits: RateLimitService,
     private readonly email: EmailService,
     private readonly audit: AuditService,
+    private readonly firebaseIdentity: FirebaseIdentityService,
     config: ConfigService<AppEnvironment, true>,
   ) {
     this.refreshIdleTtlMs =
@@ -320,6 +329,69 @@ export class AuthService {
     await new Promise((resolve) => setTimeout(resolve, milliseconds));
   }
 
+  private async issueLoginSession(
+    user: SessionUser,
+    request: RequestMetadata,
+    rateLimitBucket: string,
+    rateLimitKey: string,
+    metadata?: Record<string, string>,
+  ): Promise<LoginResult> {
+    const now = new Date();
+    const clinics = await this.activeMemberships(user.id);
+    const activeClinicId = clinics.length === 1 ? clinics[0].id : null;
+    const refreshToken = this.crypto.randomToken();
+    const familyId = randomUUID();
+    const expirations = this.expiry(now);
+
+    await this.prisma.$transaction(
+      async (transaction) => {
+        await transaction.user.update({
+          where: { id: user.id },
+          data: {
+            failedLoginCount: 0,
+            lockedUntil: null,
+            lastLoginAt: now,
+          },
+        });
+        await transaction.refreshSession.create({
+          data: {
+            userId: user.id,
+            activeClinicId,
+            familyId,
+            tokenHash: this.crypto.tokenHash(refreshToken),
+            ...expirations,
+            ipPrefix: request.ipPrefix,
+            userAgentSummary: request.userAgentSummary,
+          },
+        });
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
+
+    const accessToken = await this.accessTokens.sign({
+      userId: user.id,
+      sid: familyId,
+      sv: user.sessionVersion,
+      clinicId: activeClinicId,
+    });
+    await this.rateLimits.clear(rateLimitBucket, rateLimitKey);
+    await this.audit.recordSecurity({
+      userId: user.id,
+      action: 'LOGIN_SUCCEEDED',
+      outcome: 'SUCCESS',
+      request,
+      metadata,
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+      user: { id: user.id, name: user.name, email: user.email },
+      clinics,
+      activeClinicId,
+    };
+  }
+
   async login(input: LoginDto, request: RequestMetadata): Promise<LoginResult> {
     const canonicalEmail = this.crypto.normalizeEmail(input.email);
     await Promise.all([
@@ -380,58 +452,110 @@ export class AuthService {
       throw new UnauthorizedException(GENERIC_CREDENTIAL_ERROR);
     }
 
-    const clinics = await this.activeMemberships(user.id);
-    const activeClinicId = clinics.length === 1 ? clinics[0].id : null;
-    const refreshToken = this.crypto.randomToken();
-    const familyId = randomUUID();
-    const expirations = this.expiry(now);
+    return this.issueLoginSession(
+      user,
+      request,
+      'login-account',
+      canonicalEmail,
+      { provider: 'legacy-password' },
+    );
+  }
 
-    await this.prisma.$transaction(
-      async (transaction) => {
-        await transaction.user.update({
-          where: { id: user.id },
-          data: {
-            failedLoginCount: 0,
-            lockedUntil: null,
-            lastLoginAt: now,
-          },
-        });
-        await transaction.refreshSession.create({
-          data: {
-            userId: user.id,
-            activeClinicId,
-            familyId,
-            tokenHash: this.crypto.tokenHash(refreshToken),
-            ...expirations,
-            ipPrefix: request.ipPrefix,
-            userAgentSummary: request.userAgentSummary,
-          },
-        });
-      },
-      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+  async loginWithFirebase(
+    idToken: string,
+    request: RequestMetadata,
+  ): Promise<LoginResult> {
+    await this.rateLimits.consume(
+      'firebase-login-ip',
+      request.ipPrefix ?? 'unknown',
+      20,
+      60,
     );
 
-    const accessToken = await this.accessTokens.sign({
-      userId: user.id,
-      sid: familyId,
-      sv: user.sessionVersion,
-      clinicId: activeClinicId,
-    });
-    await this.rateLimits.clear('login-account', canonicalEmail);
-    await this.audit.recordSecurity({
-      userId: user.id,
-      action: 'LOGIN_SUCCEEDED',
-      outcome: 'SUCCESS',
-      request,
-    });
+    const identity = await this.firebaseIdentity.verifyIdToken(idToken);
+    const canonicalEmail = this.crypto.normalizeEmail(identity.email);
+    await this.rateLimits.consume(
+      'firebase-login-account',
+      identity.uid,
+      8,
+      900,
+    );
 
-    return {
-      accessToken,
-      refreshToken,
-      user: { id: user.id, name: user.name, email: user.email },
-      clinics,
-      activeClinicId,
-    };
+    const matches = await this.prisma.user.findMany({
+      where: {
+        OR: [{ firebaseUid: identity.uid }, { emailCanonical: canonicalEmail }],
+      },
+      take: 2,
+    });
+    const uidMatch = matches.find(
+      (candidate) => candidate.firebaseUid === identity.uid,
+    );
+    const emailMatch = matches.find(
+      (candidate) => candidate.emailCanonical === canonicalEmail,
+    );
+
+    if (!uidMatch && !emailMatch) {
+      await this.audit.recordSecurity({
+        action: 'LOGIN_FAILED',
+        outcome: 'FAILURE',
+        request,
+        metadata: {
+          provider: 'firebase',
+          accountHash: this.audit.hashIdentifier(canonicalEmail),
+        },
+      });
+      throw new ForbiddenException({
+        error: 'ACCOUNT_NOT_PROVISIONED',
+        message: 'A conta ainda não possui acesso ao OdontoGest.',
+      });
+    }
+
+    if (
+      (uidMatch && emailMatch && uidMatch.id !== emailMatch.id) ||
+      (uidMatch && uidMatch.emailCanonical !== canonicalEmail)
+    ) {
+      await this.audit.recordSecurity({
+        userId: uidMatch?.id ?? emailMatch?.id,
+        action: 'LOGIN_FAILED',
+        outcome: 'FAILURE',
+        request,
+        metadata: { provider: 'firebase', reason: 'identity-conflict' },
+      });
+      throw new UnauthorizedException(GENERIC_CREDENTIAL_ERROR);
+    }
+
+    let user = uidMatch ?? emailMatch!;
+    if (
+      user.deletedAt ||
+      (user.status !== UserStatus.ACTIVE &&
+        user.status !== UserStatus.PENDING_VERIFICATION)
+    ) {
+      throw new UnauthorizedException(GENERIC_CREDENTIAL_ERROR);
+    }
+
+    if (!user.firebaseUid || user.status === UserStatus.PENDING_VERIFICATION) {
+      try {
+        user = await this.prisma.user.update({
+          where: { id: user.id },
+          data: {
+            firebaseUid: identity.uid,
+            status: UserStatus.ACTIVE,
+            emailVerifiedAt: user.emailVerifiedAt ?? new Date(),
+          },
+        });
+      } catch (error) {
+        if (!hasPrismaErrorCode(error, 'P2002')) throw error;
+        throw new UnauthorizedException(GENERIC_CREDENTIAL_ERROR);
+      }
+    }
+
+    return this.issueLoginSession(
+      user,
+      request,
+      'firebase-login-account',
+      identity.uid,
+      { provider: 'firebase' },
+    );
   }
 
   private async revokeFamily(familyId: string, reason: string): Promise<void> {

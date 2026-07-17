@@ -8,6 +8,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthorizationGuard } from './authorization.guard';
 import { CryptoService } from './crypto.service';
+import { FirebaseIdentityService } from './firebase-identity.service';
 import { OriginGuard } from './origin.guard';
 
 @Module({
@@ -24,6 +25,7 @@ import { OriginGuard } from './origin.guard';
   providers: [
     AuthService,
     CryptoService,
+    FirebaseIdentityService,
     AccessTokenService,
     AccessTokenGuard,
     AuthorizationGuard,
@@ -34,6 +36,7 @@ import { OriginGuard } from './origin.guard';
     AccessTokenService,
     AuthorizationGuard,
     CryptoService,
+    FirebaseIdentityService,
   ],
 })
 export class AuthModule {}

@@ -76,6 +76,38 @@
         ]
       }
     },
+    "/api/v1/auth/firebase/session": {
+      "post": {
+        "operationId": "firebaseSession",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirebaseSessionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Troca uma identidade Firebase por uma sessão OdontoGest",
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
     "/api/v1/auth/login": {
       "post": {
         "operationId": "login",
@@ -433,21 +465,18 @@
           "token"
         ]
       },
-      "LoginDto": {
+      "FirebaseSessionDto": {
         "type": "object",
         "properties": {
-          "email": {
+          "idToken": {
             "type": "string",
-            "example": "marina@exemplo.com.br"
-          },
-          "password": {
-            "type": "string",
+            "minLength": 100,
+            "maxLength": 4096,
             "writeOnly": true
           }
         },
         "required": [
-          "email",
-          "password"
+          "idToken"
         ]
       },
       "AuthenticatedUserResponseDto": {
@@ -524,6 +553,23 @@
           "user",
           "clinics",
           "activeClinicId"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "marina@exemplo.com.br"
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "email",
+          "password"
         ]
       },
       "RefreshResponseDto": {

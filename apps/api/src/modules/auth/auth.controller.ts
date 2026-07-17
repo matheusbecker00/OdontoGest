@@ -28,6 +28,7 @@ import { AuthService } from './auth.service';
 import {
   ForgotPasswordDto,
   ActiveClinicResponseDto,
+  FirebaseSessionDto,
   LoginDto,
   LoginResponseDto,
   MessageResponseDto,
@@ -108,6 +109,26 @@ export class AuthController {
     @Req() request: Request,
   ): Promise<void> {
     await this.auth.verifyEmail(input.token, requestMetadata(request));
+  }
+
+  @Public()
+  @Post('firebase/session')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Troca uma identidade Firebase por uma sessão OdontoGest',
+  })
+  @ApiOkResponse({ type: LoginResponseDto })
+  async firebaseSession(
+    @Body() input: FirebaseSessionDto,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const { refreshToken, ...result } = await this.auth.loginWithFirebase(
+      input.idToken,
+      requestMetadata(request),
+    );
+    this.setRefreshCookie(response, refreshToken);
+    return result;
   }
 
   @Public()

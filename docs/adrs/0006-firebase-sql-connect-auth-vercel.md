@@ -24,8 +24,11 @@ dois projetos independentes, um para Angular e outro para NestJS.
   e-mail e recuperação de conta.
 - O Angular não acessa SQL Connect diretamente e não persiste tokens em
   `localStorage`.
-- O NestJS verifica o ID token do Firebase e resolve membership, clínica ativa,
-  role e permissões no servidor.
+- O NestJS verifica o ID token do Firebase, vincula o UID imutável ao usuário
+  interno e resolve membership, clínica ativa, role e permissões no servidor.
+- Após a troca de identidade, a API emite um access token curto, mantido somente
+  em memória, e uma sessão rotativa em cookie HttpOnly. O ID token Firebase não
+  carrega nem substitui o contexto de tenant.
 - O conector `api` usa `@auth(level: NO_ACCESS)` e só pode ser executado pelo
   Admin SDK no backend.
 - `clinicId` fornecido pelo cliente nunca é suficiente: toda operação deve
@@ -34,8 +37,9 @@ dois projetos independentes, um para Angular e outro para NestJS.
   no backend.
 - A região inicial é `southamerica-east1` para manter os dados no Brasil e
   reduzir latência.
-- O projeto Firebase versionado usa `demo-odontogest`; o ID real fica associado
-  localmente pelo Firebase CLI e não é inferido pelo código.
+- O projeto remoto associado é `odongest`. Scripts de emulador e geração local
+  continuam fixados em `demo-odontogest`, impedindo acesso remoto acidental em
+  testes.
 
 ## Migração
 
@@ -43,7 +47,8 @@ A migração será incremental para preservar a evidência já existente:
 
 1. versionar schema, conector e SDK administrativo gerado;
 2. provisionar o projeto Spark e ativar e-mail/senha;
-3. substituir a emissão própria de JWT pelo Firebase Authentication;
+3. trocar credenciais Firebase por sessões OdontoGest sem persistir tokens no
+   navegador;
 4. trocar repositórios Prisma pelo SDK administrativo do SQL Connect;
 5. remover Prisma, PostgreSQL e sessões legadas somente depois dos testes de
    tenant isolation no emulador;

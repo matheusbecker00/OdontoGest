@@ -15,7 +15,11 @@ Data: 16 de julho de 2026.
   `demo-odontogest`;
 - a operação `HealthCheck` respondeu usando o SDK administrativo;
 - configurações Vercel adicionadas para Angular e NestJS;
-- nenhum projeto remoto ou recurso faturável foi criado.
+- projeto remoto `odongest` associado e app Web `odontogest-web` registrado;
+- Authentication por e-mail/senha habilitado;
+- schema e conector implantados no SQL Connect em `southamerica-east1`;
+- instância `odontogest-spark` provisionada no trial sem custo, com o banco
+  `odontogest` compatível com o schema implantado.
 
 O emulador encerrou com um aviso `ECONNRESET` do PostgreSQL embutido após o
 script já ter terminado com código zero. A consulta respondeu e o comando
@@ -35,11 +39,23 @@ Executados com sucesso após as mudanças:
 
 ## Pendente antes da troca de runtime
 
-- autenticar o Firebase CLI na conta do proprietário;
-- criar ou selecionar o projeto Spark;
-- ativar Authentication por e-mail/senha;
-- substituir o guard JWT e os repositórios Prisma pelo Firebase Admin e pelo
-  SDK SQL Connect;
+- trocar os repositórios Prisma pelo SDK SQL Connect;
 - criar testes equivalentes nos emuladores Auth e SQL Connect;
 - vincular os dois projetos Hobby da Vercel;
 - repetir a bateria completa e o teste crítico de isolamento entre clínicas.
+
+## Troca de identidade Firebase
+
+O Angular usa o SDK Firebase com persistência em memória. A API valida o ID
+token, exige e-mail confirmado, vincula o `firebaseUid` a um usuário já
+provisionado e somente então emite a sessão OdontoGest. Uma conta Firebase sem
+usuário interno não recebe acesso nem cria clínica automaticamente.
+
+Validações executadas nesta integração:
+
+- schema Prisma validado e SDK SQL Connect regenerado;
+- typecheck da API e do Angular aprovado;
+- 9 testes unitários da API aprovados;
+- 8 testes do Angular aprovados;
+- teste E2E de troca de token adicionado, mas não executado localmente porque
+  esta estação não possui Docker nem PostgreSQL instalados.

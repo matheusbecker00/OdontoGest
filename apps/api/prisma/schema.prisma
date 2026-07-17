@@ -62,6 +62,7 @@ model User {
   name                String     @db.VarChar(160)
   email               String     @db.VarChar(320)
   emailCanonical      String     @unique(map: "user_email_canonical_key") @map("email_canonical") @db.VarChar(320)
+  firebaseUid         String?    @unique(map: "user_firebase_uid_key") @map("firebase_uid") @db.VarChar(128)
   passwordHash        String     @map("password_hash") @db.VarChar(255)
   passwordHashVersion Int        @default(1) @map("password_hash_version")
   status              UserStatus @default(PENDING_VERIFICATION)

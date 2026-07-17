@@ -9,7 +9,7 @@ import { inject } from '@angular/core';
 import { catchError, from, switchMap, throwError, type Observable } from 'rxjs';
 import { AuthStore } from './auth.store';
 
-const AUTH_ENDPOINT_PATTERN = /\/api\/v1\/auth\/(?:login|refresh|signup|password|email)/;
+const AUTH_ENDPOINT_PATTERN = /\/api\/v1\/auth\/(?:firebase|login|refresh|signup|password|email)/;
 
 function authenticatedRequest(
   request: HttpRequest<unknown>,

@@ -15,6 +15,7 @@ import {
   UserStatus,
 } from '../src/generated/prisma/client';
 import { CryptoService } from '../src/modules/auth/crypto.service';
+import { FirebaseIdentityService } from '../src/modules/auth/firebase-identity.service';
 import { PrismaService } from '../src/platform/database/prisma.service';
 import { FakeEmailService } from '../src/platform/email/fake-email.service';
 
@@ -60,6 +61,7 @@ function tokenFromLink(link: string): string {
 }
 
 describe('OdontoGest foundation (e2e)', () => {
+  const firebaseIdentity = { verifyIdToken: jest.fn() };
   let app: INestApplication;
   let server: Server;
   let owner: PrismaClient;
@@ -131,7 +133,10 @@ describe('OdontoGest foundation (e2e)', () => {
     });
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(FirebaseIdentityService)
+      .useValue(firebaseIdentity)
+      .compile();
     app = moduleFixture.createNestApplication({ bodyParser: false });
     configureApplication(
       app,
@@ -235,6 +240,25 @@ describe('OdontoGest foundation (e2e)', () => {
       },
       select: { id: true },
     });
+
+    firebaseIdentity.verifyIdToken.mockResolvedValueOnce({
+      uid: 'firebase-uid-marina',
+      email,
+    });
+    const firebaseLogin = await request(server)
+      .post('/api/v1/auth/firebase/session')
+      .set('Origin', WEB_ORIGIN)
+      .send({ idToken: 'firebase-test-token'.padEnd(100, '-') })
+      .expect(200);
+    expect(loginResponseSchema.parse(firebaseLogin.body as unknown)).toEqual(
+      expect.objectContaining({ activeClinicId: clinic.id }),
+    );
+    await expect(
+      owner.user.findUniqueOrThrow({
+        where: { id: user.id },
+        select: { firebaseUid: true },
+      }),
+    ).resolves.toEqual({ firebaseUid: 'firebase-uid-marina' });
 
     const login = await request(server)
       .post('/api/v1/auth/login')

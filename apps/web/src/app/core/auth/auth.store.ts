@@ -1,11 +1,13 @@
 import { computed, Injectable, signal, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { AuthApiService } from './auth-api.service';
+import { FirebaseAuthService } from './firebase-auth.service';
 import type { AuthenticatedUser, ClinicSummary, TenantContext } from './auth.models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthStore {
   private readonly api = inject(AuthApiService);
+  private readonly firebase = inject(FirebaseAuthService);
   private readonly accessTokenState = signal<string | null>(null);
   private readonly userState = signal<AuthenticatedUser | null>(null);
   private readonly clinicsState = signal<readonly ClinicSummary[]>([]);
@@ -32,11 +34,17 @@ export class AuthStore {
   }
 
   async login(email: string, password: string): Promise<void> {
-    const response = await firstValueFrom(this.api.login({ email, password }));
-    this.accessTokenState.set(response.accessToken);
-    this.userState.set(response.user);
-    this.clinicsState.set(response.clinics);
-    if (response.activeClinicId) await this.loadTenantContext();
+    const idToken = await this.firebase.signIn(email, password);
+    try {
+      const response = await firstValueFrom(this.api.exchangeFirebaseToken(idToken));
+      this.accessTokenState.set(response.accessToken);
+      this.userState.set(response.user);
+      this.clinicsState.set(response.clinics);
+      if (response.activeClinicId) await this.loadTenantContext();
+    } catch (error) {
+      await this.firebase.signOut().catch(() => undefined);
+      throw error;
+    }
   }
 
   refreshAccessToken(): Promise<string> {
@@ -77,6 +85,7 @@ export class AuthStore {
     try {
       await firstValueFrom(this.api.logout());
     } finally {
+      await this.firebase.signOut().catch(() => undefined);
       this.clear();
     }
   }

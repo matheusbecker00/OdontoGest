@@ -53,6 +53,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/auth/firebase/session": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Troca uma identidade Firebase por uma sessão OdontoGest */
+    post: operations["firebaseSession"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/auth/login": {
     parameters: {
       query?: never;
@@ -262,10 +279,8 @@ export interface components {
     TokenDto: {
       token: string;
     };
-    LoginDto: {
-      /** @example marina@exemplo.com.br */
-      email: string;
-      password: string;
+    FirebaseSessionDto: {
+      idToken: string;
     };
     AuthenticatedUserResponseDto: {
       /** Format: uuid */
@@ -287,6 +302,11 @@ export interface components {
       clinics: components["schemas"]["ClinicSummaryResponseDto"][];
       /** Format: uuid */
       activeClinicId: string | null;
+    };
+    LoginDto: {
+      /** @example marina@exemplo.com.br */
+      email: string;
+      password: string;
     };
     RefreshResponseDto: {
       accessToken: string;
@@ -407,6 +427,29 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  firebaseSession: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FirebaseSessionDto"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LoginResponseDto"];
+        };
       };
     };
   };

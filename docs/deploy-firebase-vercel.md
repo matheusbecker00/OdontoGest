@@ -5,11 +5,11 @@
 O projeto Firebase `odongest` está associado ao repositório e o aplicativo Web
 `odontogest-web` está registrado. O serviço SQL Connect `odontogest`, seu schema
 e o conector `api` estão implantados em `southamerica-east1`. A instância
-`odontogest-spark` foi solicitada no trial sem custo e pode levar alguns minutos
-para concluir o provisionamento.
+`odontogest-spark` está provisionada no trial sem custo, e o banco `odontogest`
+foi validado como compatível com o schema SQL Connect.
 
-O Authentication por e-mail/senha ainda precisa ser habilitado pelo proprietário
-no Firebase Console.
+O Authentication por e-mail/senha está habilitado. O frontend registrado é
+`odontogest-web`.
 
 ## 1. Criar e associar o projeto Firebase
 
@@ -65,7 +65,14 @@ Configure somente no projeto da API:
 - `REDIS_URL` quando o rate limit distribuído for ativado.
 
 Nunca use a credencial do Admin SDK no Angular. A configuração Web do Firebase
-não concede acesso administrativo, mas deve apontar para o mesmo projeto.
+não concede acesso administrativo e está versionada em
+`apps/web/src/environments/firebase.options.ts`. O SDK usa persistência em
+memória e o desenvolvimento conecta ao Auth Emulator.
+
+Na API da Vercel, use `FIREBASE_PROJECT_ID=odongest`, mantenha
+`FIREBASE_AUTH_CHECK_REVOKED=true` e cadastre a conta de serviço somente como
+variáveis protegidas. Converta as quebras de linha da chave privada para `\n`.
+Nunca envie o JSON da conta de serviço ao Git ou ao frontend.
 
 ## 5. Projetos Vercel
 
@@ -78,6 +85,10 @@ Crie dois projetos Hobby ligados ao mesmo repositório:
 
 Cada pasta contém um `vercel.json`. Depois do primeiro deploy, defina a URL da
 API no frontend e a origem do frontend na allowlist da API.
+
+Depois que o domínio de produção existir, adicione apenas esse domínio em
+Authentication > Configurações > Domínios autorizados. Não autorize curingas
+de preview.
 
 O plano Hobby só pode ser usado enquanto o ambiente for pessoal e não
 comercial. Antes de atender clínicas pagantes, é obrigatório revisar custos,

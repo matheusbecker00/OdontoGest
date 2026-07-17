@@ -48,6 +48,7 @@ const REQUEST_ID_PATTERN = /^[A-Za-z0-9_-]{8,80}$/;
               'res.headers.set-cookie',
               'req.body.password',
               'req.body.token',
+              'req.body.idToken',
               'req.body.email',
               'req.body.cpf',
               'req.body.cnpj',

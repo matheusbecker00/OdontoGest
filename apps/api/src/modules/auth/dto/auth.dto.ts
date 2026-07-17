@@ -38,6 +38,13 @@ export class LoginDto {
   password!: string;
 }
 
+export class FirebaseSessionDto {
+  @ApiProperty({ minLength: 100, maxLength: 4096, writeOnly: true })
+  @IsString()
+  @Length(100, 4096)
+  idToken!: string;
+}
+
 export class TokenDto {
   @ApiProperty({ minLength: 40, maxLength: 128, writeOnly: true })
   @IsString()

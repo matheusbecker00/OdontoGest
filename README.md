@@ -11,6 +11,10 @@ web, API versionada, autenticação, sessões rotativas, RBAC, isolamento por RL
 auditoria inicial, schema SQL Connect, infraestrutura local, contrato OpenAPI e
 CI de segurança.
 
+A identidade de login já é validada pelo Firebase Authentication e trocada por
+uma sessão OdontoGest vinculada ao usuário, à clínica e às permissões da API. A
+substituição dos repositórios Prisma pelo SQL Connect continua incremental.
+
 A decisão de usar Firebase Spark e Vercel Hobby está registrada no
 [ADR 0006](docs/adrs/0006-firebase-sql-connect-auth-vercel.md). A migração ainda
 não está concluída: Prisma e as sessões próprias só serão removidos depois que
@@ -95,8 +99,10 @@ PostgreSQL e Redis reais, auditoria de dependências, Gitleaks e CodeQL.
 
 - `clinicId` de negócio vem do contexto autenticado, nunca do cliente.
 - A role da aplicação usa `NOBYPASSRLS`; a role de migração é separada.
-- Access token fica apenas em memória; refresh token fica em cookie HttpOnly.
-- Senhas usam Argon2id; tokens persistidos são armazenados somente como hash.
+- ID token e access token ficam apenas em memória; refresh token fica em cookie
+  HttpOnly.
+- Firebase Authentication gerencia a senha no fluxo novo; o fluxo legado usa
+  Argon2id enquanto a migração não termina.
 - Logs redigem credenciais e dados pessoais configurados.
 - Seeds e testes usam somente identidades fictícias.
 - Mercado Pago e qualquer cobrança real permanecem fora desta fase.

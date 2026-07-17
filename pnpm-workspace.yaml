@@ -3,6 +3,7 @@ packages:
   - packages/*
 
 allowBuilds:
+  "@firebase/util": true
   "@parcel/watcher": true
   "@prisma/engines": true
   "@scarf/scarf": false
@@ -11,6 +12,8 @@ allowBuilds:
   lmdb: true
   msgpackr-extract: true
   prisma: true
+  protobufjs: true
+  re2: true
   unrs-resolver: true
 
 catalog:
@@ -25,3 +28,4 @@ overrides:
 minimumReleaseAgeExclude:
   - "@angular/cdk@22.0.5"
   - "@angular/material@22.0.5"
+  - firebase-admin@14.2.0

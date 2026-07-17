@@ -1,0 +1,69 @@
+mutation UpsertFirebaseUser(
+  $uid: String!
+  $name: String!
+  $email: String!
+  $emailCanonical: String!
+  $emailVerifiedAt: Timestamp
+) @auth(level: NO_ACCESS) @transaction {
+  user_upsert(
+    data: {
+      id: $uid
+      name: $name
+      email: $email
+      emailCanonical: $emailCanonical
+      status: ACTIVE
+      emailVerifiedAt: $emailVerifiedAt
+      updatedAt_expr: "request.time"
+    }
+  )
+}
+
+mutation InsertSecurityEvent(
+  $userId: String
+  $action: String!
+  $outcome: AuditOutcome!
+  $requestId: String!
+  $ipPrefix: String
+  $userAgentSummary: String
+  $metadataRedacted: Any
+) @auth(level: NO_ACCESS) @transaction {
+  securityEvent_insert(
+    data: {
+      userId: $userId
+      action: $action
+      outcome: $outcome
+      requestId: $requestId
+      ipPrefix: $ipPrefix
+      userAgentSummary: $userAgentSummary
+      metadataRedacted: $metadataRedacted
+    }
+  )
+}
+
+mutation InsertTenantAuditEvent(
+  $clinicId: UUID!
+  $actorUserId: String
+  $action: String!
+  $entityType: String!
+  $entityId: UUID
+  $outcome: AuditOutcome!
+  $requestId: String!
+  $ipPrefix: String
+  $userAgentSummary: String
+  $metadataRedacted: Any
+) @auth(level: NO_ACCESS) @transaction {
+  auditLog_insert(
+    data: {
+      clinicId: $clinicId
+      actorUserId: $actorUserId
+      action: $action
+      entityType: $entityType
+      entityId: $entityId
+      outcome: $outcome
+      requestId: $requestId
+      ipPrefix: $ipPrefix
+      userAgentSummary: $userAgentSummary
+      metadataRedacted: $metadataRedacted
+    }
+  )
+}

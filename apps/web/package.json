@@ -13,7 +13,6 @@
   },
   "private": true,
   "dependencies": {
-    "@odontogest/contracts": "workspace:*",
     "@angular/cdk": "22.0.5",
     "@angular/common": "^22.0.0",
     "@angular/compiler": "^22.0.0",
@@ -22,6 +21,8 @@
     "@angular/material": "22.0.5",
     "@angular/platform-browser": "^22.0.0",
     "@angular/router": "^22.0.0",
+    "@odontogest/contracts": "workspace:*",
+    "firebase": "12.16.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -35,8 +36,8 @@
     "@eslint/js": "10.0.1",
     "angular-eslint": "22.1.0",
     "eslint": "10.7.0",
-    "jsdom": "^28.0.0",
     "globals": "17.3.0",
+    "jsdom": "^28.0.0",
     "prettier": "3.9.5",
     "typescript": "~6.0.2",
     "typescript-eslint": "8.64.0",

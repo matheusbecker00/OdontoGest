@@ -1,0 +1,5 @@
+connectorId: "api"
+generate:
+  adminNodeSdk:
+    package: "@odontogest/dataconnect-admin"
+    outputDir: "../../packages/dataconnect-admin-generated"

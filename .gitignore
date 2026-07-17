@@ -15,6 +15,7 @@ playwright-report/
 *.log
 *.tsbuildinfo
 apps/api/src/generated/prisma/
+dataconnect/.dataconnect/
 
 .idea/
 .vscode/

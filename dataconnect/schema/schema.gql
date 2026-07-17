@@ -1,0 +1,243 @@
+enum UserStatus {
+  PENDING_ONBOARDING
+  ACTIVE
+  LOCKED
+  DISABLED
+}
+
+enum ClinicStatus {
+  ACTIVE
+  READ_ONLY
+  SUSPENDED
+  CLOSED
+}
+
+enum MembershipStatus {
+  INVITED
+  ACTIVE
+  SUSPENDED
+  REVOKED
+}
+
+enum RoleCode {
+  OWNER
+  ADMIN
+  DENTIST
+  RECEPTIONIST
+  FINANCE
+}
+
+enum AuditOutcome {
+  SUCCESS
+  DENIED
+  FAILURE
+}
+
+enum OutboxStatus {
+  PENDING
+  PROCESSING
+  PUBLISHED
+  FAILED
+}
+
+# O identificador principal é o UID imutável emitido pelo Firebase Authentication.
+type User
+  @table(key: "id")
+  @index(fields: ["status", "createdAt"], name: "user_status_created_idx") {
+  id: String! @col(dataType: "varchar(128)")
+  name: String! @col(dataType: "varchar(160)")
+  email: String! @col(dataType: "varchar(320)")
+  emailCanonical: String!
+    @col(dataType: "varchar(320)")
+    @unique(indexName: "user_email_canonical_key")
+  status: UserStatus! @default(value: PENDING_ONBOARDING)
+  emailVerifiedAt: Timestamp
+  authorizationVersion: Int! @default(value: 1)
+  lastLoginAt: Timestamp
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+  deletedAt: Timestamp
+}
+
+type Clinic
+  @table
+  @index(fields: ["status", "createdAt"], name: "clinic_status_created_idx") {
+  legalName: String! @col(dataType: "varchar(180)")
+  tradeName: String! @col(dataType: "varchar(180)")
+  status: ClinicStatus! @default(value: ACTIVE)
+  timezone: String!
+    @col(dataType: "varchar(80)")
+    @default(value: "America/Sao_Paulo")
+  locale: String! @col(dataType: "varchar(16)") @default(value: "pt-BR")
+  currency: String! @col(dataType: "char(3)") @default(value: "BRL")
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+  deletedAt: Timestamp
+}
+
+type ClinicSettings
+  @table
+  @unique(fields: ["clinicId"], indexName: "clinic_settings_clinic_key") {
+  clinicId: UUID!
+  clinic: Clinic! @ref(fields: ["clinicId"])
+  defaultAppointmentMinutes: Int! @default(value: 30)
+  gracePeriodDays: Int! @default(value: 7)
+  version: Int! @default(value: 1)
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+  createdBy: String @col(dataType: "varchar(128)")
+  updatedBy: String @col(dataType: "varchar(128)")
+}
+
+type Role @table {
+  code: RoleCode! @unique(indexName: "role_code_key")
+  name: String! @col(dataType: "varchar(80)")
+  description: String! @col(dataType: "varchar(240)")
+  isSystem: Boolean! @default(value: true)
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type Permission @table {
+  code: String!
+    @col(dataType: "varchar(100)")
+    @unique(indexName: "permission_code_key")
+  description: String! @col(dataType: "varchar(240)")
+  riskLevel: Int! @default(value: 1)
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type RolePermission @table(key: ["roleId", "permissionId"]) {
+  roleId: UUID!
+  permissionId: UUID!
+  role: Role! @ref(fields: ["roleId"])
+  permission: Permission! @ref(fields: ["permissionId"])
+}
+
+type ClinicMembership
+  @table
+  @unique(
+    fields: ["clinicId", "userId"]
+    indexName: "membership_clinic_user_key"
+  )
+  @index(
+    fields: ["userId", "status", "clinicId"]
+    name: "membership_user_status_clinic_idx"
+  )
+  @index(
+    fields: ["clinicId", "status", "roleId"]
+    name: "membership_clinic_status_role_idx"
+  ) {
+  clinicId: UUID!
+  userId: String! @col(dataType: "varchar(128)")
+  roleId: UUID!
+  clinic: Clinic! @ref(fields: ["clinicId"])
+  user: User! @ref(fields: ["userId"])
+  role: Role! @ref(fields: ["roleId"])
+  status: MembershipStatus! @default(value: INVITED)
+  authorizationVersion: Int! @default(value: 1)
+  invitedBy: String @col(dataType: "varchar(128)")
+  invitedAt: Timestamp
+  acceptedAt: Timestamp
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+  deletedAt: Timestamp
+}
+
+type TermsAcceptance
+  @table
+  @unique(
+    fields: ["clinicId", "userId", "documentType", "documentVersion"]
+    indexName: "terms_acceptance_version_key"
+  )
+  @index(
+    fields: ["clinicId", "acceptedAt"]
+    name: "terms_acceptance_clinic_date_idx"
+  ) {
+  clinicId: UUID!
+  userId: String! @col(dataType: "varchar(128)")
+  clinic: Clinic! @ref(fields: ["clinicId"])
+  user: User! @ref(fields: ["userId"])
+  documentType: String! @col(dataType: "varchar(40)")
+  documentVersion: String! @col(dataType: "varchar(40)")
+  acceptedAt: Timestamp! @default(expr: "request.time")
+  ipPrefix: String @col(dataType: "varchar(64)")
+  userAgentSummary: String @col(dataType: "varchar(255)")
+  evidenceDigest: String! @col(dataType: "char(64)")
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type AuditLog
+  @table
+  @index(
+    fields: ["clinicId", "occurredAt", "id"]
+    name: "audit_clinic_occurred_idx"
+  )
+  @index(
+    fields: ["actorUserId", "occurredAt"]
+    name: "audit_actor_occurred_idx"
+  ) {
+  clinicId: UUID!
+  actorUserId: String @col(dataType: "varchar(128)")
+  clinic: Clinic! @ref(fields: ["clinicId"])
+  action: String! @col(dataType: "varchar(100)")
+  entityType: String! @col(dataType: "varchar(80)")
+  entityId: UUID
+  outcome: AuditOutcome!
+  requestId: String! @col(dataType: "varchar(80)")
+  ipPrefix: String @col(dataType: "varchar(64)")
+  userAgentSummary: String @col(dataType: "varchar(255)")
+  beforeRedacted: Any
+  afterRedacted: Any
+  metadataRedacted: Any
+  occurredAt: Timestamp! @default(expr: "request.time")
+  previousHash: String @col(dataType: "char(64)")
+  eventHash: String @col(dataType: "char(64)")
+}
+
+type SecurityEvent
+  @table
+  @index(fields: ["userId", "occurredAt"], name: "security_event_user_date_idx")
+  @index(
+    fields: ["action", "occurredAt"]
+    name: "security_event_action_date_idx"
+  ) {
+  userId: String @col(dataType: "varchar(128)")
+  action: String! @col(dataType: "varchar(100)")
+  outcome: AuditOutcome!
+  requestId: String! @col(dataType: "varchar(80)")
+  ipPrefix: String @col(dataType: "varchar(64)")
+  userAgentSummary: String @col(dataType: "varchar(255)")
+  metadataRedacted: Any
+  occurredAt: Timestamp! @default(expr: "request.time")
+}
+
+type OutboxEvent
+  @table
+  @unique(
+    fields: ["clinicId", "idempotencyKey"]
+    indexName: "outbox_clinic_idempotency_key"
+  )
+  @index(
+    fields: ["status", "availableAt", "createdAt"]
+    name: "outbox_status_available_idx"
+  ) {
+  clinicId: UUID!
+  clinic: Clinic! @ref(fields: ["clinicId"])
+  aggregateType: String! @col(dataType: "varchar(80)")
+  aggregateId: UUID!
+  eventType: String! @col(dataType: "varchar(120)")
+  payload: Any!
+  idempotencyKey: String! @col(dataType: "varchar(160)")
+  status: OutboxStatus! @default(value: PENDING)
+  attemptCount: Int! @default(value: 0)
+  availableAt: Timestamp! @default(expr: "request.time")
+  lockedAt: Timestamp
+  lockedBy: String @col(dataType: "varchar(120)")
+  processedAt: Timestamp
+  lastErrorCode: String @col(dataType: "varchar(80)")
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}

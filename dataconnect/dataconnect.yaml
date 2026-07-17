@@ -1,0 +1,12 @@
+specVersion: "v1alpha"
+serviceId: "odontogest"
+location: "southamerica-east1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "odontogest"
+      cloudSql:
+        instanceId: "odontogest-spark"
+        schemaValidation: "STRICT"
+connectorDirs: ["./api"]

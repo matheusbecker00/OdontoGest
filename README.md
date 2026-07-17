@@ -1,13 +1,20 @@
 # OdontoGest
 
 Micro SaaS para gestão de clínicas odontológicas, projetado como monólito
-modular multi-tenant com Angular, NestJS, PostgreSQL, Redis e Prisma.
+modular multi-tenant com Angular, NestJS, Firebase Authentication, Firebase SQL
+Connect e PostgreSQL gerenciado.
 
 ## Estado do projeto
 
-As Fases 0 e 1 estão implementadas. A fundação atual inclui monorepo, aplicação
+As Fases 0 e 1 foram implementadas e a fundação está migrando para Firebase. A base inclui monorepo, aplicação
 web, API versionada, autenticação, sessões rotativas, RBAC, isolamento por RLS,
-auditoria inicial, infraestrutura local, contrato OpenAPI e CI de segurança.
+auditoria inicial, schema SQL Connect, infraestrutura local, contrato OpenAPI e
+CI de segurança.
+
+A decisão de usar Firebase Spark e Vercel Hobby está registrada no
+[ADR 0006](docs/adrs/0006-firebase-sql-connect-auth-vercel.md). A migração ainda
+não está concluída: Prisma e as sessões próprias só serão removidos depois que
+os testes equivalentes estiverem verdes no emulador.
 
 O sistema **não está pronto para produção** e não faz afirmação de
 conformidade com a LGPD. O onboarding transacional de clínica, cadastros e app
@@ -18,6 +25,7 @@ Documentação principal:
 - [Entrega da Fase 1](docs/fase-1.md)
 - [Desenvolvimento local](docs/desenvolvimento.md)
 - [Segurança da fundação](docs/seguranca-fase-1.md)
+- [Firebase Spark e Vercel Hobby](docs/deploy-firebase-vercel.md)
 - [Validação da Fase 1](docs/validacao-fase-1.md)
 - [Arquitetura](docs/arquitetura.md) e [modelo de dados](docs/modelo-de-dados.md)
 - [Modelo de ameaças](docs/modelo-de-ameacas.md)
@@ -33,6 +41,8 @@ apps/
   api/                 NestJS 11, REST /api/v1, Prisma e OpenAPI
 packages/
   contracts/           Tipos TypeScript gerados do OpenAPI
+  dataconnect-admin-generated/ SDK administrativo gerado do SQL Connect
+dataconnect/            Schema relacional e operações exclusivas da API
 infra/postgres/init/   Papel restrito de runtime do PostgreSQL
 docs/                   Arquitetura, segurança e operação
 ```
@@ -45,6 +55,7 @@ Pré-requisitos: Node.js 24.15 ou superior, Corepack e Docker Compose.
 corepack enable
 corepack install
 pnpm install --frozen-lockfile
+pnpm firebase:sdk:generate
 ```
 
 Copie `.env.example` para `.env`, substitua todos os placeholders por valores

@@ -1,5 +1,9 @@
 # Validação da Fase 1
 
+> Evidência histórica da implementação Prisma. A migração aprovada no ADR 0006
+> exige uma nova rodada completa de validação no Firebase Emulator Suite antes
+> de substituir esta evidência como baseline operacional.
+
 Data da execução local: 16 de julho de 2026.
 
 ## Ambiente

@@ -22,9 +22,13 @@
     "db:validate": "corepack pnpm --filter @odontogest/api prisma:validate",
     "db:migrate:deploy": "corepack pnpm --filter @odontogest/api prisma:migrate:deploy",
     "db:seed": "corepack pnpm --filter @odontogest/api exec prisma db seed",
+    "firebase:sdk:generate": "firebase dataconnect:sdk:generate --project demo-odontogest",
+    "firebase:emulators": "firebase emulators:start --only auth,dataconnect --project demo-odontogest",
+    "firebase:emulators:exec": "firebase emulators:exec --only auth,dataconnect --project demo-odontogest",
     "openapi:generate": "corepack pnpm --filter @odontogest/api openapi:generate && corepack pnpm --filter @odontogest/contracts generate"
   },
   "devDependencies": {
+    "firebase-tools": "15.24.0",
     "markdownlint-cli2": "0.20.0",
     "prettier": "3.9.5",
     "turbo": "2.10.5"

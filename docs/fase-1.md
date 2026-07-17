@@ -59,3 +59,12 @@ Endpoints da fundação:
 ## Próximo gate
 
 A Fase 2 só deve começar após revisão desta entrega e autorização explícita.
+
+## Migração de infraestrutura aprovada
+
+Após a validação original desta fase, a persistência e a identidade foram
+redirecionadas para Firebase SQL Connect e Firebase Authentication, com deploy
+inicial na Vercel Hobby. O ADR 0006 define a migração incremental. A evidência
+Prisma acima continua histórica; a nova fundação só será considerada concluída
+quando os mesmos testes de autenticação, RBAC e isolamento passarem nos
+emuladores Firebase.

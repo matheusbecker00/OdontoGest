@@ -13,6 +13,8 @@
 - [Backlog](backlog.md)
 - [ADRs](adrs/README.md)
 - [Validação da Fase 0](validacao-fase-0.md)
+- [Firebase Spark e Vercel Hobby](deploy-firebase-vercel.md)
+- [Validação do scaffold Firebase](validacao-migracao-firebase.md)
 
 As capturas em `referencias/` são evidências da inspeção visual e não integram o
 design final do produto.

@@ -1,0 +1,63 @@
+# Este conector é exclusivo do backend NestJS. Nenhuma operação é pública.
+
+query HealthCheck @auth(level: NO_ACCESS) {
+  users(limit: 1) {
+    id
+  }
+}
+
+query GetPrincipal($uid: String!) @auth(level: NO_ACCESS) {
+  user(key: { id: $uid }) {
+    id
+    name
+    email
+    status
+    authorizationVersion
+  }
+  clinicMemberships(
+    where: {
+      userId: { eq: $uid }
+      status: { eq: ACTIVE }
+      deletedAt: { eq: null }
+    }
+    orderBy: { createdAt: ASC }
+  ) {
+    authorizationVersion
+    clinic {
+      id
+      tradeName
+      status
+      timezone
+      locale
+      currency
+    }
+    role {
+      code
+      name
+      rolePermissions_on_role {
+        permission {
+          code
+        }
+      }
+    }
+  }
+}
+
+query ListTenantAuditEvents($clinicId: UUID!, $limit: Int = 50)
+@auth(level: NO_ACCESS) {
+  auditLogs(
+    where: { clinicId: { eq: $clinicId } }
+    orderBy: [{ occurredAt: DESC }, { id: DESC }]
+    limit: $limit
+  ) {
+    id
+    actorUserId
+    action
+    entityType
+    entityId
+    outcome
+    requestId
+    occurredAt
+    metadataRedacted
+  }
+}

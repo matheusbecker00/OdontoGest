@@ -1,0 +1,68 @@
+<mat-sidenav-container class="shell">
+  <mat-sidenav
+    #drawer
+    class="sidebar"
+    [mode]="isMobile() ? 'over' : 'side'"
+    [opened]="!isMobile()"
+    [fixedInViewport]="true"
+  >
+    <div class="brand">
+      <span class="brand__mark"><mat-icon>dentistry</mat-icon></span>
+      <span><strong>OdontoGest</strong><small>Gestão odontológica</small></span>
+    </div>
+
+    <nav aria-label="Navegação principal">
+      <span class="nav-label">Menu principal</span>
+      @for (item of navigation; track item.route) {
+        <a [routerLink]="item.route" routerLinkActive="active" (click)="closeMobile(drawer)">
+          <mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+      <span class="nav-label nav-label--secondary">Sistema</span>
+      <a routerLink="/app/configuracoes" routerLinkActive="active" (click)="closeMobile(drawer)">
+        <mat-icon aria-hidden="true">settings</mat-icon><span>Configurações</span>
+      </a>
+      <a routerLink="/app/ajuda" routerLinkActive="active" (click)="closeMobile(drawer)">
+        <mat-icon aria-hidden="true">help_outline</mat-icon><span>Ajuda e suporte</span>
+      </a>
+    </nav>
+
+    <div class="sidebar__footer">
+      <span class="avatar">{{ auth.user()?.name?.charAt(0) || 'M' }}</span>
+      <span class="identity">
+        <strong>{{ auth.user()?.name || 'Usuário' }}</strong>
+        <small>{{ auth.clinics()[0]?.name || 'Clínica ativa' }}</small>
+      </span>
+      <button mat-icon-button matTooltip="Sair" type="button" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <header class="topbar">
+      <button
+        class="menu-button"
+        mat-icon-button
+        type="button"
+        aria-label="Abrir menu"
+        (click)="drawer.toggle()"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+      <div>
+        <span class="mobile-brand">OdontoGest</span>
+        <h1>{{ pageTitle() }}</h1>
+      </div>
+      <div class="topbar__actions">
+        <span class="today">{{ today }}</span>
+        <button mat-icon-button matTooltip="Notificações" type="button">
+          <mat-icon>notifications_none</mat-icon>
+        </button>
+        <span class="top-avatar">{{ auth.user()?.name?.charAt(0) || 'M' }}</span>
+      </div>
+    </header>
+    <div class="content"><router-outlet /></div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

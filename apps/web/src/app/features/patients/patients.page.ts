@@ -7,7 +7,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
-import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthStore } from '../../core/auth/auth.store';
 import {
@@ -28,7 +27,6 @@ import {
     MatSelectModule,
     MatTableModule,
     ReactiveFormsModule,
-    RouterLink,
   ],
   templateUrl: './patients.page.html',
   styleUrl: './patients.page.scss',

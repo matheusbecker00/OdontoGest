@@ -42,16 +42,77 @@ export const routes: Routes = [
       import('./features/app/access-denied.page').then((module) => module.AccessDeniedPage),
   },
   {
-    path: 'app/dashboard',
+    path: 'app',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/app/dashboard.page').then((module) => module.DashboardPage),
-  },
-  {
-    path: 'app/pacientes',
-    canActivate: [permissionGuard(['patient.read'])],
-    loadComponent: () =>
-      import('./features/patients/patients.page').then((module) => module.PatientsPage),
+      import('./features/app/app-shell.component').then((module) => module.AppShellComponent),
+    children: [
+      {
+        path: 'dashboard',
+        data: { title: 'Dashboard' },
+        loadComponent: () =>
+          import('./features/app/dashboard.page').then((module) => module.DashboardPage),
+      },
+      {
+        path: 'agenda',
+        data: { title: 'Agenda' },
+        loadComponent: () =>
+          import('./features/app/calendar.page').then((module) => module.CalendarPage),
+      },
+      {
+        path: 'pacientes',
+        data: { title: 'Pacientes' },
+        canActivate: [permissionGuard(['patient.read'])],
+        loadComponent: () =>
+          import('./features/patients/patients.page').then((module) => module.PatientsPage),
+      },
+      ...[
+        {
+          path: 'profissionais',
+          title: 'Profissionais',
+          description: 'Equipe clínica, especialidades e disponibilidade.',
+          icon: 'medical_services',
+        },
+        {
+          path: 'financeiro',
+          title: 'Financeiro',
+          description: 'Receitas, despesas e controle do fluxo de caixa.',
+          icon: 'account_balance_wallet',
+        },
+        {
+          path: 'estoque',
+          title: 'Estoque',
+          description: 'Materiais, movimentações e alertas de reposição.',
+          icon: 'inventory_2',
+        },
+        {
+          path: 'relatorios',
+          title: 'Relatórios',
+          description: 'Indicadores operacionais e visão gerencial.',
+          icon: 'monitoring',
+        },
+        {
+          path: 'configuracoes',
+          title: 'Configurações',
+          description: 'Preferências da clínica, usuários e permissões.',
+          icon: 'settings',
+        },
+        {
+          path: 'ajuda',
+          title: 'Ajuda e suporte',
+          description: 'Orientações e canais de atendimento do OdontoGest.',
+          icon: 'help_outline',
+        },
+      ].map(({ path, title, description, icon }) => ({
+        path,
+        data: { title, description, icon },
+        loadComponent: () =>
+          import('./features/app/workspace-placeholder.page').then(
+            (module) => module.WorkspacePlaceholderPage,
+          ),
+      })),
+      { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+    ],
   },
   { path: '', pathMatch: 'full', redirectTo: 'login' },
   { path: '**', redirectTo: 'login' },

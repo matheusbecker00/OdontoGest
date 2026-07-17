@@ -1,116 +1,416 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatSelectModule } from '@angular/material/select';
-import { Router, RouterLink } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
+import { RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { AuthStore } from '../../core/auth/auth.store';
+import { PatientsApiService } from '../patients/patients-api.service';
 
 @Component({
   selector: 'og-dashboard-page',
-  imports: [MatButtonModule, MatCardModule, MatSelectModule, RouterLink],
+  imports: [MatButtonModule, MatIconModule, RouterLink],
   template: `
-    <main class="foundation-page">
-      <header>
+    <main class="dashboard">
+      <section class="welcome">
         <div>
-          <span>ODONTOGEST</span>
-          <h1>Fundação segura ativa</h1>
-          <p>Este painel provisório será substituído pelo shell completo na Fase 2.</p>
+          <span class="eyebrow">VISÃO GERAL</span>
+          <h2>Olá, {{ firstName() }}! <span aria-hidden="true">👋</span></h2>
+          <p>Acompanhe os principais indicadores da sua clínica.</p>
         </div>
-        <button mat-stroked-button type="button" (click)="logout()">Sair</button>
-      </header>
-
-      <section class="cards" aria-label="Estado da fundação">
-        <mat-card appearance="outlined">
-          <mat-card-header><mat-card-title>Sessão</mat-card-title></mat-card-header>
-          <mat-card-content>Autenticação protegida pelo Firebase.</mat-card-content>
-        </mat-card>
-        <mat-card appearance="outlined">
-          <mat-card-header><mat-card-title>Tenant</mat-card-title></mat-card-header>
-          <mat-card-content>
-            {{ auth.tenantContext()?.activeClinicId ?? 'Selecione uma clínica' }}
-          </mat-card-content>
-        </mat-card>
-        <mat-card appearance="outlined">
-          <mat-card-header><mat-card-title>Permissões</mat-card-title></mat-card-header>
-          <mat-card-content>{{ auth.permissions().size }} permissões ativas</mat-card-content>
-        </mat-card>
+        <a mat-flat-button routerLink="/app/agenda"> <mat-icon>add</mat-icon>Novo agendamento </a>
       </section>
 
-      @if (auth.hasEveryPermission(['patient.read'])) {
-        <a mat-flat-button routerLink="/app/pacientes">Gerenciar pacientes</a>
-      }
+      <section class="metrics" aria-label="Indicadores da clínica">
+        <article class="metric metric--blue">
+          <span class="metric__icon"><mat-icon>calendar_today</mat-icon></span>
+          <div><small>Agenda hoje</small><strong>0</strong><span>Nenhum atendimento</span></div>
+        </article>
+        <article class="metric metric--cyan">
+          <span class="metric__icon"><mat-icon>groups</mat-icon></span>
+          <div>
+            <small>Pacientes</small><strong>{{ patientTotal() }}</strong
+            ><span>Total cadastrado</span>
+          </div>
+        </article>
+        <article class="metric metric--green">
+          <span class="metric__icon"><mat-icon>payments</mat-icon></span>
+          <div>
+            <small>Recebimentos hoje</small><strong>R$ 0</strong><span>Sem lançamentos</span>
+          </div>
+        </article>
+        <article class="metric metric--orange">
+          <span class="metric__icon"><mat-icon>pending_actions</mat-icon></span>
+          <div><small>Pendências</small><strong>0</strong><span>Tudo em dia</span></div>
+        </article>
+      </section>
 
-      @if (auth.clinics().length > 1) {
-        <mat-form-field appearance="outline">
-          <mat-label>Clínica ativa</mat-label>
-          <mat-select (selectionChange)="selectClinic($event.value)">
-            @for (clinic of auth.clinics(); track clinic.id) {
-              <mat-option [value]="clinic.id">{{ clinic.name }} — {{ clinic.role }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-      }
+      <section class="dashboard-grid">
+        <article class="panel schedule">
+          <header>
+            <div>
+              <h3>Agenda de hoje</h3>
+              <p>Seus próximos atendimentos</p>
+            </div>
+            <a routerLink="/app/agenda">Ver agenda completa</a>
+          </header>
+          <div class="empty-state">
+            <span><mat-icon>event_available</mat-icon></span>
+            <strong>Nenhum atendimento agendado</strong>
+            <p>Sua agenda está livre hoje.</p>
+            <a mat-stroked-button routerLink="/app/agenda">Abrir calendário</a>
+          </div>
+        </article>
+
+        <aside class="panel quick-actions">
+          <header>
+            <div>
+              <h3>Acesso rápido</h3>
+              <p>Atalhos mais utilizados</p>
+            </div>
+          </header>
+          <div class="quick-actions__grid">
+            <a routerLink="/app/pacientes"
+              ><mat-icon>person_add</mat-icon><span>Novo paciente</span></a
+            >
+            <a routerLink="/app/agenda"
+              ><mat-icon>edit_calendar</mat-icon><span>Agendar consulta</span></a
+            >
+            <a routerLink="/app/financeiro"
+              ><mat-icon>add_card</mat-icon><span>Novo lançamento</span></a
+            >
+            <a routerLink="/app/relatorios"
+              ><mat-icon>bar_chart</mat-icon><span>Ver relatórios</span></a
+            >
+          </div>
+        </aside>
+
+        <article class="panel overview">
+          <header>
+            <div>
+              <h3>Resumo da clínica</h3>
+              <p>Informações do ambiente atual</p>
+            </div>
+          </header>
+          <div class="clinic-row">
+            <span class="clinic-icon"><mat-icon>domain</mat-icon></span>
+            <div>
+              <small>Clínica ativa</small><strong>{{ clinicName() }}</strong>
+            </div>
+            <span class="badge">Ativa</span>
+          </div>
+          <div class="progress-row">
+            <span>Configuração inicial</span><strong>65%</strong>
+            <div><i></i></div>
+          </div>
+          <a routerLink="/app/configuracoes"
+            >Completar configuração <mat-icon>arrow_forward</mat-icon></a
+          >
+        </article>
+      </section>
     </main>
   `,
   styles: `
     :host {
       display: block;
-      min-height: 100dvh;
-      background: #f1f5f9;
-      color: #0f172a;
     }
-    .foundation-page {
-      max-width: 90rem;
-      margin: auto;
-      padding: clamp(1rem, 4vw, 3rem);
+    .dashboard {
+      color: #10213a;
     }
-    header {
+    .welcome {
       display: flex;
-      align-items: start;
+      align-items: center;
       justify-content: space-between;
       gap: 1rem;
+      margin-bottom: 1.6rem;
     }
-    header span {
+    .eyebrow {
       color: #2563eb;
-      font-weight: 800;
+      font-size: 0.67rem;
+      font-weight: 850;
+      letter-spacing: 0.12em;
     }
-    h1 {
+    h2 {
       margin: 0.25rem 0;
+      font-size: clamp(1.65rem, 3vw, 2.15rem);
+      letter-spacing: -0.04em;
     }
+    .welcome p,
     header p {
       margin: 0;
-      color: #64748b;
+      color: #718198;
+      font-size: 0.86rem;
     }
-    .cards {
+    .welcome a {
+      height: 2.8rem;
+      border-radius: 0.75rem;
+    }
+    .metrics {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 1rem;
-      margin: 2rem 0;
     }
-    mat-card {
-      border-radius: 1.375rem;
+    .metric {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      min-height: 8rem;
+      padding: 1.15rem;
+      border: 1px solid #e4eaf1;
+      border-radius: 1rem;
+      background: white;
+      box-shadow: 0 5px 18px rgb(15 23 42 / 4%);
     }
-    mat-form-field {
-      width: min(100%, 28rem);
+    .metric__icon {
+      display: grid;
+      flex: 0 0 auto;
+      width: 3rem;
+      height: 3rem;
+      place-items: center;
+      border-radius: 0.9rem;
+    }
+    .metric small,
+    .metric strong,
+    .metric span {
+      display: block;
+    }
+    .metric small {
+      color: #718198;
+      font-size: 0.72rem;
+      font-weight: 650;
+    }
+    .metric strong {
+      margin: 0.2rem 0;
+      font-size: 1.55rem;
+      letter-spacing: -0.04em;
+    }
+    .metric div > span {
+      color: #8a99ad;
+      font-size: 0.66rem;
+    }
+    .metric--blue .metric__icon {
+      color: #2563eb;
+      background: #eaf2ff;
+    }
+    .metric--cyan .metric__icon {
+      color: #0891b2;
+      background: #e6f8fc;
+    }
+    .metric--green .metric__icon {
+      color: #059669;
+      background: #e7f8f2;
+    }
+    .metric--orange .metric__icon {
+      color: #ea580c;
+      background: #fff1e8;
+    }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(18rem, 1fr);
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .panel {
+      overflow: hidden;
+      border: 1px solid #e4eaf1;
+      border-radius: 1rem;
+      background: white;
+      box-shadow: 0 5px 18px rgb(15 23 42 / 4%);
+    }
+    .panel header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.15rem 1.25rem;
+      border-bottom: 1px solid #edf1f5;
+    }
+    h3 {
+      margin: 0 0 0.2rem;
+      font-size: 0.98rem;
+    }
+    header a,
+    .overview > a {
+      color: #2563eb;
+      font-size: 0.73rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .empty-state {
+      display: grid;
+      justify-items: center;
+      padding: 3.1rem 1rem;
+      color: #718198;
+      text-align: center;
+    }
+    .empty-state > span {
+      display: grid;
+      width: 3.5rem;
+      height: 3.5rem;
+      place-items: center;
+      border-radius: 50%;
+      color: #2563eb;
+      background: #eef4ff;
+    }
+    .empty-state strong {
+      margin-top: 0.8rem;
+      color: #263a55;
+      font-size: 0.85rem;
+    }
+    .empty-state p {
+      margin: 0.25rem 0 0.9rem;
+      font-size: 0.74rem;
+    }
+    .empty-state a {
+      border-color: #d9e2ed;
+      border-radius: 0.7rem;
+    }
+    .quick-actions__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      padding: 1rem;
+    }
+    .quick-actions__grid a {
+      display: grid;
+      justify-items: center;
+      gap: 0.45rem;
+      min-height: 6.25rem;
+      place-content: center;
+      border: 1px solid #e8edf3;
+      border-radius: 0.85rem;
+      color: #52657e;
+      background: #fafbfd;
+      font-size: 0.72rem;
+      font-weight: 650;
+      text-align: center;
+      text-decoration: none;
+      transition: 150ms;
+    }
+    .quick-actions__grid a:hover {
+      border-color: #a9c7f8;
+      color: #2563eb;
+      background: #f4f8ff;
+      transform: translateY(-2px);
+    }
+    .quick-actions__grid mat-icon {
+      color: #2563eb;
+    }
+    .overview {
+      grid-column: 1/-1;
+      padding-bottom: 1rem;
+    }
+    .clinic-row {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 1.1rem 1.25rem;
+    }
+    .clinic-icon {
+      display: grid;
+      width: 2.5rem;
+      height: 2.5rem;
+      place-items: center;
+      border-radius: 0.75rem;
+      color: #2563eb;
+      background: #edf4ff;
+    }
+    .clinic-row div {
+      flex: 1;
+    }
+    .clinic-row small,
+    .clinic-row strong {
+      display: block;
+    }
+    .clinic-row small {
+      color: #8190a4;
+      font-size: 0.68rem;
+    }
+    .clinic-row strong {
+      margin-top: 0.15rem;
+      font-size: 0.82rem;
+    }
+    .badge {
+      padding: 0.25rem 0.65rem;
+      border-radius: 99px;
+      color: #047857;
+      background: #e6f8f1;
+      font-size: 0.65rem;
+      font-weight: 800;
+    }
+    .progress-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.5rem;
+      padding: 0 1.25rem 1rem;
+      color: #64748b;
+      font-size: 0.7rem;
+    }
+    .progress-row div {
+      grid-column: 1/-1;
+      height: 0.4rem;
+      overflow: hidden;
+      border-radius: 99px;
+      background: #e7edf4;
+    }
+    .progress-row i {
+      display: block;
+      width: 65%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #2563eb, #0ea5e9);
+    }
+    .overview > a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-left: 1.25rem;
+    }
+    .overview > a mat-icon {
+      width: 1rem;
+      height: 1rem;
+      font-size: 1rem;
+    }
+    @media (width < 75rem) {
+      .metrics {
+        grid-template-columns: 1fr 1fr;
+      }
     }
     @media (width < 48rem) {
-      .cards {
+      .welcome {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      .overview {
+        grid-column: auto;
+      }
+    }
+    @media (width < 34rem) {
+      .metrics {
         grid-template-columns: 1fr;
       }
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardPage {
-  protected readonly auth = inject(AuthStore);
-  private readonly router = inject(Router);
+export class DashboardPage implements OnInit {
+  private readonly auth = inject(AuthStore);
+  private readonly patients = inject(PatientsApiService);
+  protected readonly patientTotal = signal(0);
+  protected readonly firstName = () => this.auth.user()?.name?.split(' ')[0] || 'bem-vindo';
+  protected readonly clinicName = () => this.auth.clinics()[0]?.name || 'Clínica ativa';
 
-  protected async logout(): Promise<void> {
-    await this.auth.logout();
-    await this.router.navigateByUrl('/login');
+  ngOnInit(): void {
+    void this.loadPatientTotal();
   }
 
-  protected async selectClinic(clinicId: string): Promise<void> {
-    await this.auth.selectClinic(clinicId);
+  private async loadPatientTotal(): Promise<void> {
+    try {
+      const response = await firstValueFrom(this.patients.list({ page: 1, pageSize: 1 }));
+      this.patientTotal.set(response.pagination.total);
+    } catch {
+      this.patientTotal.set(0);
+    }
   }
 }

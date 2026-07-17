@@ -1,14 +1,10 @@
 :host {
   display: block;
-  min-height: 100dvh;
-  background: #f1f5f9;
   color: #0f172a;
 }
 
 .patients-page {
-  width: min(100% - 2rem, 90rem);
-  margin: auto;
-  padding: clamp(1rem, 4vw, 3rem) 0;
+  width: 100%;
 }
 
 .page-header {
@@ -18,7 +14,6 @@
   gap: 1rem;
   margin-bottom: 1.5rem;
 
-  a,
   .eyebrow {
     color: #2563eb;
     font-weight: 800;
@@ -26,7 +21,7 @@
   }
 
   .eyebrow {
-    margin: 1.5rem 0 0.25rem;
+    margin: 0 0 0.25rem;
     font-size: 0.75rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -34,7 +29,8 @@
 
   h1 {
     margin: 0;
-    font-size: clamp(2rem, 5vw, 3rem);
+    font-size: clamp(1.65rem, 3vw, 2.15rem);
+    letter-spacing: -0.04em;
   }
 
   p:last-child {
@@ -45,7 +41,9 @@
 
 mat-card {
   margin-bottom: 1rem;
-  border-radius: 1.25rem;
+  border-color: #e4eaf1;
+  border-radius: 1rem;
+  box-shadow: 0 5px 18px rgb(15 23 42 / 4%);
 }
 
 .filters-card form,

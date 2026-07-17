@@ -30,7 +30,7 @@ forma independente.
   membership ativa;
 - eventos globais de segurança e trilha de auditoria tenant-aware;
 - CI com lint, formatação, tipos, testes, build, migrations, E2E, SCA,
-  dependency review e secret scan.
+  dependency review, secret scan e CodeQL.
 
 ## Contrato e superfície HTTP
 

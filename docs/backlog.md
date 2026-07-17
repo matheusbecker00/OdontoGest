@@ -25,10 +25,7 @@ representam funcionalidade já implementada.
 | F1-15 |  P1  | OpenAPI/contracts      | diff controlado e cliente gerado deterministicamente       |
 | F1-16 |  P1  | Health/readiness       | dependências com timeout e status correto                  |
 | F1-17 |  P1  | Security headers/CORS  | allowlist e testes por ambiente                            |
-| F1-18 |  P1  | CI de segurança        | SCA e secret scan bloqueiam achado definido                |
-
-CodeQL fica condicionado a tornar o repositório público ou contratar GitHub Code
-Security; ele não está disponível para este repositório privado no plano gratuito.
+| F1-18 |  P1  | CI de segurança        | SCA, secret scan e CodeQL bloqueiam achado definido        |
 
 ## Fase 2 — Clínica e cadastros
 

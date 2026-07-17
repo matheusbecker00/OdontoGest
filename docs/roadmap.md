@@ -36,7 +36,7 @@ e autorização explícita antes da Fase 2.
 - Pin de runtime/toolchain, lockfile e política de atualização.
 - TypeScript strict, ESLint sem `any` implícito, Prettier e testes.
 - Convenções de commit/migração e checks de fronteira de módulos.
-- CI: install limpo, lint, typecheck, testes, build, SCA e secret scan.
+- CI: install limpo, lint, typecheck, testes, build, SCA, secret scan e CodeQL.
 
 ### 1.2 Infraestrutura local
 

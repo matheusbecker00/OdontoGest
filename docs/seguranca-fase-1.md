@@ -45,9 +45,7 @@ limitações. Ele não substitui revisão jurídica, pentest ou operação segur
 - dependências e runtime fixados por lockfile e `packageManager`;
 - scripts nativos de instalação usam allowlist no workspace;
 - CI faz instalação imutável, lint, tipos, testes, build e valida contrato;
-- `pnpm audit`, dependency review, Gitleaks e Dependabot estão configurados;
-- CodeQL depende de GitHub Code Security enquanto o repositório permanecer privado
-  e, por isso, não integra o plano gratuito atual.
+- `pnpm audit`, dependency review, Gitleaks, CodeQL e Dependabot estão configurados.
 
 ## Riscos e pendências conhecidos
 

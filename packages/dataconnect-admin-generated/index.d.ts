@@ -12,6 +12,10 @@ export enum AuditOutcome {
   DENIED = "DENIED",
   FAILURE = "FAILURE",
 }
+export enum PatientRegistrationStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+}
 export enum UserStatus {
   PENDING_ONBOARDING = "PENDING_ONBOARDING",
   ACTIVE = "ACTIVE",
@@ -37,6 +41,50 @@ export interface ClinicSettings_Key {
 export interface Clinic_Key {
   id: UUIDString;
   __typename?: 'Clinic_Key';
+}
+
+export interface CreatePatientData {
+  patient_insert: Patient_Key;
+  auditLog_insert: AuditLog_Key;
+}
+
+export interface CreatePatientVariables {
+  id: UUIDString;
+  clinicId: UUIDString;
+  actorUserId: string;
+  fullName: string;
+  cpf: string;
+  birthDate?: DateString | null;
+  phone?: string | null;
+  whatsapp?: string | null;
+  email?: string | null;
+  addressLine?: string | null;
+  administrativeNotes?: string | null;
+  requestId: string;
+  ipPrefix?: string | null;
+  userAgentSummary?: string | null;
+}
+
+export interface GetPatientData {
+  patients: ({
+    id: UUIDString;
+    fullName: string;
+    cpf: string;
+    birthDate?: DateString | null;
+    phone?: string | null;
+    whatsapp?: string | null;
+    email?: string | null;
+    addressLine?: string | null;
+    administrativeNotes?: string | null;
+    registrationStatus: PatientRegistrationStatus;
+    createdAt: TimestampString;
+    updatedAt: TimestampString;
+  } & Patient_Key)[];
+}
+
+export interface GetPatientVariables {
+  clinicId: UUIDString;
+  id: UUIDString;
 }
 
 export interface GetPrincipalData {
@@ -79,6 +127,20 @@ export interface HealthCheckData {
   } & User_Key)[];
 }
 
+export interface InactivatePatientData {
+  patient_updateMany: number;
+  auditLog_insert: AuditLog_Key;
+}
+
+export interface InactivatePatientVariables {
+  id: UUIDString;
+  clinicId: UUIDString;
+  actorUserId: string;
+  requestId: string;
+  ipPrefix?: string | null;
+  userAgentSummary?: string | null;
+}
+
 export interface InsertSecurityEventData {
   securityEvent_insert: SecurityEvent_Key;
 }
@@ -110,6 +172,29 @@ export interface InsertTenantAuditEventVariables {
   metadataRedacted?: unknown | null;
 }
 
+export interface ListPatientsData {
+  patients: ({
+    id: UUIDString;
+    fullName: string;
+    cpf: string;
+    birthDate?: DateString | null;
+    phone?: string | null;
+    whatsapp?: string | null;
+    email?: string | null;
+    addressLine?: string | null;
+    administrativeNotes?: string | null;
+    registrationStatus: PatientRegistrationStatus;
+    createdAt: TimestampString;
+    updatedAt: TimestampString;
+  } & Patient_Key)[];
+}
+
+export interface ListPatientsVariables {
+  clinicId: UUIDString;
+  limit?: number | null;
+  offset?: number | null;
+}
+
 export interface ListTenantAuditEventsData {
   auditLogs: ({
     id: UUIDString;
@@ -132,6 +217,11 @@ export interface ListTenantAuditEventsVariables {
 export interface OutboxEvent_Key {
   id: UUIDString;
   __typename?: 'OutboxEvent_Key';
+}
+
+export interface Patient_Key {
+  id: UUIDString;
+  __typename?: 'Patient_Key';
 }
 
 export interface Permission_Key {
@@ -158,6 +248,28 @@ export interface SecurityEvent_Key {
 export interface TermsAcceptance_Key {
   id: UUIDString;
   __typename?: 'TermsAcceptance_Key';
+}
+
+export interface UpdatePatientData {
+  patient_updateMany: number;
+  auditLog_insert: AuditLog_Key;
+}
+
+export interface UpdatePatientVariables {
+  id: UUIDString;
+  clinicId: UUIDString;
+  actorUserId: string;
+  fullName: string;
+  cpf: string;
+  birthDate?: DateString | null;
+  phone?: string | null;
+  whatsapp?: string | null;
+  email?: string | null;
+  addressLine?: string | null;
+  administrativeNotes?: string | null;
+  requestId: string;
+  ipPrefix?: string | null;
+  userAgentSummary?: string | null;
 }
 
 export interface UpsertFirebaseUserData {
@@ -192,6 +304,21 @@ export function insertTenantAuditEvent(dc: DataConnect, vars: InsertTenantAuditE
 /** Generated Node Admin SDK operation action function for the 'InsertTenantAuditEvent' Mutation. Allow users to pass in custom DataConnect instances. */
 export function insertTenantAuditEvent(vars: InsertTenantAuditEventVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<InsertTenantAuditEventData>>;
 
+/** Generated Node Admin SDK operation action function for the 'CreatePatient' Mutation. Allow users to execute without passing in DataConnect. */
+export function createPatient(dc: DataConnect, vars: CreatePatientVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<CreatePatientData>>;
+/** Generated Node Admin SDK operation action function for the 'CreatePatient' Mutation. Allow users to pass in custom DataConnect instances. */
+export function createPatient(vars: CreatePatientVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<CreatePatientData>>;
+
+/** Generated Node Admin SDK operation action function for the 'UpdatePatient' Mutation. Allow users to execute without passing in DataConnect. */
+export function updatePatient(dc: DataConnect, vars: UpdatePatientVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<UpdatePatientData>>;
+/** Generated Node Admin SDK operation action function for the 'UpdatePatient' Mutation. Allow users to pass in custom DataConnect instances. */
+export function updatePatient(vars: UpdatePatientVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<UpdatePatientData>>;
+
+/** Generated Node Admin SDK operation action function for the 'InactivatePatient' Mutation. Allow users to execute without passing in DataConnect. */
+export function inactivatePatient(dc: DataConnect, vars: InactivatePatientVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<InactivatePatientData>>;
+/** Generated Node Admin SDK operation action function for the 'InactivatePatient' Mutation. Allow users to pass in custom DataConnect instances. */
+export function inactivatePatient(vars: InactivatePatientVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<InactivatePatientData>>;
+
 /** Generated Node Admin SDK operation action function for the 'HealthCheck' Query. Allow users to execute without passing in DataConnect. */
 export function healthCheck(dc: DataConnect, options?: OperationOptions): Promise<ExecuteOperationResponse<HealthCheckData>>;
 /** Generated Node Admin SDK operation action function for the 'HealthCheck' Query. Allow users to pass in custom DataConnect instances. */
@@ -206,4 +333,14 @@ export function getPrincipal(vars: GetPrincipalVariables, options?: OperationOpt
 export function listTenantAuditEvents(dc: DataConnect, vars: ListTenantAuditEventsVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<ListTenantAuditEventsData>>;
 /** Generated Node Admin SDK operation action function for the 'ListTenantAuditEvents' Query. Allow users to pass in custom DataConnect instances. */
 export function listTenantAuditEvents(vars: ListTenantAuditEventsVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<ListTenantAuditEventsData>>;
+
+/** Generated Node Admin SDK operation action function for the 'ListPatients' Query. Allow users to execute without passing in DataConnect. */
+export function listPatients(dc: DataConnect, vars: ListPatientsVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<ListPatientsData>>;
+/** Generated Node Admin SDK operation action function for the 'ListPatients' Query. Allow users to pass in custom DataConnect instances. */
+export function listPatients(vars: ListPatientsVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<ListPatientsData>>;
+
+/** Generated Node Admin SDK operation action function for the 'GetPatient' Query. Allow users to execute without passing in DataConnect. */
+export function getPatient(dc: DataConnect, vars: GetPatientVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<GetPatientData>>;
+/** Generated Node Admin SDK operation action function for the 'GetPatient' Query. Allow users to pass in custom DataConnect instances. */
+export function getPatient(vars: GetPatientVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<GetPatientData>>;
 

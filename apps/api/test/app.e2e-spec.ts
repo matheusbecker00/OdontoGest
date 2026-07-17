@@ -38,6 +38,13 @@ const errorResponseSchema = z.object({
     requestId: z.string(),
   }),
 });
+const patientResponseSchema = z.object({
+  id: z.string().uuid(),
+  fullName: z.string(),
+  cpfMasked: z.string(),
+  registrationStatus: z.enum(['ACTIVE', 'INACTIVE']),
+  financialStatus: z.literal('UP_TO_DATE'),
+});
 
 function requireEnvironment(name: string): string {
   const value = process.env[name];
@@ -81,6 +88,7 @@ describe('OdontoGest foundation (e2e)', () => {
     await owner.securityEvent.deleteMany();
     await owner.auditLog.deleteMany();
     await owner.termsAcceptance.deleteMany();
+    await owner.patient.deleteMany();
     await owner.refreshSession.deleteMany();
     await owner.emailVerificationToken.deleteMany();
     await owner.passwordResetToken.deleteMany();
@@ -94,10 +102,12 @@ describe('OdontoGest foundation (e2e)', () => {
   async function createTenantFixture(label: string): Promise<{
     userId: string;
     clinicId: string;
+    email: string;
+    password: string;
   }> {
-    const passwordHash = await crypto.hashPassword(
-      `Fixture-${label}-password-2026!`,
-    );
+    const password = `Fixture-${label}-password-2026!`;
+    const email = `${label.toLowerCase()}@fixture.example.test`;
+    const passwordHash = await crypto.hashPassword(password);
     const role = await owner.role.findUniqueOrThrow({
       where: { code: RoleCode.OWNER },
       select: { id: true },
@@ -105,8 +115,8 @@ describe('OdontoGest foundation (e2e)', () => {
     const user = await owner.user.create({
       data: {
         name: `Usuário ${label}`,
-        email: `${label.toLowerCase()}@fixture.example.test`,
-        emailCanonical: `${label.toLowerCase()}@fixture.example.test`,
+        email,
+        emailCanonical: email,
         passwordHash,
         status: UserStatus.ACTIVE,
         emailVerifiedAt: new Date(),
@@ -130,7 +140,7 @@ describe('OdontoGest foundation (e2e)', () => {
         acceptedAt: new Date(),
       },
     });
-    return { userId: user.id, clinicId: clinic.id };
+    return { userId: user.id, clinicId: clinic.id, email, password };
   }
 
   beforeAll(async () => {
@@ -475,5 +485,86 @@ describe('OdontoGest foundation (e2e)', () => {
         }),
     );
     expect(forgedContextRead).toBeNull();
+  });
+
+  it('cadastra, pagina, atualiza e inativa paciente sem vazar entre clínicas', async () => {
+    const tenantA = await createTenantFixture('PatientA');
+    const tenantB = await createTenantFixture('PatientB');
+    const login = await request(server)
+      .post('/api/v1/auth/login')
+      .set('Origin', WEB_ORIGIN)
+      .send({ email: tenantA.email, password: tenantA.password })
+      .expect(200);
+    const accessToken = loginResponseSchema.parse(
+      login.body as unknown,
+    ).accessToken;
+
+    await request(server)
+      .post('/api/v1/patients')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ fullName: 'CPF Inválido', cpf: '111.111.111-11' })
+      .expect(400);
+
+    const created = await request(server)
+      .post('/api/v1/patients')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        fullName: 'Ana Paula Martins',
+        cpf: '529.982.247-25',
+        birthDate: '1990-05-20',
+        phone: '(11) 99999-0000',
+      })
+      .expect(201);
+    const patient = patientResponseSchema.parse(created.body as unknown);
+    expect(patient.cpfMasked).toBe('***.***.***-25');
+
+    await request(server)
+      .post('/api/v1/patients')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ fullName: 'Duplicado', cpf: '52998224725' })
+      .expect(409);
+
+    const listed = await request(server)
+      .get('/api/v1/patients?page=1&pageSize=10&search=Ana')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
+    const listBody = z
+      .object({
+        items: z.array(patientResponseSchema),
+        pagination: z.object({ total: z.number(), totalPages: z.number() }),
+      })
+      .parse(listed.body as unknown);
+    expect(listBody.items).toHaveLength(1);
+    expect(listBody.pagination.total).toBe(1);
+
+    const updated = await request(server)
+      .patch(`/api/v1/patients/${patient.id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ fullName: 'Ana Paula Martins Atualizada' })
+      .expect(200);
+    expect(
+      patientResponseSchema.parse(updated.body as unknown).fullName,
+    ).toContain('Atualizada');
+
+    const inactivated = await request(server)
+      .post(`/api/v1/patients/${patient.id}/inactivate`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(201);
+    expect(
+      patientResponseSchema.parse(inactivated.body as unknown)
+        .registrationStatus,
+    ).toBe('INACTIVE');
+
+    const crossTenant = await runtimePrisma.withSecurityContext(
+      { userId: tenantB.userId, clinicId: tenantB.clinicId },
+      (transaction) =>
+        transaction.patient.findUnique({ where: { id: patient.id } }),
+    );
+    expect(crossTenant).toBeNull();
+    expect(
+      await owner.auditLog.count({
+        where: { clinicId: tenantA.clinicId, entityId: patient.id },
+      }),
+    ).toBe(3);
   });
 });

@@ -40,6 +40,11 @@ enum OutboxStatus {
   FAILED
 }
 
+enum PatientRegistrationStatus {
+  ACTIVE
+  INACTIVE
+}
+
 # O identificador principal é o UID imutável emitido pelo Firebase Authentication.
 type User
   @table(key: "id")
@@ -87,6 +92,35 @@ type ClinicSettings
   updatedAt: Timestamp! @default(expr: "request.time")
   createdBy: String @col(dataType: "varchar(128)")
   updatedBy: String @col(dataType: "varchar(128)")
+}
+
+type Patient
+  @table
+  @unique(fields: ["clinicId", "cpf"], indexName: "patient_clinic_cpf_key")
+  @index(
+    fields: ["clinicId", "registrationStatus", "fullName", "id"]
+    name: "patient_clinic_status_name_idx"
+  )
+  @index(
+    fields: ["clinicId", "createdAt", "id"]
+    name: "patient_clinic_created_idx"
+  ) {
+  clinicId: UUID!
+  clinic: Clinic! @ref(fields: ["clinicId"])
+  fullName: String! @col(dataType: "varchar(180)")
+  cpf: String! @col(dataType: "char(11)")
+  birthDate: Date
+  phone: String @col(dataType: "varchar(20)")
+  whatsapp: String @col(dataType: "varchar(20)")
+  email: String @col(dataType: "varchar(320)")
+  addressLine: String @col(dataType: "varchar(500)")
+  administrativeNotes: String @col(dataType: "varchar(1000)")
+  registrationStatus: PatientRegistrationStatus! @default(value: ACTIVE)
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+  createdBy: String! @col(dataType: "varchar(128)")
+  updatedBy: String! @col(dataType: "varchar(128)")
+  deletedAt: Timestamp
 }
 
 type Role @table {

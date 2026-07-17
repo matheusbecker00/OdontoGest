@@ -61,3 +61,50 @@ query ListTenantAuditEvents($clinicId: UUID!, $limit: Int = 50)
     metadataRedacted
   }
 }
+
+query ListPatients($clinicId: UUID!, $limit: Int = 20, $offset: Int = 0)
+@auth(level: NO_ACCESS) {
+  patients(
+    where: { clinicId: { eq: $clinicId }, deletedAt: { eq: null } }
+    orderBy: [{ fullName: ASC }, { id: ASC }]
+    limit: $limit
+    offset: $offset
+  ) {
+    id
+    fullName
+    cpf
+    birthDate
+    phone
+    whatsapp
+    email
+    addressLine
+    administrativeNotes
+    registrationStatus
+    createdAt
+    updatedAt
+  }
+}
+
+query GetPatient($clinicId: UUID!, $id: UUID!) @auth(level: NO_ACCESS) {
+  patients(
+    where: {
+      id: { eq: $id }
+      clinicId: { eq: $clinicId }
+      deletedAt: { eq: null }
+    }
+    limit: 1
+  ) {
+    id
+    fullName
+    cpf
+    birthDate
+    phone
+    whatsapp
+    email
+    addressLine
+    administrativeNotes
+    registrationStatus
+    createdAt
+    updatedAt
+  }
+}

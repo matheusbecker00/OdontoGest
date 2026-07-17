@@ -7,6 +7,12 @@ const AuditOutcome = {
 }
 exports.AuditOutcome = AuditOutcome;
 
+const PatientRegistrationStatus = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+}
+exports.PatientRegistrationStatus = PatientRegistrationStatus;
+
 const UserStatus = {
   PENDING_ONBOARDING: "PENDING_ONBOARDING",
   ACTIVE: "ACTIVE",
@@ -43,6 +49,27 @@ function insertTenantAuditEvent(dcOrVarsOrOptions, varsOrOptions, options) {
 }
 exports.insertTenantAuditEvent = insertTenantAuditEvent;
 
+function createPatient(dcOrVarsOrOptions, varsOrOptions, options) {
+  const { dc: dcInstance, vars: inputVars, options: inputOpts} = validateAdminArgs(connectorConfig, dcOrVarsOrOptions, varsOrOptions, options, true, true);
+  dcInstance.useGen(true);
+  return dcInstance.executeMutation('CreatePatient', inputVars, inputOpts);
+}
+exports.createPatient = createPatient;
+
+function updatePatient(dcOrVarsOrOptions, varsOrOptions, options) {
+  const { dc: dcInstance, vars: inputVars, options: inputOpts} = validateAdminArgs(connectorConfig, dcOrVarsOrOptions, varsOrOptions, options, true, true);
+  dcInstance.useGen(true);
+  return dcInstance.executeMutation('UpdatePatient', inputVars, inputOpts);
+}
+exports.updatePatient = updatePatient;
+
+function inactivatePatient(dcOrVarsOrOptions, varsOrOptions, options) {
+  const { dc: dcInstance, vars: inputVars, options: inputOpts} = validateAdminArgs(connectorConfig, dcOrVarsOrOptions, varsOrOptions, options, true, true);
+  dcInstance.useGen(true);
+  return dcInstance.executeMutation('InactivatePatient', inputVars, inputOpts);
+}
+exports.inactivatePatient = inactivatePatient;
+
 function healthCheck(dcOrOptions, options) {
   const { dc: dcInstance, options: inputOpts} = validateAdminArgs(connectorConfig, dcOrOptions, options, undefined);
   dcInstance.useGen(true);
@@ -63,4 +90,18 @@ function listTenantAuditEvents(dcOrVarsOrOptions, varsOrOptions, options) {
   return dcInstance.executeQuery('ListTenantAuditEvents', inputVars, inputOpts);
 }
 exports.listTenantAuditEvents = listTenantAuditEvents;
+
+function listPatients(dcOrVarsOrOptions, varsOrOptions, options) {
+  const { dc: dcInstance, vars: inputVars, options: inputOpts} = validateAdminArgs(connectorConfig, dcOrVarsOrOptions, varsOrOptions, options, true, true);
+  dcInstance.useGen(true);
+  return dcInstance.executeQuery('ListPatients', inputVars, inputOpts);
+}
+exports.listPatients = listPatients;
+
+function getPatient(dcOrVarsOrOptions, varsOrOptions, options) {
+  const { dc: dcInstance, vars: inputVars, options: inputOpts} = validateAdminArgs(connectorConfig, dcOrVarsOrOptions, varsOrOptions, options, true, true);
+  dcInstance.useGen(true);
+  return dcInstance.executeQuery('GetPatient', inputVars, inputOpts);
+}
+exports.getPatient = getPatient;
 

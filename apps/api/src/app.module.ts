@@ -15,6 +15,7 @@ import { AccessTokenGuard } from './modules/auth/access-token.guard';
 import { AuthorizationGuard } from './modules/auth/authorization.guard';
 import { HealthModule } from './modules/health/health.module';
 import { TenancyModule } from './modules/tenancy/tenancy.module';
+import { PatientsModule } from './modules/patients/patients.module';
 
 const REQUEST_ID_PATTERN = /^[A-Za-z0-9_-]{8,80}$/;
 
@@ -76,6 +77,7 @@ const REQUEST_ID_PATTERN = /^[A-Za-z0-9_-]{8,80}$/;
     AuditModule,
     AuthModule,
     TenancyModule,
+    PatientsModule,
     HealthModule,
   ],
   providers: [

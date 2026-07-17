@@ -397,6 +397,192 @@
         ]
       }
     },
+    "/api/v1/patients": {
+      "get": {
+        "operationId": "patientsList",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "INACTIVE"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pacientes"
+        ]
+      },
+      "post": {
+        "operationId": "patientsCreate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePatientDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pacientes"
+        ]
+      }
+    },
+    "/api/v1/patients/{id}": {
+      "get": {
+        "operationId": "patientsFindById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pacientes"
+        ]
+      },
+      "patch": {
+        "operationId": "patientsUpdate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePatientDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pacientes"
+        ]
+      }
+    },
+    "/api/v1/patients/{id}/inactivate": {
+      "post": {
+        "operationId": "patientsInactivate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "",
+        "tags": [
+          "Pacientes"
+        ]
+      }
+    },
     "/api/v1/health/live": {
       "get": {
         "operationId": "live",
@@ -837,6 +1023,86 @@
           "authorizationVersion",
           "permissions"
         ]
+      },
+      "CreatePatientDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "example": "Ana Paula Martins",
+            "maxLength": 180
+          },
+          "cpf": {
+            "type": "string",
+            "example": "529.982.247-25"
+          },
+          "birthDate": {
+            "type": "string",
+            "example": "1990-05-20"
+          },
+          "phone": {
+            "type": "string",
+            "example": "(11) 99999-0000"
+          },
+          "whatsapp": {
+            "type": "string",
+            "example": "(11) 99999-0000"
+          },
+          "email": {
+            "type": "string",
+            "example": "ana@example.test"
+          },
+          "addressLine": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "administrativeNotes": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "fullName",
+          "cpf"
+        ]
+      },
+      "UpdatePatientDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "example": "Ana Paula Martins",
+            "maxLength": 180
+          },
+          "cpf": {
+            "type": "string",
+            "example": "529.982.247-25"
+          },
+          "birthDate": {
+            "type": "string",
+            "example": "1990-05-20"
+          },
+          "phone": {
+            "type": "string",
+            "example": "(11) 99999-0000"
+          },
+          "whatsapp": {
+            "type": "string",
+            "example": "(11) 99999-0000"
+          },
+          "email": {
+            "type": "string",
+            "example": "ana@example.test"
+          },
+          "addressLine": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "administrativeNotes": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        }
       }
     }
   }

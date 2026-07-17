@@ -27,8 +27,8 @@ documentação são critérios contínuos, não uma etapa final.
 
 ## Fase 1 — Fundação segura
 
-Status em 16 de julho de 2026: implementada e validada localmente; aguarda revisão
-e autorização explícita antes da Fase 2.
+Status em 16 de julho de 2026: implementada e validada. A Fase 2 foi autorizada
+e iniciada pelo cadastro seguro de pacientes.
 
 ### 1.1 Monorepo e qualidade
 

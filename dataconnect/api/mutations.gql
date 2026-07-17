@@ -67,3 +67,189 @@ mutation InsertTenantAuditEvent(
     }
   )
 }
+
+mutation CreatePatient(
+  $id: UUID!
+  $clinicId: UUID!
+  $actorUserId: String!
+  $fullName: String!
+  $cpf: String!
+  $birthDate: Date
+  $phone: String
+  $whatsapp: String
+  $email: String
+  $addressLine: String
+  $administrativeNotes: String
+  $requestId: String!
+  $ipPrefix: String
+  $userAgentSummary: String
+) @auth(level: NO_ACCESS) @transaction {
+  query
+    @check(
+      expr: "response.query.clinicMemberships.size() == 1"
+      message: "Active clinic membership required"
+    )
+    @redact {
+    clinicMemberships(
+      where: {
+        clinicId: { eq: $clinicId }
+        userId: { eq: $actorUserId }
+        status: { eq: ACTIVE }
+        deletedAt: { eq: null }
+      }
+      limit: 1
+    ) {
+      id
+    }
+  }
+  patient_insert(
+    data: {
+      id: $id
+      clinicId: $clinicId
+      fullName: $fullName
+      cpf: $cpf
+      birthDate: $birthDate
+      phone: $phone
+      whatsapp: $whatsapp
+      email: $email
+      addressLine: $addressLine
+      administrativeNotes: $administrativeNotes
+      createdBy: $actorUserId
+      updatedBy: $actorUserId
+    }
+  )
+  auditLog_insert(
+    data: {
+      clinicId: $clinicId
+      actorUserId: $actorUserId
+      action: "PATIENT_CREATED"
+      entityType: "Patient"
+      entityId: $id
+      outcome: SUCCESS
+      requestId: $requestId
+      ipPrefix: $ipPrefix
+      userAgentSummary: $userAgentSummary
+    }
+  )
+}
+
+mutation UpdatePatient(
+  $id: UUID!
+  $clinicId: UUID!
+  $actorUserId: String!
+  $fullName: String!
+  $cpf: String!
+  $birthDate: Date
+  $phone: String
+  $whatsapp: String
+  $email: String
+  $addressLine: String
+  $administrativeNotes: String
+  $requestId: String!
+  $ipPrefix: String
+  $userAgentSummary: String
+) @auth(level: NO_ACCESS) @transaction {
+  query
+    @check(
+      expr: "response.query.clinicMemberships.size() == 1"
+      message: "Active clinic membership required"
+    )
+    @redact {
+    clinicMemberships(
+      where: {
+        clinicId: { eq: $clinicId }
+        userId: { eq: $actorUserId }
+        status: { eq: ACTIVE }
+        deletedAt: { eq: null }
+      }
+      limit: 1
+    ) {
+      id
+    }
+  }
+  patient_updateMany(
+    where: {
+      id: { eq: $id }
+      clinicId: { eq: $clinicId }
+      deletedAt: { eq: null }
+    }
+    data: {
+      fullName: $fullName
+      cpf: $cpf
+      birthDate: $birthDate
+      phone: $phone
+      whatsapp: $whatsapp
+      email: $email
+      addressLine: $addressLine
+      administrativeNotes: $administrativeNotes
+      updatedBy: $actorUserId
+      updatedAt_expr: "request.time"
+    }
+  ) @check(expr: "this == 1", message: "Patient not found")
+  auditLog_insert(
+    data: {
+      clinicId: $clinicId
+      actorUserId: $actorUserId
+      action: "PATIENT_UPDATED"
+      entityType: "Patient"
+      entityId: $id
+      outcome: SUCCESS
+      requestId: $requestId
+      ipPrefix: $ipPrefix
+      userAgentSummary: $userAgentSummary
+    }
+  )
+}
+
+mutation InactivatePatient(
+  $id: UUID!
+  $clinicId: UUID!
+  $actorUserId: String!
+  $requestId: String!
+  $ipPrefix: String
+  $userAgentSummary: String
+) @auth(level: NO_ACCESS) @transaction {
+  query
+    @check(
+      expr: "response.query.clinicMemberships.size() == 1"
+      message: "Active clinic membership required"
+    )
+    @redact {
+    clinicMemberships(
+      where: {
+        clinicId: { eq: $clinicId }
+        userId: { eq: $actorUserId }
+        status: { eq: ACTIVE }
+        deletedAt: { eq: null }
+      }
+      limit: 1
+    ) {
+      id
+    }
+  }
+  patient_updateMany(
+    where: {
+      id: { eq: $id }
+      clinicId: { eq: $clinicId }
+      deletedAt: { eq: null }
+    }
+    data: {
+      registrationStatus: INACTIVE
+      updatedBy: $actorUserId
+      updatedAt_expr: "request.time"
+    }
+  ) @check(expr: "this == 1", message: "Patient not found")
+  auditLog_insert(
+    data: {
+      clinicId: $clinicId
+      actorUserId: $actorUserId
+      action: "PATIENT_INACTIVATED"
+      entityType: "Patient"
+      entityId: $id
+      outcome: SUCCESS
+      requestId: $requestId
+      ipPrefix: $ipPrefix
+      userAgentSummary: $userAgentSummary
+    }
+  )
+}

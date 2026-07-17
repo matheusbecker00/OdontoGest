@@ -57,6 +57,11 @@ enum OutboxStatus {
   FAILED
 }
 
+enum PatientRegistrationStatus {
+  ACTIVE
+  INACTIVE
+}
+
 model User {
   id                  String     @id @default(uuid()) @db.Uuid
   name                String     @db.VarChar(160)
@@ -82,6 +87,8 @@ model User {
   auditLogs               AuditLog[]               @relation("AuditActor")
   securityEvents          SecurityEvent[]
   termsAcceptances        TermsAcceptance[]
+  patientsCreated         Patient[]                @relation("PatientCreatedBy")
+  patientsUpdated         Patient[]                @relation("PatientUpdatedBy")
 
   @@map("users")
 }
@@ -104,9 +111,38 @@ model Clinic {
   auditLogs        AuditLog[]
   termsAcceptances TermsAcceptance[]
   outboxEvents     OutboxEvent[]
+  patients         Patient[]
 
   @@index([status, createdAt], map: "clinic_status_created_idx")
   @@map("clinics")
+}
+
+model Patient {
+  id                  String                    @id @default(uuid()) @db.Uuid
+  clinicId            String                    @map("clinic_id") @db.Uuid
+  fullName            String                    @map("full_name") @db.VarChar(180)
+  cpf                 String                    @db.Char(11)
+  birthDate           DateTime?                 @map("birth_date") @db.Date
+  phone               String?                   @db.VarChar(20)
+  whatsapp            String?                   @db.VarChar(20)
+  email               String?                   @db.VarChar(320)
+  addressLine         String?                   @map("address_line") @db.VarChar(500)
+  administrativeNotes String?                   @map("administrative_notes") @db.VarChar(1000)
+  registrationStatus  PatientRegistrationStatus @default(ACTIVE) @map("registration_status")
+  createdAt           DateTime                  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime                  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  createdBy           String                    @map("created_by") @db.Uuid
+  updatedBy           String                    @map("updated_by") @db.Uuid
+  deletedAt           DateTime?                 @map("deleted_at") @db.Timestamptz(3)
+
+  clinic  Clinic @relation(fields: [clinicId], references: [id], onDelete: Restrict)
+  creator User   @relation("PatientCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+  updater User   @relation("PatientUpdatedBy", fields: [updatedBy], references: [id], onDelete: Restrict)
+
+  @@unique([clinicId, cpf], map: "patient_clinic_cpf_key")
+  @@index([clinicId, registrationStatus, fullName, id], map: "patient_clinic_status_name_idx")
+  @@index([clinicId, createdAt, id], map: "patient_clinic_created_idx")
+  @@map("patients")
 }
 
 model ClinicSettings {

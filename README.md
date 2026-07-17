@@ -6,10 +6,15 @@ Connect e PostgreSQL gerenciado.
 
 ## Estado do projeto
 
-As Fases 0 e 1 foram implementadas e a fundação está migrando para Firebase. A base inclui monorepo, aplicação
+As Fases 0 e 1 foram implementadas e a Fase 2 está em andamento. A base inclui monorepo, aplicação
 web, API versionada, autenticação, sessões rotativas, RBAC, isolamento por RLS,
 auditoria inicial, schema SQL Connect, infraestrutura local, contrato OpenAPI e
 CI de segurança.
+
+O primeiro bloco funcional da Fase 2 entrega o backend de pacientes: cadastro,
+consulta, busca, paginação, edição e inativação, com CPF validado e mascarado
+nas respostas, permissões, auditoria transacional e isolamento por clínica. O
+modelo e as operações equivalentes também estão definidos no SQL Connect.
 
 A identidade de login já é validada pelo Firebase Authentication e trocada por
 uma sessão OdontoGest vinculada ao usuário, à clínica e às permissões da API. A
@@ -23,8 +28,9 @@ os testes equivalentes estiverem verdes no emulador.
 O sistema **não está pronto para produção** e não faz afirmação de
 conformidade com a LGPD. A fundação do onboarding foi antecipada para permitir
 criar uma conta de teste: identidade Firebase, clínica, membership `OWNER`,
-configurações, aceites versionados e auditoria nascem em uma transação. CPF/CNPJ, telefone,
-trial comercial, demais cadastros e app shell continuam na Fase 2.
+configurações, aceites versionados e auditoria nascem em uma transação. CNPJ e
+telefone da clínica, trial comercial, interface de pacientes, demais cadastros e
+app shell continuam na Fase 2.
 
 Documentação principal:
 

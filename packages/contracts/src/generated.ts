@@ -247,6 +247,54 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/patients": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["patientsList"];
+    put?: never;
+    post: operations["patientsCreate"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/patients/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["patientsFindById"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations["patientsUpdate"];
+    trace?: never;
+  };
+  "/api/v1/patients/{id}/inactivate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["patientsInactivate"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/health/live": {
     parameters: {
       query?: never;
@@ -391,6 +439,38 @@ export interface components {
         "OWNER" | "ADMIN" | "DENTIST" | "RECEPTIONIST" | "FINANCE" | null;
       authorizationVersion: number | null;
       permissions: string[];
+    };
+    CreatePatientDto: {
+      /** @example Ana Paula Martins */
+      fullName: string;
+      /** @example 529.982.247-25 */
+      cpf: string;
+      /** @example 1990-05-20 */
+      birthDate?: string;
+      /** @example (11) 99999-0000 */
+      phone?: string;
+      /** @example (11) 99999-0000 */
+      whatsapp?: string;
+      /** @example ana@example.test */
+      email?: string;
+      addressLine?: string;
+      administrativeNotes?: string;
+    };
+    UpdatePatientDto: {
+      /** @example Ana Paula Martins */
+      fullName?: string;
+      /** @example 529.982.247-25 */
+      cpf?: string;
+      /** @example 1990-05-20 */
+      birthDate?: string;
+      /** @example (11) 99999-0000 */
+      phone?: string;
+      /** @example (11) 99999-0000 */
+      whatsapp?: string;
+      /** @example ana@example.test */
+      email?: string;
+      addressLine?: string;
+      administrativeNotes?: string;
     };
   };
   responses: never;
@@ -704,6 +784,110 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["TenantContextResponseDto"];
         };
+      };
+    };
+  };
+  patientsList: {
+    parameters: {
+      query?: {
+        page?: number;
+        pageSize?: number;
+        search?: string;
+        status?: "ACTIVE" | "INACTIVE";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  patientsCreate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreatePatientDto"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  patientsFindById: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  patientsUpdate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdatePatientDto"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  patientsInactivate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

@@ -1,0 +1,158 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.patients-page {
+  width: min(100% - 2rem, 90rem);
+  margin: auto;
+  padding: clamp(1rem, 4vw, 3rem) 0;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  a,
+  .eyebrow {
+    color: #2563eb;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .eyebrow {
+    margin: 1.5rem 0 0.25rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+
+  p:last-child {
+    margin: 0.5rem 0 0;
+    color: #64748b;
+  }
+}
+
+mat-card {
+  margin-bottom: 1rem;
+  border-radius: 1.25rem;
+}
+
+.filters-card form,
+.patient-form {
+  display: grid;
+  grid-template-columns: minmax(14rem, 2fr) minmax(10rem, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.filters-card mat-form-field,
+.patient-form mat-form-field {
+  width: 100%;
+}
+
+.patient-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 1rem 0 0;
+
+  .wide {
+    grid-column: 1 / -1;
+  }
+}
+
+.list-card {
+  overflow: hidden;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 45rem;
+}
+
+td span,
+td strong {
+  display: block;
+}
+
+td span {
+  color: #64748b;
+}
+
+.status {
+  display: inline-block;
+  width: fit-content;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  color: #166534;
+  background: #dcfce7;
+  font-size: 0.75rem;
+  font-weight: 700;
+
+  &.inactive {
+    color: #475569;
+    background: #e2e8f0;
+  }
+}
+
+.actions {
+  white-space: nowrap;
+}
+
+.state {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  padding: 4rem 1rem;
+  color: #64748b;
+  text-align: center;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid #e2e8f0;
+  color: #64748b;
+}
+
+.error-message {
+  padding: 0.875rem 1rem;
+  border: 1px solid #fecaca;
+  border-radius: 0.75rem;
+  color: #991b1b;
+  background: #fef2f2;
+}
+
+@media (width < 48rem) {
+  .page-header,
+  .pagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .filters-card form,
+  .patient-form {
+    grid-template-columns: 1fr;
+  }
+
+  .patient-form .wide {
+    grid-column: auto;
+  }
+}

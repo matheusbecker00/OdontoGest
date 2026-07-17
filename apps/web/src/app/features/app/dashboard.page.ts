@@ -2,12 +2,12 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthStore } from '../../core/auth/auth.store';
 
 @Component({
   selector: 'og-dashboard-page',
-  imports: [MatButtonModule, MatCardModule, MatSelectModule],
+  imports: [MatButtonModule, MatCardModule, MatSelectModule, RouterLink],
   template: `
     <main class="foundation-page">
       <header>
@@ -35,6 +35,10 @@ import { AuthStore } from '../../core/auth/auth.store';
           <mat-card-content>{{ auth.permissions().size }} permissões ativas</mat-card-content>
         </mat-card>
       </section>
+
+      @if (auth.hasEveryPermission(['patient.read'])) {
+        <a mat-flat-button routerLink="/app/pacientes">Gerenciar pacientes</a>
+      }
 
       @if (auth.clinics().length > 1) {
         <mat-form-field appearance="outline">

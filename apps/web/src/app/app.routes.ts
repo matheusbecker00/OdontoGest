@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
+import { permissionGuard } from './core/auth/permission.guard';
 
 export const routes: Routes = [
   {
@@ -45,6 +46,12 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/app/dashboard.page').then((module) => module.DashboardPage),
+  },
+  {
+    path: 'app/pacientes',
+    canActivate: [permissionGuard(['patient.read'])],
+    loadComponent: () =>
+      import('./features/patients/patients.page').then((module) => module.PatientsPage),
   },
   { path: '', pathMatch: 'full', redirectTo: 'login' },
   { path: '**', redirectTo: 'login' },

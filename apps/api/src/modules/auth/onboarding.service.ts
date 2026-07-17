@@ -85,7 +85,7 @@ export class OnboardingService {
           ${randomUUID()}::uuid,
           ${input.clinicName.trim()}::varchar,
           ${CURRENT_TERMS_VERSION}::varchar,
-          ${evidenceDigest}::char,
+          ${evidenceDigest}::char(64),
           ${request.requestId}::varchar,
           ${request.ipPrefix}::varchar,
           ${request.userAgentSummary}::varchar,

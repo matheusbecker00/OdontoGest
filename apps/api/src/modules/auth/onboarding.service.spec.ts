@@ -69,6 +69,11 @@ describe('OnboardingService', () => {
       'onboarding-account',
       'firebase-owner-1',
     );
+    const queryCalls = prisma.$queryRaw.mock.calls as unknown[][];
+    const queryTemplate = queryCalls.at(0)?.at(0);
+    expect(Array.isArray(queryTemplate)).toBe(true);
+    if (!Array.isArray(queryTemplate)) throw new Error('Query ausente.');
+    expect(queryTemplate.join('')).toContain('::char(64)');
   });
 
   it('transforma conflito de identidade do banco em resposta segura', async () => {

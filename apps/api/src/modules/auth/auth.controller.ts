@@ -29,6 +29,8 @@ import {
   ForgotPasswordDto,
   ActiveClinicResponseDto,
   FirebaseSessionDto,
+  FirebaseOnboardingDto,
+  FirebaseOnboardingResponseDto,
   LoginDto,
   LoginResponseDto,
   MessageResponseDto,
@@ -40,6 +42,7 @@ import {
   TokenDto,
 } from './dto/auth.dto';
 import { OriginGuard } from './origin.guard';
+import { OnboardingService } from './onboarding.service';
 
 function readCookie(request: Request, name: string): string | null {
   const cookies = request.cookies as Record<string, unknown> | undefined;
@@ -57,6 +60,7 @@ export class AuthController {
 
   constructor(
     private readonly auth: AuthService,
+    private readonly onboarding: OnboardingService,
     config: ConfigService<AppEnvironment, true>,
   ) {
     this.cookieName = config.get('COOKIE_NAME', { infer: true });
@@ -109,6 +113,18 @@ export class AuthController {
     @Req() request: Request,
   ): Promise<void> {
     await this.auth.verifyEmail(input.token, requestMetadata(request));
+  }
+
+  @Public()
+  @Post('firebase/onboarding')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Provisiona o primeiro usuário e sua clínica' })
+  @ApiResponse({ status: 201, type: FirebaseOnboardingResponseDto })
+  onboardingClinic(
+    @Body() input: FirebaseOnboardingDto,
+    @Req() request: Request,
+  ) {
+    return this.onboarding.create(input, requestMetadata(request));
   }
 
   @Public()

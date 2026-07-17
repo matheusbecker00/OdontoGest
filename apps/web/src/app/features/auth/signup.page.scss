@@ -1,0 +1,125 @@
+@use '../../../styles/tokens' as tokens;
+
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+.signup-page {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(18rem, 1fr) minmax(30rem, 42rem);
+  align-items: center;
+  gap: tokens.og-space(10);
+  padding: clamp(1rem, 4vw, 5rem);
+  color: white;
+  background:
+    radial-gradient(circle at 15% 20%, rgb(59 130 246 / 38%), transparent 38%),
+    radial-gradient(circle at 85% 15%, rgb(124 58 237 / 42%), transparent 40%), #0f172a;
+}
+
+.signup-intro {
+  max-width: 42rem;
+
+  span {
+    color: #bfdbfe;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+
+  h1 {
+    margin: tokens.og-space(4) 0;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+
+  p {
+    color: #dbeafe;
+    font-size: 1.0625rem;
+    line-height: 1.7;
+  }
+}
+
+.signup-card {
+  padding: clamp(1.25rem, 3vw, 2rem);
+  color: tokens.og-color(ink-950);
+  background: rgb(255 255 255 / 97%);
+  border-radius: tokens.og-radius(card);
+  box-shadow: tokens.og-shadow(dialog);
+
+  header {
+    display: flex;
+    gap: tokens.og-space(3);
+    align-items: center;
+    margin-bottom: tokens.og-space(5);
+  }
+
+  header > mat-icon {
+    color: tokens.og-color(primary-600);
+  }
+
+  h2,
+  p {
+    margin: 0;
+  }
+
+  header p {
+    margin-top: tokens.og-space(1);
+    color: tokens.og-color(ink-500);
+  }
+
+  form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: tokens.og-space(3);
+  }
+
+  a {
+    justify-self: center;
+    color: tokens.og-color(primary-600);
+    font-weight: 700;
+    text-align: center;
+  }
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-error {
+  padding: tokens.og-space(3);
+  color: tokens.og-color(danger);
+  background: tokens.og-color(danger-surface);
+  border-radius: tokens.og-radius(md);
+}
+
+.legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: tokens.og-space(2);
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+@media (width < 62rem) {
+  .signup-page {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (width < 40rem) {
+  .signup-page {
+    align-items: start;
+  }
+
+  .signup-card form {
+    grid-template-columns: 1fr;
+  }
+
+  .full-width {
+    grid-column: auto;
+  }
+}

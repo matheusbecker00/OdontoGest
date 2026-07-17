@@ -21,8 +21,10 @@ não está concluída: Prisma e as sessões próprias só serão removidos depoi
 os testes equivalentes estiverem verdes no emulador.
 
 O sistema **não está pronto para produção** e não faz afirmação de
-conformidade com a LGPD. O onboarding transacional de clínica, cadastros e app
-shell pertencem à Fase 2 e não foram antecipados.
+conformidade com a LGPD. A fundação do onboarding foi antecipada para permitir
+criar uma conta de teste: identidade Firebase, clínica, membership `OWNER`,
+configurações, aceites versionados e auditoria nascem em uma transação. CPF/CNPJ, telefone,
+trial comercial, demais cadastros e app shell continuam na Fase 2.
 
 Documentação principal:
 
@@ -78,6 +80,10 @@ Swagger só é exposto em `http://localhost:3000/api/docs` quando
 
 O seed cria apenas papéis e permissões do sistema. Não cria usuários, clínicas
 ou dados demonstrativos.
+
+Com API, banco e emuladores ativos, abra `/cadastro` para criar a primeira conta.
+No ambiente local, o link de confirmação aparece no Auth Emulator. A senha é
+enviada diretamente ao Firebase e não é persistida pela API.
 
 ## Validação
 

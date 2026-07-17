@@ -47,6 +47,33 @@ export class AuthStore {
     }
   }
 
+  async register(input: {
+    responsibleName: string;
+    clinicName: string;
+    email: string;
+    password: string;
+  }): Promise<void> {
+    const idToken = await this.firebase.createAccount(
+      input.email,
+      input.password,
+      input.responsibleName,
+    );
+    try {
+      await firstValueFrom(
+        this.api.createOnboarding({
+          idToken,
+          responsibleName: input.responsibleName,
+          clinicName: input.clinicName,
+          acceptTerms: true,
+        }),
+      );
+      await this.firebase.sendVerificationAndSignOut();
+    } catch (error) {
+      await this.firebase.signOut().catch(() => undefined);
+      throw error;
+    }
+  }
+
   refreshAccessToken(): Promise<string> {
     if (this.refreshInFlight) return this.refreshInFlight;
     this.refreshInFlight = firstValueFrom(this.api.refresh())

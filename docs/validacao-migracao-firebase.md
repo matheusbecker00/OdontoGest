@@ -55,7 +55,20 @@ Validações executadas nesta integração:
 
 - schema Prisma validado e SDK SQL Connect regenerado;
 - typecheck da API e do Angular aprovado;
-- 9 testes unitários da API aprovados;
-- 8 testes do Angular aprovados;
+- 11 testes unitários da API aprovados;
+- 11 testes do Angular aprovados;
 - teste E2E de troca de token adicionado, mas não executado localmente porque
   esta estação não possui Docker nem PostgreSQL instalados.
+
+## Onboarding inicial
+
+A rota `/cadastro` cria a identidade diretamente no Firebase e envia à API
+somente um ID token. Uma função `SECURITY DEFINER`, com assinatura restrita,
+provisiona atomicamente o usuário pendente, a clínica, configurações, membership
+`OWNER`, aceites de termos e privacidade e auditoria. Repetir a operação com o mesmo UID
+retorna a clínica existente.
+
+O teste E2E dessa transação foi adicionado, incluindo a verificação de
+idempotência, mas também depende do PostgreSQL indisponível nesta estação. O
+runtime ainda usa Prisma durante a migração; gravar simultaneamente no SQL
+Connect foi evitado para não criar duas fontes de verdade.

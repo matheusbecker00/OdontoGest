@@ -10,6 +10,7 @@ import { AuthorizationGuard } from './authorization.guard';
 import { CryptoService } from './crypto.service';
 import { FirebaseIdentityService } from './firebase-identity.service';
 import { OriginGuard } from './origin.guard';
+import { OnboardingService } from './onboarding.service';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { OriginGuard } from './origin.guard';
     AuthService,
     CryptoService,
     FirebaseIdentityService,
+    OnboardingService,
     AccessTokenService,
     AccessTokenGuard,
     AuthorizationGuard,

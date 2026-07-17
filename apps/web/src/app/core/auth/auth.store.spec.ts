@@ -8,6 +8,7 @@ import { FirebaseAuthService } from './firebase-auth.service';
 describe('AuthStore', () => {
   const api = {
     exchangeFirebaseToken: vi.fn(),
+    createOnboarding: vi.fn(),
     refresh: vi.fn(),
     logout: vi.fn(),
     selectClinic: vi.fn(),
@@ -15,12 +16,16 @@ describe('AuthStore', () => {
   };
   const firebase = {
     signIn: vi.fn(),
+    createAccount: vi.fn(),
+    sendVerificationAndSignOut: vi.fn(),
     signOut: vi.fn(),
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
     firebase.signIn.mockResolvedValue('firebase-id-token');
+    firebase.createAccount.mockResolvedValue('firebase-signup-token');
+    firebase.sendVerificationAndSignOut.mockResolvedValue(undefined);
     firebase.signOut.mockResolvedValue(undefined);
     TestBed.configureTestingModule({
       providers: [
@@ -63,5 +68,36 @@ describe('AuthStore', () => {
     expect(first).toBe('rotated-access-token');
     expect(second).toBe('rotated-access-token');
     expect(api.refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it('cria onboarding sem enviar a senha para a API', async () => {
+    api.createOnboarding.mockReturnValue(
+      of({
+        clinicId: '22222222-2222-4222-8222-222222222222',
+        created: true,
+        verificationRequired: true,
+      }),
+    );
+    const store = TestBed.inject(AuthStore);
+
+    await store.register({
+      responsibleName: 'Marina Souza',
+      clinicName: 'Clínica Sorriso',
+      email: 'marina@example.test',
+      password: 'senha-ficticia-segura',
+    });
+
+    expect(firebase.createAccount).toHaveBeenCalledWith(
+      'marina@example.test',
+      'senha-ficticia-segura',
+      'Marina Souza',
+    );
+    expect(api.createOnboarding).toHaveBeenCalledWith({
+      idToken: 'firebase-signup-token',
+      responsibleName: 'Marina Souza',
+      clinicName: 'Clínica Sorriso',
+      acceptTerms: true,
+    });
+    expect(firebase.sendVerificationAndSignOut).toHaveBeenCalled();
   });
 });

@@ -3,6 +3,20 @@ import { authGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
   {
+    path: 'cadastro',
+    loadComponent: () => import('./features/auth/signup.page').then((module) => module.SignupPage),
+  },
+  {
+    path: 'termos',
+    data: { document: 'terms' },
+    loadComponent: () => import('./features/legal/legal.page').then((module) => module.LegalPage),
+  },
+  {
+    path: 'privacidade',
+    data: { document: 'privacy' },
+    loadComponent: () => import('./features/legal/legal.page').then((module) => module.LegalPage),
+  },
+  {
     path: 'login',
     loadComponent: () => import('./features/auth/login.page').then((module) => module.LoginPage),
   },

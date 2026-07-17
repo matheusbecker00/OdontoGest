@@ -16,6 +16,21 @@ export class AuthApiService {
     );
   }
 
+  createOnboarding(input: {
+    idToken: string;
+    responsibleName: string;
+    clinicName: string;
+    acceptTerms: true;
+  }) {
+    return this.http.post<{
+      clinicId: string;
+      created: boolean;
+      verificationRequired: true;
+    }>(`${API_ROOT}/auth/firebase/onboarding`, input, {
+      withCredentials: true,
+    });
+  }
+
   refresh() {
     return this.http.post<RefreshResponse>(
       `${API_ROOT}/auth/refresh`,

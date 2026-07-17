@@ -26,6 +26,11 @@ const loginResponseSchema = z.object({
   activeClinicId: z.string().uuid().nullable(),
   user: z.object({ id: z.string().uuid(), email: z.string().email() }),
 });
+const onboardingResponseSchema = z.object({
+  clinicId: z.string().uuid(),
+  created: z.boolean(),
+  verificationRequired: z.literal(true),
+});
 const errorResponseSchema = z.object({
   error: z.object({
     code: z.string(),
@@ -61,7 +66,10 @@ function tokenFromLink(link: string): string {
 }
 
 describe('OdontoGest foundation (e2e)', () => {
-  const firebaseIdentity = { verifyIdToken: jest.fn() };
+  const firebaseIdentity = {
+    verifyIdToken: jest.fn(),
+    verifyIdTokenForOnboarding: jest.fn(),
+  };
   let app: INestApplication;
   let server: Server;
   let owner: PrismaClient;
@@ -179,6 +187,60 @@ describe('OdontoGest foundation (e2e)', () => {
     );
   });
 
+  it('provisiona o onboarding Firebase uma única vez', async () => {
+    const email = 'onboarding@fase1.example.test';
+    firebaseIdentity.verifyIdTokenForOnboarding.mockResolvedValue({
+      uid: 'firebase-onboarding-owner',
+      email,
+      emailVerified: false,
+    });
+    const input = {
+      idToken: 'firebase-onboarding-token'.padEnd(100, '-'),
+      responsibleName: 'Responsável Onboarding',
+      clinicName: 'Clínica Onboarding',
+      acceptTerms: true,
+    };
+
+    const first = await request(server)
+      .post('/api/v1/auth/firebase/onboarding')
+      .set('Origin', WEB_ORIGIN)
+      .send(input)
+      .expect(201);
+    const firstBody = onboardingResponseSchema.parse(first.body as unknown);
+    expect(firstBody).toEqual(
+      expect.objectContaining({ created: true, verificationRequired: true }),
+    );
+
+    const second = await request(server)
+      .post('/api/v1/auth/firebase/onboarding')
+      .set('Origin', WEB_ORIGIN)
+      .send(input)
+      .expect(201);
+    const secondBody = onboardingResponseSchema.parse(second.body as unknown);
+    expect(secondBody).toEqual(
+      expect.objectContaining({
+        clinicId: firstBody.clinicId,
+        created: false,
+      }),
+    );
+
+    const user = await owner.user.findUniqueOrThrow({
+      where: { firebaseUid: 'firebase-onboarding-owner' },
+      include: {
+        memberships: true,
+        termsAcceptances: true,
+      },
+    });
+    expect(user.passwordHash).toBe('!firebase-managed!');
+    expect(user.memberships).toHaveLength(1);
+    expect(user.termsAcceptances).toHaveLength(2);
+    expect(
+      await owner.clinic.count({
+        where: { memberships: { some: { userId: user.id } } },
+      }),
+    ).toBe(1);
+  });
+
   it('protege o ciclo de conta, rotação de refresh e autorização', async () => {
     const email = 'proprietaria@fase1.example.test';
     const oldPassword = 'Senha-forte-inicial-2026!';
@@ -244,6 +306,7 @@ describe('OdontoGest foundation (e2e)', () => {
     firebaseIdentity.verifyIdToken.mockResolvedValueOnce({
       uid: 'firebase-uid-marina',
       email,
+      emailVerified: true,
     });
     const firebaseLogin = await request(server)
       .post('/api/v1/auth/firebase/session')

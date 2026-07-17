@@ -2,11 +2,14 @@ import { Injectable } from '@angular/core';
 import { getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import {
   connectAuthEmulator,
+  createUserWithEmailAndPassword,
   getAuth,
   inMemoryPersistence,
   setPersistence,
+  sendEmailVerification,
   signInWithEmailAndPassword,
   signOut,
+  updateProfile,
   type Auth,
 } from 'firebase/auth';
 import { environment } from '../../../environments/environment';
@@ -38,6 +41,40 @@ export class FirebaseAuthService {
     await this.ready;
     const credential = await signInWithEmailAndPassword(this.auth, email.trim(), password);
     return credential.user.getIdToken(true);
+  }
+
+  async createAccount(email: string, password: string, displayName: string): Promise<string> {
+    await this.ready;
+    let credential;
+    try {
+      credential = await createUserWithEmailAndPassword(this.auth, email.trim(), password);
+    } catch (error) {
+      if (
+        typeof error !== 'object' ||
+        error === null ||
+        !('code' in error) ||
+        error.code !== 'auth/email-already-in-use'
+      ) {
+        throw error;
+      }
+      credential = await signInWithEmailAndPassword(this.auth, email.trim(), password);
+    }
+    await updateProfile(credential.user, { displayName: displayName.trim() });
+    return credential.user.getIdToken(true);
+  }
+
+  async sendVerificationAndSignOut(): Promise<void> {
+    await this.ready;
+    const user = this.auth.currentUser;
+    try {
+      if (user && !user.emailVerified) {
+        await sendEmailVerification(user, {
+          url: `${globalThis.location.origin}/login?emailVerified=success`,
+        });
+      }
+    } finally {
+      await signOut(this.auth);
+    }
   }
 
   async signOut(): Promise<void> {

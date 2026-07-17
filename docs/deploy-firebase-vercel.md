@@ -11,6 +11,10 @@ foi validado como compatível com o schema SQL Connect.
 O Authentication por e-mail/senha está habilitado. O frontend registrado é
 `odontogest-web`.
 
+O onboarding inicial funciona no runtime Prisma atual. A API ainda não deve ser
+publicada como se usasse exclusivamente SQL Connect: a troca dos repositórios e
+das sessões continua pendente e deve ocorrer antes do deploy público.
+
 ## 1. Criar e associar o projeto Firebase
 
 Para reproduzir a associação em outra estação, autentique e selecione o projeto:

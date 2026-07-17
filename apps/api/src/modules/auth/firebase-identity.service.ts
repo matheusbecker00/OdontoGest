@@ -23,6 +23,7 @@ const INVALID_FIREBASE_TOKEN = {
 export interface FirebaseIdentity {
   uid: string;
   email: string;
+  emailVerified: boolean;
 }
 
 @Injectable()
@@ -52,7 +53,7 @@ export class FirebaseIdentityService {
       initializeApp(options, FIREBASE_APP_NAME);
   }
 
-  async verifyIdToken(idToken: string): Promise<FirebaseIdentity> {
+  private async decodeIdToken(idToken: string): Promise<FirebaseIdentity> {
     let decoded: Awaited<
       ReturnType<ReturnType<typeof getAuth>['verifyIdToken']>
     >;
@@ -65,13 +66,30 @@ export class FirebaseIdentityService {
       throw new UnauthorizedException(INVALID_FIREBASE_TOKEN);
     }
 
-    if (!decoded.email || decoded.email_verified !== true) {
+    if (!decoded.email) {
+      throw new UnauthorizedException(INVALID_FIREBASE_TOKEN);
+    }
+
+    return {
+      uid: decoded.uid,
+      email: decoded.email,
+      emailVerified: decoded.email_verified === true,
+    };
+  }
+
+  async verifyIdToken(idToken: string): Promise<FirebaseIdentity> {
+    const identity = await this.decodeIdToken(idToken);
+    if (!identity.emailVerified) {
       throw new ForbiddenException({
         error: 'EMAIL_VERIFICATION_REQUIRED',
         message: 'Confirme seu e-mail antes de entrar.',
       });
     }
 
-    return { uid: decoded.uid, email: decoded.email };
+    return identity;
+  }
+
+  verifyIdTokenForOnboarding(idToken: string): Promise<FirebaseIdentity> {
+    return this.decodeIdToken(idToken);
   }
 }

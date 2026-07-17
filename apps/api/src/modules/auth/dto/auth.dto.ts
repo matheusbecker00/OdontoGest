@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  Equals,
+  IsBoolean,
   IsEmail,
   IsString,
   IsUUID,
@@ -43,6 +45,34 @@ export class FirebaseSessionDto {
   @IsString()
   @Length(100, 4096)
   idToken!: string;
+}
+
+export class FirebaseOnboardingDto extends FirebaseSessionDto {
+  @ApiProperty({ example: 'Marina Souza' })
+  @IsString()
+  @Length(2, 160)
+  responsibleName!: string;
+
+  @ApiProperty({ example: 'Clínica Sorriso' })
+  @IsString()
+  @Length(2, 180)
+  clinicName!: string;
+
+  @ApiProperty({ example: true })
+  @IsBoolean()
+  @Equals(true)
+  acceptTerms!: boolean;
+}
+
+export class FirebaseOnboardingResponseDto {
+  @ApiProperty({ format: 'uuid' })
+  clinicId!: string;
+
+  @ApiProperty()
+  created!: boolean;
+
+  @ApiProperty({ enum: [true] })
+  verificationRequired!: true;
 }
 
 export class TokenDto {

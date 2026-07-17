@@ -76,6 +76,38 @@
         ]
       }
     },
+    "/api/v1/auth/firebase/onboarding": {
+      "post": {
+        "operationId": "onboardingClinic",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirebaseOnboardingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirebaseOnboardingResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Provisiona o primeiro usuário e sua clínica",
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
     "/api/v1/auth/firebase/session": {
       "post": {
         "operationId": "firebaseSession",
@@ -463,6 +495,58 @@
         },
         "required": [
           "token"
+        ]
+      },
+      "FirebaseOnboardingDto": {
+        "type": "object",
+        "properties": {
+          "idToken": {
+            "type": "string",
+            "minLength": 100,
+            "maxLength": 4096,
+            "writeOnly": true
+          },
+          "responsibleName": {
+            "type": "string",
+            "example": "Marina Souza"
+          },
+          "clinicName": {
+            "type": "string",
+            "example": "Clínica Sorriso"
+          },
+          "acceptTerms": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "idToken",
+          "responsibleName",
+          "clinicName",
+          "acceptTerms"
+        ]
+      },
+      "FirebaseOnboardingResponseDto": {
+        "type": "object",
+        "properties": {
+          "clinicId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "created": {
+            "type": "boolean"
+          },
+          "verificationRequired": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "required": [
+          "clinicId",
+          "created",
+          "verificationRequired"
         ]
       },
       "FirebaseSessionDto": {

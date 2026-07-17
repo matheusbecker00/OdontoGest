@@ -126,28 +126,28 @@ captura de body desabilitada, testes canário e retenção reduzida. Criticidade
 
 ## Registro STRIDE
 
-| ID  | Categoria    | Cenário                                      | Controle planejado                                               | Teste/evidência                | Risco residual |
-| --- | ------------ | -------------------------------------------- | ---------------------------------------------------------------- | ------------------------------ | -------------- |
-| T01 | Spoofing     | Credential stuffing no login                 | Rate limit Redis, atraso progressivo, mensagem genérica, alerta  | teste de limite e enumeração   | Médio          |
-| T02 | Spoofing     | Reuso de refresh roubado                     | Rotação, família, hash e revogação                               | concorrência/replay            | Médio          |
-| T03 | Spoofing     | Webhook forjado                              | Validação oficial da assinatura e consulta ao provedor           | vetor válido/inválido/replay   | Baixo          |
-| T04 | Tampering    | `clinicId`/IDs aninhados adulterados         | DTO estrito, contexto tenant, FK composta, RLS                   | suíte cross-tenant             | Baixo          |
-| T05 | Tampering    | Total/desconto/parcela enviados pelo cliente | Recalcular no domínio e transação                                | testes com valores adulterados | Baixo          |
-| T06 | Tampering    | Status financeiro manual                     | Projeção server-side a partir de receivables                     | contrato não aceita campo      | Baixo          |
-| T07 | Tampering    | Evento de auditoria alterado                 | Role sem update/delete, append-only, retenção e hash futuro      | teste de permissão DB          | Médio          |
-| T08 | Repudiation  | Usuário nega estorno/cancelamento            | Auditoria com ator, request, antes/depois redigido               | teste de trilha completa       | Baixo          |
-| T09 | Repudiation  | Aceite de termos sem evidência               | Versão, data, usuário e evidence digest                          | teste de onboarding atômico    | Baixo          |
-| T10 | Disclosure   | IDOR cross-tenant                            | Filtro + RLS + 404 genérico                                      | Clínica A/B obrigatório        | Baixo          |
-| T11 | Disclosure   | XSS exfiltra dados/tokens                    | Angular encoding, CSP, sem HTML arbitrário, token em memória     | testes CSP/XSS                 | Médio          |
-| T12 | Disclosure   | Backup/export público                        | Criptografia, bucket privado, URL curta, acesso auditado         | restore/export drill           | Médio          |
-| T13 | Disclosure   | Logs contêm PII                              | Redaction allowlist e testes canário                             | scanner de logs                | Baixo          |
-| T14 | DoS          | Login/relatórios/exports caros               | Rate limit, paginação, fila, timeout e budget                    | carga e abuso                  | Médio          |
-| T15 | DoS          | Worker preso em webhook ruim                 | Retry com backoff, DLQ, circuit breaker, payload limitado        | chaos/retry test               | Médio          |
-| T16 | Elevation    | Frontend oculta botão, API permite           | Guard backend default-deny                                       | matriz por papel               | Baixo          |
-| T17 | Elevation    | Membership revogada continua no JWT          | Revalidação/versionamento e access curto                         | revogação imediata             | Baixo          |
-| T18 | Elevation    | Role do banco ignora RLS                     | Runtime `NOBYPASSRLS`, owner separado                            | teste de conexão runtime       | Baixo          |
-| T19 | Supply chain | Pacote/build malicioso                       | Lockfile, provenance quando disponível, SCA, CodeQL, secret scan | CI bloqueante                  | Médio          |
-| T20 | Configuração | CORS wildcard ou Swagger público             | Config schema fail-fast e teste de ambiente                      | teste de config prod           | Baixo          |
+| ID  | Categoria    | Cenário                                      | Controle planejado                                              | Teste/evidência                | Risco residual |
+| --- | ------------ | -------------------------------------------- | --------------------------------------------------------------- | ------------------------------ | -------------- |
+| T01 | Spoofing     | Credential stuffing no login                 | Rate limit Redis, atraso progressivo, mensagem genérica, alerta | teste de limite e enumeração   | Médio          |
+| T02 | Spoofing     | Reuso de refresh roubado                     | Rotação, família, hash e revogação                              | concorrência/replay            | Médio          |
+| T03 | Spoofing     | Webhook forjado                              | Validação oficial da assinatura e consulta ao provedor          | vetor válido/inválido/replay   | Baixo          |
+| T04 | Tampering    | `clinicId`/IDs aninhados adulterados         | DTO estrito, contexto tenant, FK composta, RLS                  | suíte cross-tenant             | Baixo          |
+| T05 | Tampering    | Total/desconto/parcela enviados pelo cliente | Recalcular no domínio e transação                               | testes com valores adulterados | Baixo          |
+| T06 | Tampering    | Status financeiro manual                     | Projeção server-side a partir de receivables                    | contrato não aceita campo      | Baixo          |
+| T07 | Tampering    | Evento de auditoria alterado                 | Role sem update/delete, append-only, retenção e hash futuro     | teste de permissão DB          | Médio          |
+| T08 | Repudiation  | Usuário nega estorno/cancelamento            | Auditoria com ator, request, antes/depois redigido              | teste de trilha completa       | Baixo          |
+| T09 | Repudiation  | Aceite de termos sem evidência               | Versão, data, usuário e evidence digest                         | teste de onboarding atômico    | Baixo          |
+| T10 | Disclosure   | IDOR cross-tenant                            | Filtro + RLS + 404 genérico                                     | Clínica A/B obrigatório        | Baixo          |
+| T11 | Disclosure   | XSS exfiltra dados/tokens                    | Angular encoding, CSP, sem HTML arbitrário, token em memória    | testes CSP/XSS                 | Médio          |
+| T12 | Disclosure   | Backup/export público                        | Criptografia, bucket privado, URL curta, acesso auditado        | restore/export drill           | Médio          |
+| T13 | Disclosure   | Logs contêm PII                              | Redaction allowlist e testes canário                            | scanner de logs                | Baixo          |
+| T14 | DoS          | Login/relatórios/exports caros               | Rate limit, paginação, fila, timeout e budget                   | carga e abuso                  | Médio          |
+| T15 | DoS          | Worker preso em webhook ruim                 | Retry com backoff, DLQ, circuit breaker, payload limitado       | chaos/retry test               | Médio          |
+| T16 | Elevation    | Frontend oculta botão, API permite           | Guard backend default-deny                                      | matriz por papel               | Baixo          |
+| T17 | Elevation    | Membership revogada continua no JWT          | Revalidação/versionamento e access curto                        | revogação imediata             | Baixo          |
+| T18 | Elevation    | Role do banco ignora RLS                     | Runtime `NOBYPASSRLS`, owner separado                           | teste de conexão runtime       | Baixo          |
+| T19 | Supply chain | Pacote/build malicioso                       | Lockfile, provenance quando disponível, SCA e secret scan       | CI bloqueante                  | Médio          |
+| T20 | Configuração | CORS wildcard ou Swagger público             | Config schema fail-fast e teste de ambiente                     | teste de config prod           | Baixo          |
 
 ## Requisitos de segurança derivados
 

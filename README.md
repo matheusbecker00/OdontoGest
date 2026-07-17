@@ -100,7 +100,7 @@ pnpm openapi:generate
 
 Os testes E2E exigem PostgreSQL com uma URL de migração e outra de runtime;
 consulte [docs/desenvolvimento.md](docs/desenvolvimento.md). O CI também executa
-PostgreSQL e Redis reais, auditoria de dependências, Gitleaks e CodeQL.
+PostgreSQL e Redis reais, auditoria de dependências e Gitleaks.
 
 ## Regras de segurança preservadas
 

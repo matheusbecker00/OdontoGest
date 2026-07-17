@@ -5,6 +5,7 @@ dist/
 coverage/
 apps/api/src/generated/prisma/
 packages/dataconnect-admin-generated/
+packages/dataconnect-client-generated/
 dataconnect/.dataconnect/
 apps/api/openapi/openapi.json
 docs/referencias/

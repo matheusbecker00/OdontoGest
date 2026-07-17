@@ -2,31 +2,34 @@
 
 ## Estado atual
 
-O schema da fundação e o conector administrativo estão versionados. O SDK é
-gerado por `pnpm firebase:sdk:generate`. Nenhum projeto remoto foi criado ou
-implantado ainda, pois o Firebase CLI precisa ser autenticado pelo proprietário.
+O projeto Firebase `odongest` está associado ao repositório e o aplicativo Web
+`odontogest-web` está registrado. O serviço SQL Connect `odontogest`, seu schema
+e o conector `api` estão implantados em `southamerica-east1`. A instância
+`odontogest-spark` foi solicitada no trial sem custo e pode levar alguns minutos
+para concluir o provisionamento.
+
+O Authentication por e-mail/senha ainda precisa ser habilitado pelo proprietário
+no Firebase Console.
 
 ## 1. Criar e associar o projeto Firebase
 
-1. Crie um projeto no plano Spark no Firebase Console.
-2. Em Authentication, habilite apenas **E-mail/senha** nesta etapa.
-3. No terminal, autentique e associe o projeto:
+Para reproduzir a associação em outra estação, autentique e selecione o projeto:
 
 ```bash
 pnpm exec firebase login
-pnpm exec firebase use --add
+pnpm exec firebase use odongest
 ```
 
-Escolha um alias explícito, como `development`. Não substitua o projeto demo por
-um ID de produção em testes automatizados.
+Em Authentication, habilite apenas **E-mail/senha** nesta etapa. Os scripts de
+emulador continuam usando explicitamente `demo-odontogest`, para que testes
+locais não alcancem recursos remotos por engano.
 
 ## 2. Provisionar SQL Connect
 
 O serviço usa `southamerica-east1`, banco `odontogest` e instância
 `odontogest-spark`, conforme `dataconnect/dataconnect.yaml`.
 
-Antes do primeiro deploy, revise no console se o projeto ainda é elegível ao
-trial Spark de 90 dias. Depois execute:
+Para gerar novamente o SDK ou publicar uma alteração revisada, execute:
 
 ```bash
 pnpm firebase:sdk:generate

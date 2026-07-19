@@ -6,7 +6,7 @@
       <p>Gerencie dentistas, especialidades e dados da agenda.</p>
     </div>
     <button mat-flat-button type="button" (click)="startCreate()">
-      <mat-icon>add</mat-icon>Novo profissional
+      <og-icon name="add" />Novo profissional
     </button>
   </header>
 
@@ -94,7 +94,7 @@
       <div class="state"><mat-spinner diameter="34" /><span>Carregando profissionais…</span></div>
     } @else if (filtered().length === 0) {
       <div class="state">
-        <mat-icon>medical_services</mat-icon><strong>Nenhum profissional encontrado</strong
+        <og-icon name="medical_services" /><strong>Nenhum profissional encontrado</strong
         ><span>Cadastre o primeiro dentista da clínica.</span>
       </div>
     } @else {

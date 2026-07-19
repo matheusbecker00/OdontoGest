@@ -1,5 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, ErrorHandler, provideBrowserGlobalErrorListeners } from '@angular/core';
 import {
   type NavigationError,
   PreloadAllModules,
@@ -9,6 +9,7 @@ import {
 } from '@angular/router';
 
 import { routes } from './app.routes';
+import { AppErrorHandler } from './core/runtime/app-error-handler';
 
 const CHUNK_RECOVERY_KEY = 'og.chunk-recovery';
 
@@ -47,6 +48,7 @@ function recoverNavigation(error: NavigationError): void {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    { provide: ErrorHandler, useClass: AppErrorHandler },
     provideRouter(
       routes,
       withPreloading(PreloadAllModules),

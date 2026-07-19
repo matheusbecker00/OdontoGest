@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {
@@ -13,6 +12,7 @@ import {
 } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthStore } from '../../core/auth/auth.store';
+import { IconComponent } from '../../shared/components/icon.component';
 
 interface NavigationItem {
   readonly label: string;
@@ -24,7 +24,7 @@ interface NavigationItem {
   selector: 'og-app-shell',
   imports: [
     MatButtonModule,
-    MatIconModule,
+    IconComponent,
     MatSidenavModule,
     MatTooltipModule,
     RouterLink,

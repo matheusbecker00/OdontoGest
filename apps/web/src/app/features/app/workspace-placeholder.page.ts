@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute } from '@angular/router';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'og-workspace-placeholder-page',
-  imports: [MatIconModule],
+  imports: [IconComponent],
   template: `
     <main class="placeholder-page">
       <section class="heading">
@@ -13,9 +13,7 @@ import { ActivatedRoute } from '@angular/router';
         <p>{{ data.description }}</p>
       </section>
       <section class="feature-card">
-        <span class="feature-icon"
-          ><mat-icon>{{ data.icon }}</mat-icon></span
-        >
+        <span class="feature-icon"><og-icon [name]="data.icon" /></span>
         <div>
           <span class="tag">EM IMPLANTAÇÃO</span>
           <h3>Este módulo está sendo preparado</h3>
@@ -73,7 +71,7 @@ import { ActivatedRoute } from '@angular/router';
       color: #2563eb;
       background: #edf4ff;
     }
-    .feature-icon mat-icon {
+    .feature-icon og-icon {
       width: 2rem;
       height: 2rem;
       font-size: 2rem;

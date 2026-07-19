@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { IconComponent } from '../../shared/components/icon.component';
 
 interface CalendarDay {
   readonly date: number;
@@ -12,7 +12,7 @@ interface CalendarDay {
 
 @Component({
   selector: 'og-calendar-page',
-  imports: [MatButtonModule, MatIconModule],
+  imports: [MatButtonModule, IconComponent],
   template: `
     <main class="agenda-page">
       <section class="page-heading">
@@ -22,7 +22,7 @@ interface CalendarDay {
           <p>Visualize e organize a rotina de atendimentos.</p>
         </div>
         <button mat-flat-button type="button" disabled>
-          <mat-icon>add</mat-icon>Novo agendamento
+          <og-icon name="add" />Novo agendamento
         </button>
       </section>
 
@@ -36,7 +36,7 @@ interface CalendarDay {
                 aria-label="Mês anterior"
                 (click)="changeMonth(-1)"
               >
-                <mat-icon>chevron_left</mat-icon>
+                <og-icon name="chevron_left" />
               </button>
               <button
                 mat-icon-button
@@ -44,7 +44,7 @@ interface CalendarDay {
                 aria-label="Próximo mês"
                 (click)="changeMonth(1)"
               >
-                <mat-icon>chevron_right</mat-icon>
+                <og-icon name="chevron_right" />
               </button>
               <h3>{{ monthLabel() }}</h3>
             </div>
@@ -74,18 +74,18 @@ interface CalendarDay {
 
         <aside class="day-panel">
           <header>
-            <span class="day-panel__icon"><mat-icon>today</mat-icon></span>
+            <span class="day-panel__icon"><og-icon name="today" /></span>
             <div>
               <small>DATA SELECIONADA</small><strong>{{ selectedDateLabel() }}</strong>
             </div>
           </header>
           <div class="empty-state">
-            <span><mat-icon>event_available</mat-icon></span>
+            <span><og-icon name="event_available" /></span>
             <strong>Agenda livre</strong>
             <p>Nenhum atendimento registrado para esta data.</p>
           </div>
           <div class="notice">
-            <mat-icon>info</mat-icon>
+            <og-icon name="info" />
             <p>O cadastro de agendamentos será conectado ao banco na próxima entrega.</p>
           </div>
         </aside>
@@ -288,7 +288,7 @@ interface CalendarDay {
       color: #586b82;
       background: #f4f7fb;
     }
-    .notice mat-icon {
+    .notice og-icon {
       flex: 0 0 auto;
       width: 1rem;
       height: 1rem;

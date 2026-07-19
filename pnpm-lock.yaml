@@ -206,9 +206,9 @@ importers:
       '@angular/router':
         specifier: ^22.0.0
         version: 22.0.6(@angular/common@22.0.6(@angular/core@22.0.6(@angular/compiler@22.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@22.0.6(@angular/compiler@22.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@22.0.6(@angular/common@22.0.6(@angular/core@22.0.6(@angular/compiler@22.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@22.0.6(@angular/compiler@22.0.6)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
-      '@fontsource/material-symbols-outlined':
-        specifier: 5.3.0
-        version: 5.3.0
+      '@lucide/angular':
+        specifier: 1.25.0
+        version: 1.25.0(@angular/common@22.0.6(@angular/core@22.0.6(@angular/compiler@22.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@22.0.6(@angular/compiler@22.0.6)(rxjs@7.8.2)(zone.js@0.15.1))
       '@odontogest/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
@@ -1497,9 +1497,6 @@ packages:
   '@firebase/webchannel-wrapper@1.0.6':
     resolution: {integrity: sha512-Vr/Mqu79dMwGRAyGbJ4uN4+BtXB3/mRTdzetD1daWNeG8QaWuzhhbG77GltO5c0yYmYls8i250iX73624GJd7Q==}
 
-  '@fontsource/material-symbols-outlined@5.3.0':
-    resolution: {integrity: sha512-mdDimo8tsXJpVfm9iFQWSE6HJr/Xg7DXWhpb6mryGLgQRi8XvX33w/bn1Kisf+ze8arfgXAxRj8s3KQ0YxVo+A==}
-
   '@gar/promise-retry@1.0.3':
     resolution: {integrity: sha512-GmzA9ckNokPypTg10pgpeHNQe7ph+iIKKmhKu3Ob9ANkswreCx7R3cKmY781K8QK3AqVL3xVh9A42JvIAbkkSA==}
     engines: {node: ^20.17.0 || >=22.9.0}
@@ -2058,6 +2055,12 @@ packages:
     resolution: {integrity: sha512-JF1BmLCm9kGEVZgYmJq43zeQVdHVgAJnTi/NURWEsy6L1ZrrlSmdltS+D17QN4LODwf+1LMXAA9auIZVXtWwzw==}
     cpu: [x64]
     os: [win32]
+
+  '@lucide/angular@1.25.0':
+    resolution: {integrity: sha512-Hu1eHlGIeyamhSCFEO5YmiUlWn/h4y9BOXMDndY0HRu05CNeCt5BENkfBoeE/bzggMGGbYG+SOBkQUG939tFXw==}
+    peerDependencies:
+      '@angular/common': '>=17.0.0'
+      '@angular/core': '>=17.0.0'
 
   '@lukeed/csprng@1.1.0':
     resolution: {integrity: sha512-Z7C/xXCiGWsg0KuKsHTKJxbWhpI3Vs5GwLfOean7MGyVFGqdRgBbAjOCh6u4bbjPc/8MJ2pZmK/0DLdCbivLDA==}
@@ -9372,8 +9375,6 @@ snapshots:
 
   '@firebase/webchannel-wrapper@1.0.6': {}
 
-  '@fontsource/material-symbols-outlined@5.3.0': {}
-
   '@gar/promise-retry@1.0.3': {}
 
   '@google-cloud/cloud-sql-connector@1.11.2':
@@ -10047,6 +10048,12 @@ snapshots:
 
   '@lmdb/lmdb-win32-x64@3.5.4':
     optional: true
+
+  '@lucide/angular@1.25.0(@angular/common@22.0.6(@angular/core@22.0.6(@angular/compiler@22.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@22.0.6(@angular/compiler@22.0.6)(rxjs@7.8.2)(zone.js@0.15.1))':
+    dependencies:
+      '@angular/common': 22.0.6(@angular/core@22.0.6(@angular/compiler@22.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
+      '@angular/core': 22.0.6(@angular/compiler@22.0.6)(rxjs@7.8.2)(zone.js@0.15.1)
+      tslib: 2.8.1
 
   '@lukeed/csprng@1.1.0': {}
 

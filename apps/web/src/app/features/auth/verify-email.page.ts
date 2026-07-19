@@ -1,17 +1,17 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthApiService } from '../../core/auth/auth-api.service';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'og-verify-email-page',
-  imports: [RouterLink, MatProgressSpinnerModule, MatIconModule],
+  imports: [RouterLink, MatProgressSpinnerModule, IconComponent],
   template: `
     <main>
       @if (state() === 'sent') {
-        <mat-icon class="sent-icon" aria-hidden="true">mark_email_read</mat-icon>
+        <og-icon class="sent-icon" name="mark_email_read" aria-hidden="true" />
         <h1>Confirme seu e-mail</h1>
         <p>Enviamos as instruções de confirmação. Depois, volte para entrar.</p>
         <a routerLink="/login">Voltar ao login</a>

@@ -2,11 +2,11 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthStore } from '../../core/auth/auth.store';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'og-login-page',
@@ -15,7 +15,7 @@ import { AuthStore } from '../../core/auth/auth.store';
     RouterLink,
     MatButtonModule,
     MatFormFieldModule,
-    MatIconModule,
+    IconComponent,
     MatInputModule,
     MatProgressSpinnerModule,
   ],

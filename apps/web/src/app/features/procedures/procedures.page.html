@@ -6,7 +6,7 @@
       <p>Configure serviços, valores e duração padrão.</p>
     </div>
     <button mat-flat-button type="button" (click)="startCreate()">
-      <mat-icon>add</mat-icon>Novo procedimento
+      <og-icon name="add" />Novo procedimento
     </button>
   </header>
   <section class="card toolbar">
@@ -80,7 +80,7 @@
       <div class="state"><mat-spinner diameter="34" /><span>Carregando procedimentos…</span></div>
     } @else if (filtered().length === 0) {
       <div class="state">
-        <mat-icon>dentistry</mat-icon><strong>Nenhum procedimento encontrado</strong
+        <og-icon name="dentistry" /><strong>Nenhum procedimento encontrado</strong
         ><span>Cadastre o primeiro serviço da clínica.</span>
       </div>
     } @else {

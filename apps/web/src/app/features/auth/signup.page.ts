@@ -3,11 +3,11 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router, RouterLink } from '@angular/router';
 import { AuthStore } from '../../core/auth/auth.store';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'og-signup-page',
@@ -17,7 +17,7 @@ import { AuthStore } from '../../core/auth/auth.store';
     MatButtonModule,
     MatCheckboxModule,
     MatFormFieldModule,
-    MatIconModule,
+    IconComponent,
     MatInputModule,
     MatProgressSpinnerModule,
   ],

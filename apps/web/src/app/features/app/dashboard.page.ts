@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthStore } from '../../core/auth/auth.store';
+import { IconComponent } from '../../shared/components/icon.component';
 import { PatientsApiService } from '../patients/patients-api.service';
 
 @Component({
   selector: 'og-dashboard-page',
-  imports: [MatButtonModule, MatIconModule, RouterLink],
+  imports: [MatButtonModule, IconComponent, RouterLink],
   template: `
     <main class="dashboard">
       <section class="welcome">
@@ -17,29 +17,29 @@ import { PatientsApiService } from '../patients/patients-api.service';
           <h2>Olá, {{ firstName() }}! <span aria-hidden="true">👋</span></h2>
           <p>Acompanhe os principais indicadores da sua clínica.</p>
         </div>
-        <a mat-flat-button routerLink="/app/agenda"> <mat-icon>add</mat-icon>Novo agendamento </a>
+        <a mat-flat-button routerLink="/app/agenda"> <og-icon name="add" />Novo agendamento </a>
       </section>
 
       <section class="metrics" aria-label="Indicadores da clínica">
         <article class="metric metric--blue">
-          <span class="metric__icon"><mat-icon>calendar_today</mat-icon></span>
+          <span class="metric__icon"><og-icon name="calendar_today" /></span>
           <div><small>Agenda hoje</small><strong>0</strong><span>Nenhum atendimento</span></div>
         </article>
         <article class="metric metric--cyan">
-          <span class="metric__icon"><mat-icon>groups</mat-icon></span>
+          <span class="metric__icon"><og-icon name="groups" /></span>
           <div>
             <small>Pacientes</small><strong>{{ patientTotal() }}</strong
             ><span>Total cadastrado</span>
           </div>
         </article>
         <article class="metric metric--green">
-          <span class="metric__icon"><mat-icon>payments</mat-icon></span>
+          <span class="metric__icon"><og-icon name="payments" /></span>
           <div>
             <small>Recebimentos hoje</small><strong>R$ 0</strong><span>Sem lançamentos</span>
           </div>
         </article>
         <article class="metric metric--orange">
-          <span class="metric__icon"><mat-icon>pending_actions</mat-icon></span>
+          <span class="metric__icon"><og-icon name="pending_actions" /></span>
           <div><small>Pendências</small><strong>0</strong><span>Tudo em dia</span></div>
         </article>
       </section>
@@ -54,7 +54,7 @@ import { PatientsApiService } from '../patients/patients-api.service';
             <a routerLink="/app/agenda">Ver agenda completa</a>
           </header>
           <div class="empty-state">
-            <span><mat-icon>event_available</mat-icon></span>
+            <span><og-icon name="event_available" /></span>
             <strong>Nenhum atendimento agendado</strong>
             <p>Sua agenda está livre hoje.</p>
             <a mat-stroked-button routerLink="/app/agenda">Abrir calendário</a>
@@ -70,16 +70,16 @@ import { PatientsApiService } from '../patients/patients-api.service';
           </header>
           <div class="quick-actions__grid">
             <a routerLink="/app/pacientes"
-              ><mat-icon>person_add</mat-icon><span>Novo paciente</span></a
+              ><og-icon name="person_add" /><span>Novo paciente</span></a
             >
             <a routerLink="/app/agenda"
-              ><mat-icon>edit_calendar</mat-icon><span>Agendar consulta</span></a
+              ><og-icon name="edit_calendar" /><span>Agendar consulta</span></a
             >
             <a routerLink="/app/financeiro"
-              ><mat-icon>add_card</mat-icon><span>Novo lançamento</span></a
+              ><og-icon name="add_card" /><span>Novo lançamento</span></a
             >
             <a routerLink="/app/relatorios"
-              ><mat-icon>bar_chart</mat-icon><span>Ver relatórios</span></a
+              ><og-icon name="bar_chart" /><span>Ver relatórios</span></a
             >
           </div>
         </aside>
@@ -92,7 +92,7 @@ import { PatientsApiService } from '../patients/patients-api.service';
             </div>
           </header>
           <div class="clinic-row">
-            <span class="clinic-icon"><mat-icon>domain</mat-icon></span>
+            <span class="clinic-icon"><og-icon name="domain" /></span>
             <div>
               <small>Clínica ativa</small><strong>{{ clinicName() }}</strong>
             </div>
@@ -103,8 +103,8 @@ import { PatientsApiService } from '../patients/patients-api.service';
             <div><i></i></div>
           </div>
           <a routerLink="/app/configuracoes"
-            >Completar configuração <mat-icon>arrow_forward</mat-icon></a
-          >
+            >Completar configuração <og-icon name="arrow_forward"
+          /></a>
         </article>
       </section>
     </main>
@@ -291,7 +291,7 @@ import { PatientsApiService } from '../patients/patients-api.service';
       background: #f4f8ff;
       transform: translateY(-2px);
     }
-    .quick-actions__grid mat-icon {
+    .quick-actions__grid og-icon {
       color: #2563eb;
     }
     .overview {
@@ -364,7 +364,7 @@ import { PatientsApiService } from '../patients/patients-api.service';
       gap: 0.3rem;
       margin-left: 1.25rem;
     }
-    .overview > a mat-icon {
+    .overview > a og-icon {
       width: 1rem;
       height: 1rem;
       font-size: 1rem;

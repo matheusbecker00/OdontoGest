@@ -7,7 +7,7 @@
     [fixedInViewport]="true"
   >
     <div class="brand">
-      <span class="brand__mark"><mat-icon>dentistry</mat-icon></span>
+      <span class="brand__mark"><og-icon name="dentistry" /></span>
       <span><strong>OdontoGest</strong><small>Gestão odontológica</small></span>
     </div>
 
@@ -15,16 +15,16 @@
       <span class="nav-label">Menu principal</span>
       @for (item of navigation; track item.route) {
         <a [routerLink]="item.route" routerLinkActive="active" (click)="closeMobile(drawer)">
-          <mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>
+          <og-icon [name]="item.icon" aria-hidden="true" />
           <span>{{ item.label }}</span>
         </a>
       }
       <span class="nav-label nav-label--secondary">Sistema</span>
       <a routerLink="/app/configuracoes" routerLinkActive="active" (click)="closeMobile(drawer)">
-        <mat-icon aria-hidden="true">settings</mat-icon><span>Configurações</span>
+        <og-icon name="settings" aria-hidden="true" /><span>Configurações</span>
       </a>
       <a routerLink="/app/ajuda" routerLinkActive="active" (click)="closeMobile(drawer)">
-        <mat-icon aria-hidden="true">help_outline</mat-icon><span>Ajuda e suporte</span>
+        <og-icon name="help_outline" aria-hidden="true" /><span>Ajuda e suporte</span>
       </a>
     </nav>
 
@@ -35,7 +35,7 @@
         <small>{{ auth.clinics()[0]?.name || 'Clínica ativa' }}</small>
       </span>
       <button mat-icon-button matTooltip="Sair" type="button" (click)="logout()">
-        <mat-icon>logout</mat-icon>
+        <og-icon name="logout" />
       </button>
     </div>
   </mat-sidenav>
@@ -49,7 +49,7 @@
         aria-label="Abrir menu"
         (click)="drawer.toggle()"
       >
-        <mat-icon>menu</mat-icon>
+        <og-icon name="menu" />
       </button>
       <div>
         <span class="mobile-brand">OdontoGest</span>
@@ -58,7 +58,7 @@
       <div class="topbar__actions">
         <span class="today">{{ today }}</span>
         <button mat-icon-button matTooltip="Notificações" type="button">
-          <mat-icon>notifications_none</mat-icon>
+          <og-icon name="notifications_none" />
         </button>
         <span class="top-avatar">{{ auth.user()?.name?.charAt(0) || 'M' }}</span>
       </div>

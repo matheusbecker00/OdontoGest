@@ -9,11 +9,11 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { firstValueFrom } from 'rxjs';
+import { IconComponent } from '../../shared/components/icon.component';
 import { type Dentist, DentistsApiService } from './dentists-api.service';
 
 @Component({
@@ -21,7 +21,7 @@ import { type Dentist, DentistsApiService } from './dentists-api.service';
   imports: [
     MatButtonModule,
     MatFormFieldModule,
-    MatIconModule,
+    IconComponent,
     MatInputModule,
     MatProgressSpinnerModule,
     MatSelectModule,

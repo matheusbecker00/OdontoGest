@@ -30,7 +30,11 @@ export class LoginPage {
   private readonly route = inject(ActivatedRoute);
 
   protected readonly pending = signal(false);
-  protected readonly errorMessage = signal<string | null>(null);
+  protected readonly errorMessage = signal<string | null>(
+    this.route.snapshot.queryParamMap.get('erro') === 'carregamento'
+      ? 'A aplicação foi atualizada. Entre novamente para continuar.'
+      : null,
+  );
   protected readonly form = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email, Validators.maxLength(320)]],
     password: ['', [Validators.required, Validators.maxLength(128)]],

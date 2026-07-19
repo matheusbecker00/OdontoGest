@@ -39,10 +39,13 @@ export class AppShellComponent implements OnDestroy {
   protected readonly auth = inject(AuthStore);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly media = globalThis.matchMedia('(max-width: 63.99rem)');
+  private readonly media =
+    typeof globalThis.matchMedia === 'function'
+      ? globalThis.matchMedia('(max-width: 63.99rem)')
+      : null;
   private readonly mediaListener = (event: MediaQueryListEvent) => this.isMobile.set(event.matches);
 
-  protected readonly isMobile = signal(this.media.matches);
+  protected readonly isMobile = signal(this.media?.matches ?? false);
   protected readonly pageTitle = signal('Dashboard');
   protected readonly today = new Intl.DateTimeFormat('pt-BR', {
     weekday: 'long',
@@ -61,7 +64,7 @@ export class AppShellComponent implements OnDestroy {
   ];
 
   constructor() {
-    this.media.addEventListener('change', this.mediaListener);
+    this.media?.addEventListener('change', this.mediaListener);
     this.updatePageTitle();
     this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
       this.updatePageTitle();
@@ -69,7 +72,7 @@ export class AppShellComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.media.removeEventListener('change', this.mediaListener);
+    this.media?.removeEventListener('change', this.mediaListener);
   }
 
   protected closeMobile(drawer: MatSidenav): void {

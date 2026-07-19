@@ -29,7 +29,11 @@
                 "input": "public"
               }
             ],
-            "styles": ["@angular/material/prebuilt-themes/azure-blue.css", "src/styles.scss"]
+            "styles": [
+              "@fontsource/material-symbols-outlined/400.css",
+              "@angular/material/prebuilt-themes/azure-blue.css",
+              "src/styles.scss"
+            ]
           },
           "configurations": {
             "production": {

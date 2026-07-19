@@ -1,0 +1,39 @@
+import { signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
+import { AuthStore } from '../../core/auth/auth.store';
+import { AppShellComponent } from './app-shell.component';
+
+describe('AppShellComponent', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [AppShellComponent],
+      providers: [
+        provideRouter([]),
+        {
+          provide: AuthStore,
+          useValue: {
+            user: signal({ id: 'user-1', name: 'Matheus Becker', email: 'matheus@example.com' }),
+            clinics: signal([{ id: 'clinic-1', name: 'Clínica Teste', role: 'OWNER' }]),
+            logout: vi.fn(),
+          },
+        },
+      ],
+    }).compileComponents();
+  });
+
+  it('renderiza o painel mesmo quando matchMedia não está disponível', () => {
+    const original = globalThis.matchMedia;
+    Object.defineProperty(globalThis, 'matchMedia', { configurable: true, value: undefined });
+
+    try {
+      const fixture = TestBed.createComponent(AppShellComponent);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.textContent).toContain('Dashboard');
+      expect(fixture.nativeElement.textContent).toContain('Pacientes');
+    } finally {
+      Object.defineProperty(globalThis, 'matchMedia', { configurable: true, value: original });
+    }
+  });
+});

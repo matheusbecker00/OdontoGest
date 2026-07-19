@@ -183,7 +183,9 @@ const ICONS: Readonly<Record<string, LucideIconData>> = Object.fromEntries(
     svg {
       width: 100%;
       height: 100%;
-      stroke-width: 2;
+      display: block;
+      stroke-width: 1.8;
+      vector-effect: non-scaling-stroke;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

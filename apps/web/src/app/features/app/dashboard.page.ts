@@ -163,10 +163,14 @@ import { PatientsApiService } from '../patients/patients-api.service';
     .metric__icon {
       display: grid;
       flex: 0 0 auto;
-      width: 3rem;
-      height: 3rem;
+      width: 2.75rem;
+      height: 2.75rem;
       place-items: center;
-      border-radius: 0.9rem;
+      border-radius: 0.8rem;
+    }
+    .metric__icon og-icon {
+      width: 1.1rem;
+      height: 1.1rem;
     }
     .metric small,
     .metric strong,
@@ -243,12 +247,16 @@ import { PatientsApiService } from '../patients/patients-api.service';
     }
     .empty-state > span {
       display: grid;
-      width: 3.5rem;
-      height: 3.5rem;
+      width: 3.25rem;
+      height: 3.25rem;
       place-items: center;
       border-radius: 50%;
       color: #2563eb;
       background: #eef4ff;
+    }
+    .empty-state > span og-icon {
+      width: 1.25rem;
+      height: 1.25rem;
     }
     .empty-state strong {
       margin-top: 0.8rem;
@@ -292,6 +300,8 @@ import { PatientsApiService } from '../patients/patients-api.service';
       transform: translateY(-2px);
     }
     .quick-actions__grid og-icon {
+      width: 1.2rem;
+      height: 1.2rem;
       color: #2563eb;
     }
     .overview {
@@ -306,12 +316,16 @@ import { PatientsApiService } from '../patients/patients-api.service';
     }
     .clinic-icon {
       display: grid;
-      width: 2.5rem;
-      height: 2.5rem;
+      width: 2.35rem;
+      height: 2.35rem;
       place-items: center;
       border-radius: 0.75rem;
       color: #2563eb;
       background: #edf4ff;
+    }
+    .clinic-icon og-icon {
+      width: 1.1rem;
+      height: 1.1rem;
     }
     .clinic-row div {
       flex: 1;

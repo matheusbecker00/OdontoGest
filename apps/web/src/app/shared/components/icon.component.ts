@@ -15,7 +15,6 @@ import {
   LucideCircleQuestionMark,
   LucideClipboardClock,
   LucideCreditCard,
-  LucideDynamicIcon,
   LucideInfo,
   LucideKeyRound,
   LucideLayoutDashboard,
@@ -32,7 +31,7 @@ import {
   LucideUserPlus,
   LucideUsers,
   LucideWalletCards,
-  provideLucideIcons,
+  type LucideIconData,
 } from '@lucide/angular';
 
 const ICON_ALIASES: Readonly<Record<string, string>> = {
@@ -72,45 +71,105 @@ const ICON_ALIASES: Readonly<Record<string, string>> = {
   info: 'info',
 };
 
+const ICONS: Readonly<Record<string, LucideIconData>> = Object.fromEntries(
+  [
+    LucideArrowRight,
+    LucideBadge,
+    LucideBanknote,
+    LucideBell,
+    LucideBuilding2,
+    LucideCalendarCheck,
+    LucideCalendarDays,
+    LucideCalendarPlus,
+    LucideChartBar,
+    LucideChartNoAxesCombined,
+    LucideChevronLeft,
+    LucideChevronRight,
+    LucideCircleQuestionMark,
+    LucideClipboardClock,
+    LucideCreditCard,
+    LucideInfo,
+    LucideKeyRound,
+    LucideLayoutDashboard,
+    LucideLock,
+    LucideLogOut,
+    LucideMail,
+    LucideMailCheck,
+    LucideMenu,
+    LucidePackage,
+    LucidePlus,
+    LucideSettings,
+    LucideShieldCheck,
+    LucideStethoscope,
+    LucideUserPlus,
+    LucideUsers,
+    LucideWalletCards,
+  ].map((icon) => [icon.icon.name, icon.icon]),
+);
+
 @Component({
   selector: 'og-icon',
-  imports: [LucideDynamicIcon],
-  providers: [
-    provideLucideIcons(
-      LucideArrowRight,
-      LucideBadge,
-      LucideBanknote,
-      LucideBell,
-      LucideBuilding2,
-      LucideCalendarCheck,
-      LucideCalendarDays,
-      LucideCalendarPlus,
-      LucideChartBar,
-      LucideChartNoAxesCombined,
-      LucideChevronLeft,
-      LucideChevronRight,
-      LucideCircleQuestionMark,
-      LucideClipboardClock,
-      LucideCreditCard,
-      LucideInfo,
-      LucideKeyRound,
-      LucideLayoutDashboard,
-      LucideLock,
-      LucideLogOut,
-      LucideMail,
-      LucideMailCheck,
-      LucideMenu,
-      LucidePackage,
-      LucidePlus,
-      LucideSettings,
-      LucideShieldCheck,
-      LucideStethoscope,
-      LucideUserPlus,
-      LucideUsers,
-      LucideWalletCards,
-    ),
-  ],
-  template: '<svg [lucideIcon]="resolvedName()" aria-hidden="true"></svg>',
+  template: `
+    <svg
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      viewBox="0 0 24 24"
+    >
+      @for (child of icon().node; track child[1]['key'] ?? $index) {
+        @let tag = child[0];
+        @let attrs = child[1];
+        @switch (tag) {
+          @case ('path') {
+            <svg:path [attr.d]="attrs['d']" [attr.fill]="attrs['fill']" />
+          }
+          @case ('line') {
+            <svg:line
+              [attr.x1]="attrs['x1']"
+              [attr.x2]="attrs['x2']"
+              [attr.y1]="attrs['y1']"
+              [attr.y2]="attrs['y2']"
+            />
+          }
+          @case ('polygon') {
+            <svg:polygon [attr.points]="attrs['points']" />
+          }
+          @case ('polyline') {
+            <svg:polyline [attr.points]="attrs['points']" />
+          }
+          @case ('circle') {
+            <svg:circle
+              [attr.cx]="attrs['cx']"
+              [attr.cy]="attrs['cy']"
+              [attr.r]="attrs['r']"
+              [attr.fill]="attrs['fill']"
+            />
+          }
+          @case ('ellipse') {
+            <svg:ellipse
+              [attr.cx]="attrs['cx']"
+              [attr.cy]="attrs['cy']"
+              [attr.rx]="attrs['rx']"
+              [attr.ry]="attrs['ry']"
+            />
+          }
+          @case ('rect') {
+            <svg:rect
+              [attr.x]="attrs['x']"
+              [attr.y]="attrs['y']"
+              [attr.width]="attrs['width']"
+              [attr.height]="attrs['height']"
+              [attr.rx]="attrs['rx']"
+              [attr.ry]="attrs['ry']"
+              [attr.fill]="attrs['fill']"
+            />
+          }
+        }
+      }
+    </svg>
+  `,
   styles: `
     :host {
       display: inline-flex;
@@ -131,5 +190,8 @@ const ICON_ALIASES: Readonly<Record<string, string>> = {
 })
 export class IconComponent {
   readonly name = input.required<string>();
-  protected readonly resolvedName = computed(() => ICON_ALIASES[this.name()] ?? this.name());
+  protected readonly icon = computed(() => {
+    const resolvedName = ICON_ALIASES[this.name()] ?? this.name();
+    return ICONS[resolvedName] ?? LucideCircleQuestionMark.icon;
+  });
 }

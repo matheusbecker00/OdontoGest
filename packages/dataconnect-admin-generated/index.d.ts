@@ -65,6 +65,11 @@ export interface CreatePatientVariables {
   userAgentSummary?: string | null;
 }
 
+export interface Dentist_Key {
+  id: UUIDString;
+  __typename?: 'Dentist_Key';
+}
+
 export interface GetPatientData {
   patients: ({
     id: UUIDString;
@@ -227,6 +232,11 @@ export interface Patient_Key {
 export interface Permission_Key {
   id: UUIDString;
   __typename?: 'Permission_Key';
+}
+
+export interface Procedure_Key {
+  id: UUIDString;
+  __typename?: 'Procedure_Key';
 }
 
 export interface RolePermission_Key {

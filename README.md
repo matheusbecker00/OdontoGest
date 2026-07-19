@@ -11,11 +11,11 @@ web, API versionada, autenticação, sessões rotativas, RBAC, isolamento por RL
 auditoria inicial, schema SQL Connect, infraestrutura local, contrato OpenAPI e
 CI de segurança.
 
-O primeiro bloco funcional da Fase 2 entrega pacientes de ponta a ponta: cadastro,
-consulta, busca, paginação, edição e inativação, com CPF validado e mascarado
-nas respostas, tela responsiva, permissões, auditoria transacional e isolamento
-por clínica. O modelo e as operações equivalentes também estão definidos no SQL
-Connect.
+Os cadastros centrais da Fase 2 entregam pacientes, profissionais e procedimentos
+de ponta a ponta: consulta, busca, filtros, criação, edição e inativação. As
+operações usam Firebase SQL Connect, validam a clínica ativa no servidor e
+registram auditoria na mesma transação. CPF é mascarado nas respostas; CRO é
+único por clínica/UF e valores de procedimentos são persistidos em centavos.
 
 A identidade de login já é validada pelo Firebase Authentication e trocada por
 uma sessão OdontoGest vinculada ao usuário, à clínica e às permissões da API. A
@@ -30,8 +30,9 @@ O sistema **não está pronto para produção** e não faz afirmação de
 conformidade com a LGPD. A fundação do onboarding foi antecipada para permitir
 criar uma conta de teste: identidade Firebase, clínica, membership `OWNER`,
 configurações, aceites versionados e auditoria nascem em uma transação. CNPJ e
-telefone da clínica, trial comercial, demais cadastros e app shell continuam na
-Fase 2.
+telefone da clínica, trial comercial, convites, sessões visíveis e exportação
+autorizada continuam pendentes na Fase 2. O app shell responsivo já está
+implantado.
 
 Documentação principal:
 
@@ -40,6 +41,7 @@ Documentação principal:
 - [Segurança da fundação](docs/seguranca-fase-1.md)
 - [Firebase Spark e Vercel Hobby](docs/deploy-firebase-vercel.md)
 - [Validação da Fase 1](docs/validacao-fase-1.md)
+- [Validação dos cadastros da Fase 2](docs/validacao-fase-2-cadastros.md)
 - [Arquitetura](docs/arquitetura.md) e [modelo de dados](docs/modelo-de-dados.md)
 - [Modelo de ameaças](docs/modelo-de-ameacas.md)
 - [Matriz de permissões](docs/matriz-de-permissoes.md)

@@ -1,0 +1,134 @@
+<main>
+  <header class="page-heading">
+    <div>
+      <span class="eyebrow">CATÁLOGO</span>
+      <h2>Procedimentos</h2>
+      <p>Configure serviços, valores e duração padrão.</p>
+    </div>
+    <button mat-flat-button type="button" (click)="startCreate()">
+      <mat-icon>add</mat-icon>Novo procedimento
+    </button>
+  </header>
+  <section class="card toolbar">
+    <mat-form-field appearance="outline"
+      ><mat-label>Buscar nome ou categoria</mat-label
+      ><input
+        matInput
+        [value]="search()"
+        (input)="search.set($any($event.target).value)" /></mat-form-field
+    ><mat-form-field appearance="outline"
+      ><mat-label>Situação</mat-label
+      ><mat-select [value]="status()" (valueChange)="status.set($event)"
+        ><mat-option value="">Todos</mat-option><mat-option value="ACTIVE">Ativos</mat-option
+        ><mat-option value="INACTIVE">Inativos</mat-option></mat-select
+      ></mat-form-field
+    >
+  </section>
+  @if (formOpen()) {
+    <section class="card form-card">
+      <h3>{{ editing() ? 'Editar procedimento' : 'Novo procedimento' }}</h3>
+      <form class="entity-form" [formGroup]="form" (ngSubmit)="save()">
+        <mat-form-field appearance="outline"
+          ><mat-label>Nome</mat-label><input matInput formControlName="name" /><mat-error
+            >Informe o nome.</mat-error
+          ></mat-form-field
+        >
+        <mat-form-field appearance="outline"
+          ><mat-label>Categoria</mat-label><input matInput formControlName="category" /><mat-error
+            >Informe a categoria.</mat-error
+          ></mat-form-field
+        >
+        <mat-form-field appearance="outline"
+          ><mat-label>Valor padrão</mat-label><span matTextPrefix>R$&nbsp;</span
+          ><input
+            matInput
+            type="number"
+            min="0"
+            step="0.01"
+            formControlName="priceReais"
+          /><mat-error>Informe um valor válido.</mat-error></mat-form-field
+        >
+        <mat-form-field appearance="outline"
+          ><mat-label>Duração</mat-label
+          ><mat-select formControlName="durationMinutes"
+            ><mat-option [value]="15">15 minutos</mat-option
+            ><mat-option [value]="30">30 minutos</mat-option
+            ><mat-option [value]="45">45 minutos</mat-option
+            ><mat-option [value]="60">60 minutos</mat-option
+            ><mat-option [value]="90">90 minutos</mat-option
+            ><mat-option [value]="120">120 minutos</mat-option></mat-select
+          ></mat-form-field
+        >
+        <mat-form-field appearance="outline" class="wide"
+          ><mat-label>Descrição</mat-label
+          ><textarea matInput rows="3" formControlName="description"></textarea>
+        </mat-form-field>
+        <div class="form-actions wide">
+          <button mat-button type="button" (click)="cancel()">Cancelar</button
+          ><button mat-flat-button type="submit" [disabled]="saving()">
+            {{ saving() ? 'Salvando…' : 'Salvar procedimento' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+  <section class="card">
+    @if (loading()) {
+      <div class="state"><mat-spinner diameter="34" /><span>Carregando procedimentos…</span></div>
+    } @else if (filtered().length === 0) {
+      <div class="state">
+        <mat-icon>dentistry</mat-icon><strong>Nenhum procedimento encontrado</strong
+        ><span>Cadastre o primeiro serviço da clínica.</span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Procedimento</th>
+              <th>Categoria</th>
+              <th>Valor padrão</th>
+              <th>Duração</th>
+              <th>Situação</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of filtered(); track item.id) {
+              <tr>
+                <td>
+                  <strong>{{ item.name }}</strong
+                  ><small>{{ item.description || 'Sem descrição' }}</small>
+                </td>
+                <td>{{ item.category }}</td>
+                <td>
+                  <strong>{{ money(item.defaultPriceCents) }}</strong>
+                </td>
+                <td>{{ item.durationMinutes }} min</td>
+                <td>
+                  <span class="status" [class.inactive]="item.status === 'INACTIVE'">{{
+                    item.status === 'ACTIVE' ? 'Ativo' : 'Inativo'
+                  }}</span>
+                </td>
+                <td class="actions">
+                  <button mat-button type="button" (click)="startEdit(item)">Editar</button
+                  ><button
+                    mat-button
+                    type="button"
+                    [disabled]="item.status === 'INACTIVE' || saving()"
+                    (click)="inactivate(item)"
+                  >
+                    Inativar
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</main>

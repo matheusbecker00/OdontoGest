@@ -45,6 +45,16 @@ enum PatientRegistrationStatus {
   INACTIVE
 }
 
+enum DentistStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ProcedureStatus {
+  ACTIVE
+  INACTIVE
+}
+
 # O identificador principal é o UID imutável emitido pelo Firebase Authentication.
 type User
   @table(key: "id")
@@ -116,6 +126,56 @@ type Patient
   addressLine: String @col(dataType: "varchar(500)")
   administrativeNotes: String @col(dataType: "varchar(1000)")
   registrationStatus: PatientRegistrationStatus! @default(value: ACTIVE)
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+  createdBy: String! @col(dataType: "varchar(128)")
+  updatedBy: String! @col(dataType: "varchar(128)")
+  deletedAt: Timestamp
+}
+
+type Dentist
+  @table
+  @unique(
+    fields: ["clinicId", "croState", "cro"]
+    indexName: "dentist_clinic_cro_key"
+  )
+  @index(
+    fields: ["clinicId", "status", "name", "id"]
+    name: "dentist_clinic_status_name_idx"
+  ) {
+  clinicId: UUID!
+  clinic: Clinic! @ref(fields: ["clinicId"])
+  name: String! @col(dataType: "varchar(180)")
+  cro: String! @col(dataType: "varchar(20)")
+  croState: String! @col(dataType: "char(2)")
+  specialty: String! @col(dataType: "varchar(120)")
+  phone: String @col(dataType: "varchar(20)")
+  email: String @col(dataType: "varchar(320)")
+  calendarColor: String! @col(dataType: "char(7)") @default(value: "#2563EB")
+  defaultAppointmentMinutes: Int! @default(value: 30)
+  status: DentistStatus! @default(value: ACTIVE)
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+  createdBy: String! @col(dataType: "varchar(128)")
+  updatedBy: String! @col(dataType: "varchar(128)")
+  deletedAt: Timestamp
+}
+
+type Procedure
+  @table
+  @unique(fields: ["clinicId", "name"], indexName: "procedure_clinic_name_key")
+  @index(
+    fields: ["clinicId", "status", "category", "name", "id"]
+    name: "procedure_clinic_status_category_idx"
+  ) {
+  clinicId: UUID!
+  clinic: Clinic! @ref(fields: ["clinicId"])
+  name: String! @col(dataType: "varchar(180)")
+  category: String! @col(dataType: "varchar(100)")
+  description: String @col(dataType: "varchar(1000)")
+  defaultPriceCents: Int!
+  durationMinutes: Int!
+  status: ProcedureStatus! @default(value: ACTIVE)
   createdAt: Timestamp! @default(expr: "request.time")
   updatedAt: Timestamp! @default(expr: "request.time")
   createdBy: String! @col(dataType: "varchar(128)")

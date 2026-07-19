@@ -268,3 +268,403 @@ mutation InactivateMyPatient(
     }
   )
 }
+
+mutation CreateMyDentist(
+  $id: UUID!
+  $clinicId: UUID!
+  $name: String!
+  $cro: String!
+  $croState: String!
+  $specialty: String!
+  $phone: String
+  $email: String
+  $calendarColor: String!
+  $defaultAppointmentMinutes: Int!
+  $auditId: UUID!
+  $requestId: String!
+)
+@auth(
+  expr: "auth.uid != '' && vars.defaultAppointmentMinutes >= 10 && vars.defaultAppointmentMinutes <= 480"
+)
+@transaction {
+  query
+    @check(
+      expr: "response.query.clinicMemberships.size() == 1"
+      message: "Active clinic membership required"
+    )
+    @redact {
+    clinicMemberships(
+      where: {
+        clinicId: { eq: $clinicId }
+        userId: { eq_expr: "auth.uid" }
+        status: { eq: ACTIVE }
+        deletedAt: { eq: null }
+      }
+      limit: 1
+    ) {
+      id
+      role {
+        code
+          @check(
+            expr: "this == 'OWNER' || this == 'ADMIN'"
+            message: "Insufficient permission"
+          )
+      }
+    }
+  }
+  dentist_insert(
+    data: {
+      id: $id
+      clinicId: $clinicId
+      name: $name
+      cro: $cro
+      croState: $croState
+      specialty: $specialty
+      phone: $phone
+      email: $email
+      calendarColor: $calendarColor
+      defaultAppointmentMinutes: $defaultAppointmentMinutes
+      createdBy_expr: "auth.uid"
+      updatedBy_expr: "auth.uid"
+    }
+  )
+  auditLog_insert(
+    data: {
+      id: $auditId
+      clinicId: $clinicId
+      actorUserId_expr: "auth.uid"
+      action: "DENTIST_CREATED"
+      entityType: "Dentist"
+      entityId: $id
+      outcome: SUCCESS
+      requestId: $requestId
+    }
+  )
+}
+
+mutation UpdateMyDentist(
+  $id: UUID!
+  $clinicId: UUID!
+  $name: String!
+  $cro: String!
+  $croState: String!
+  $specialty: String!
+  $phone: String
+  $email: String
+  $calendarColor: String!
+  $defaultAppointmentMinutes: Int!
+  $auditId: UUID!
+  $requestId: String!
+)
+@auth(
+  expr: "auth.uid != '' && vars.defaultAppointmentMinutes >= 10 && vars.defaultAppointmentMinutes <= 480"
+)
+@transaction {
+  query
+    @check(
+      expr: "response.query.clinicMemberships.size() == 1"
+      message: "Active clinic membership required"
+    )
+    @redact {
+    clinicMemberships(
+      where: {
+        clinicId: { eq: $clinicId }
+        userId: { eq_expr: "auth.uid" }
+        status: { eq: ACTIVE }
+        deletedAt: { eq: null }
+      }
+      limit: 1
+    ) {
+      id
+      role {
+        code
+          @check(
+            expr: "this == 'OWNER' || this == 'ADMIN'"
+            message: "Insufficient permission"
+          )
+      }
+    }
+  }
+  dentist_updateMany(
+    where: {
+      id: { eq: $id }
+      clinicId: { eq: $clinicId }
+      deletedAt: { eq: null }
+    }
+    data: {
+      name: $name
+      cro: $cro
+      croState: $croState
+      specialty: $specialty
+      phone: $phone
+      email: $email
+      calendarColor: $calendarColor
+      defaultAppointmentMinutes: $defaultAppointmentMinutes
+      updatedBy_expr: "auth.uid"
+      updatedAt_expr: "request.time"
+    }
+  ) @check(expr: "this == 1", message: "Dentist not found")
+  auditLog_insert(
+    data: {
+      id: $auditId
+      clinicId: $clinicId
+      actorUserId_expr: "auth.uid"
+      action: "DENTIST_UPDATED"
+      entityType: "Dentist"
+      entityId: $id
+      outcome: SUCCESS
+      requestId: $requestId
+    }
+  )
+}
+
+mutation InactivateMyDentist(
+  $id: UUID!
+  $clinicId: UUID!
+  $auditId: UUID!
+  $requestId: String!
+) @auth(level: USER) @transaction {
+  query
+    @check(
+      expr: "response.query.clinicMemberships.size() == 1"
+      message: "Active clinic membership required"
+    )
+    @redact {
+    clinicMemberships(
+      where: {
+        clinicId: { eq: $clinicId }
+        userId: { eq_expr: "auth.uid" }
+        status: { eq: ACTIVE }
+        deletedAt: { eq: null }
+      }
+      limit: 1
+    ) {
+      id
+      role {
+        code
+          @check(
+            expr: "this == 'OWNER' || this == 'ADMIN'"
+            message: "Insufficient permission"
+          )
+      }
+    }
+  }
+  dentist_updateMany(
+    where: {
+      id: { eq: $id }
+      clinicId: { eq: $clinicId }
+      deletedAt: { eq: null }
+    }
+    data: {
+      status: INACTIVE
+      updatedBy_expr: "auth.uid"
+      updatedAt_expr: "request.time"
+    }
+  ) @check(expr: "this == 1", message: "Dentist not found")
+  auditLog_insert(
+    data: {
+      id: $auditId
+      clinicId: $clinicId
+      actorUserId_expr: "auth.uid"
+      action: "DENTIST_INACTIVATED"
+      entityType: "Dentist"
+      entityId: $id
+      outcome: SUCCESS
+      requestId: $requestId
+    }
+  )
+}
+
+mutation CreateMyProcedure(
+  $id: UUID!
+  $clinicId: UUID!
+  $name: String!
+  $category: String!
+  $description: String
+  $defaultPriceCents: Int!
+  $durationMinutes: Int!
+  $auditId: UUID!
+  $requestId: String!
+)
+@auth(
+  expr: "auth.uid != '' && vars.defaultPriceCents >= 0 && vars.durationMinutes >= 5 && vars.durationMinutes <= 480"
+)
+@transaction {
+  query
+    @check(
+      expr: "response.query.clinicMemberships.size() == 1"
+      message: "Active clinic membership required"
+    )
+    @redact {
+    clinicMemberships(
+      where: {
+        clinicId: { eq: $clinicId }
+        userId: { eq_expr: "auth.uid" }
+        status: { eq: ACTIVE }
+        deletedAt: { eq: null }
+      }
+      limit: 1
+    ) {
+      id
+      role {
+        code
+          @check(
+            expr: "this == 'OWNER' || this == 'ADMIN'"
+            message: "Insufficient permission"
+          )
+      }
+    }
+  }
+  procedure_insert(
+    data: {
+      id: $id
+      clinicId: $clinicId
+      name: $name
+      category: $category
+      description: $description
+      defaultPriceCents: $defaultPriceCents
+      durationMinutes: $durationMinutes
+      createdBy_expr: "auth.uid"
+      updatedBy_expr: "auth.uid"
+    }
+  )
+  auditLog_insert(
+    data: {
+      id: $auditId
+      clinicId: $clinicId
+      actorUserId_expr: "auth.uid"
+      action: "PROCEDURE_CREATED"
+      entityType: "Procedure"
+      entityId: $id
+      outcome: SUCCESS
+      requestId: $requestId
+    }
+  )
+}
+
+mutation UpdateMyProcedure(
+  $id: UUID!
+  $clinicId: UUID!
+  $name: String!
+  $category: String!
+  $description: String
+  $defaultPriceCents: Int!
+  $durationMinutes: Int!
+  $auditId: UUID!
+  $requestId: String!
+)
+@auth(
+  expr: "auth.uid != '' && vars.defaultPriceCents >= 0 && vars.durationMinutes >= 5 && vars.durationMinutes <= 480"
+)
+@transaction {
+  query
+    @check(
+      expr: "response.query.clinicMemberships.size() == 1"
+      message: "Active clinic membership required"
+    )
+    @redact {
+    clinicMemberships(
+      where: {
+        clinicId: { eq: $clinicId }
+        userId: { eq_expr: "auth.uid" }
+        status: { eq: ACTIVE }
+        deletedAt: { eq: null }
+      }
+      limit: 1
+    ) {
+      id
+      role {
+        code
+          @check(
+            expr: "this == 'OWNER' || this == 'ADMIN'"
+            message: "Insufficient permission"
+          )
+      }
+    }
+  }
+  procedure_updateMany(
+    where: {
+      id: { eq: $id }
+      clinicId: { eq: $clinicId }
+      deletedAt: { eq: null }
+    }
+    data: {
+      name: $name
+      category: $category
+      description: $description
+      defaultPriceCents: $defaultPriceCents
+      durationMinutes: $durationMinutes
+      updatedBy_expr: "auth.uid"
+      updatedAt_expr: "request.time"
+    }
+  ) @check(expr: "this == 1", message: "Procedure not found")
+  auditLog_insert(
+    data: {
+      id: $auditId
+      clinicId: $clinicId
+      actorUserId_expr: "auth.uid"
+      action: "PROCEDURE_UPDATED"
+      entityType: "Procedure"
+      entityId: $id
+      outcome: SUCCESS
+      requestId: $requestId
+    }
+  )
+}
+
+mutation InactivateMyProcedure(
+  $id: UUID!
+  $clinicId: UUID!
+  $auditId: UUID!
+  $requestId: String!
+) @auth(level: USER) @transaction {
+  query
+    @check(
+      expr: "response.query.clinicMemberships.size() == 1"
+      message: "Active clinic membership required"
+    )
+    @redact {
+    clinicMemberships(
+      where: {
+        clinicId: { eq: $clinicId }
+        userId: { eq_expr: "auth.uid" }
+        status: { eq: ACTIVE }
+        deletedAt: { eq: null }
+      }
+      limit: 1
+    ) {
+      id
+      role {
+        code
+          @check(
+            expr: "this == 'OWNER' || this == 'ADMIN'"
+            message: "Insufficient permission"
+          )
+      }
+    }
+  }
+  procedure_updateMany(
+    where: {
+      id: { eq: $id }
+      clinicId: { eq: $clinicId }
+      deletedAt: { eq: null }
+    }
+    data: {
+      status: INACTIVE
+      updatedBy_expr: "auth.uid"
+      updatedAt_expr: "request.time"
+    }
+  ) @check(expr: "this == 1", message: "Procedure not found")
+  auditLog_insert(
+    data: {
+      id: $auditId
+      clinicId: $clinicId
+      actorUserId_expr: "auth.uid"
+      action: "PROCEDURE_INACTIVATED"
+      entityType: "Procedure"
+      entityId: $id
+      outcome: SUCCESS
+      requestId: $requestId
+    }
+  )
+}

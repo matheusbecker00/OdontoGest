@@ -8,6 +8,14 @@ const OWNER_PERMISSIONS = [
   'patient.create',
   'patient.update',
   'patient.inactivate',
+  'dentist.read',
+  'dentist.create',
+  'dentist.update',
+  'dentist.inactivate',
+  'procedure.read',
+  'procedure.create',
+  'procedure.update',
+  'procedure.inactivate',
 ] as const;
 
 @Injectable({ providedIn: 'root' })

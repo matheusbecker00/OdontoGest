@@ -54,6 +54,7 @@ export class AppShellComponent implements OnDestroy {
     { label: 'Agenda', icon: 'calendar_month', route: '/app/agenda' },
     { label: 'Pacientes', icon: 'groups', route: '/app/pacientes' },
     { label: 'Profissionais', icon: 'medical_services', route: '/app/profissionais' },
+    { label: 'Procedimentos', icon: 'dentistry', route: '/app/procedimentos' },
     { label: 'Financeiro', icon: 'account_balance_wallet', route: '/app/financeiro' },
     { label: 'Estoque', icon: 'inventory_2', route: '/app/estoque' },
     { label: 'Relatórios', icon: 'monitoring', route: '/app/relatorios' },

@@ -14,7 +14,7 @@ If a user is not using a supported framework, they can use the generated SDK dir
 Here's an example of how to use it with the first 5 operations:
 
 ```js
-import { createOwnerClinic, createMyPatient, updateMyPatient, inactivateMyPatient, getMyContext, listMyPatients } from '@odontogest/dataconnect-client';
+import { createOwnerClinic, createMyPatient, updateMyPatient, inactivateMyPatient, createMyDentist, updateMyDentist, inactivateMyDentist, createMyProcedure, updateMyProcedure, inactivateMyProcedure } from '@odontogest/dataconnect-client';
 
 
 // Operation CreateOwnerClinic:  For variables, look at type CreateOwnerClinicVars in ../index.d.ts
@@ -29,11 +29,23 @@ const { data } = await UpdateMyPatient(dataConnect, updateMyPatientVars);
 // Operation InactivateMyPatient:  For variables, look at type InactivateMyPatientVars in ../index.d.ts
 const { data } = await InactivateMyPatient(dataConnect, inactivateMyPatientVars);
 
-// Operation GetMyContext: 
-const { data } = await GetMyContext(dataConnect);
+// Operation CreateMyDentist:  For variables, look at type CreateMyDentistVars in ../index.d.ts
+const { data } = await CreateMyDentist(dataConnect, createMyDentistVars);
 
-// Operation ListMyPatients:  For variables, look at type ListMyPatientsVars in ../index.d.ts
-const { data } = await ListMyPatients(dataConnect, listMyPatientsVars);
+// Operation UpdateMyDentist:  For variables, look at type UpdateMyDentistVars in ../index.d.ts
+const { data } = await UpdateMyDentist(dataConnect, updateMyDentistVars);
+
+// Operation InactivateMyDentist:  For variables, look at type InactivateMyDentistVars in ../index.d.ts
+const { data } = await InactivateMyDentist(dataConnect, inactivateMyDentistVars);
+
+// Operation CreateMyProcedure:  For variables, look at type CreateMyProcedureVars in ../index.d.ts
+const { data } = await CreateMyProcedure(dataConnect, createMyProcedureVars);
+
+// Operation UpdateMyProcedure:  For variables, look at type UpdateMyProcedureVars in ../index.d.ts
+const { data } = await UpdateMyProcedure(dataConnect, updateMyProcedureVars);
+
+// Operation InactivateMyProcedure:  For variables, look at type InactivateMyProcedureVars in ../index.d.ts
+const { data } = await InactivateMyProcedure(dataConnect, inactivateMyProcedureVars);
 
 
 ```

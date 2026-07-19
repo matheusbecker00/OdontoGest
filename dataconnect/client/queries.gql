@@ -62,3 +62,66 @@ query ListMyPatients($clinicId: UUID!, $limit: Int = 500) @auth(level: USER) {
     }
   }
 }
+
+query ListMyDentists($clinicId: UUID!, $limit: Int = 500) @auth(level: USER) {
+  clinicMemberships(
+    where: {
+      clinicId: { eq: $clinicId }
+      userId: { eq_expr: "auth.uid" }
+      status: { eq: ACTIVE }
+      deletedAt: { eq: null }
+    }
+    limit: 1
+  ) {
+    clinic {
+      dentists_on_clinic(
+        where: { deletedAt: { eq: null } }
+        orderBy: [{ name: ASC }, { id: ASC }]
+        limit: $limit
+      ) {
+        id
+        name
+        cro
+        croState
+        specialty
+        phone
+        email
+        calendarColor
+        defaultAppointmentMinutes
+        status
+        createdAt
+        updatedAt
+      }
+    }
+  }
+}
+
+query ListMyProcedures($clinicId: UUID!, $limit: Int = 500) @auth(level: USER) {
+  clinicMemberships(
+    where: {
+      clinicId: { eq: $clinicId }
+      userId: { eq_expr: "auth.uid" }
+      status: { eq: ACTIVE }
+      deletedAt: { eq: null }
+    }
+    limit: 1
+  ) {
+    clinic {
+      procedures_on_clinic(
+        where: { deletedAt: { eq: null } }
+        orderBy: [{ category: ASC }, { name: ASC }, { id: ASC }]
+        limit: $limit
+      ) {
+        id
+        name
+        category
+        description
+        defaultPriceCents
+        durationMinutes
+        status
+        createdAt
+        updatedAt
+      }
+    }
+  }
+}

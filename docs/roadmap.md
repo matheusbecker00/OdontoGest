@@ -76,6 +76,10 @@ e iniciada pelo cadastro seguro de pacientes.
 
 ## Fase 2 — Clínica e cadastros
 
+Status em 19 de julho de 2026: em andamento. App shell, pacientes, profissionais
+e procedimentos estão implementados no Firebase SQL Connect e na aplicação web.
+Administração, exportação e o gate E2E completo permanecem pendentes.
+
 ### 2.1 Onboarding transacional
 
 - `/cadastro`, verificação, trial e aceite versionado.

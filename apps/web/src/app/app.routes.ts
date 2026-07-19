@@ -66,13 +66,21 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/patients/patients.page').then((module) => module.PatientsPage),
       },
+      {
+        path: 'profissionais',
+        data: { title: 'Profissionais' },
+        canActivate: [permissionGuard(['dentist.read'])],
+        loadComponent: () =>
+          import('./features/dentists/dentists.page').then((module) => module.DentistsPage),
+      },
+      {
+        path: 'procedimentos',
+        data: { title: 'Procedimentos' },
+        canActivate: [permissionGuard(['procedure.read'])],
+        loadComponent: () =>
+          import('./features/procedures/procedures.page').then((module) => module.ProceduresPage),
+      },
       ...[
-        {
-          path: 'profissionais',
-          title: 'Profissionais',
-          description: 'Equipe clínica, especialidades e disponibilidade.',
-          icon: 'medical_services',
-        },
         {
           path: 'financeiro',
           title: 'Financeiro',

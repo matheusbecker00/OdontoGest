@@ -1,0 +1,148 @@
+<main>
+  <header class="page-heading">
+    <div>
+      <span class="eyebrow">EQUIPE CLÍNICA</span>
+      <h2>Profissionais</h2>
+      <p>Gerencie dentistas, especialidades e dados da agenda.</p>
+    </div>
+    <button mat-flat-button type="button" (click)="startCreate()">
+      <mat-icon>add</mat-icon>Novo profissional
+    </button>
+  </header>
+
+  <section class="card toolbar">
+    <mat-form-field appearance="outline"
+      ><mat-label>Buscar profissional, CRO ou especialidade</mat-label
+      ><input matInput [value]="search()" (input)="search.set($any($event.target).value)"
+    /></mat-form-field>
+    <mat-form-field appearance="outline"
+      ><mat-label>Situação</mat-label
+      ><mat-select [value]="status()" (valueChange)="status.set($event)"
+        ><mat-option value="">Todos</mat-option><mat-option value="ACTIVE">Ativos</mat-option
+        ><mat-option value="INACTIVE">Inativos</mat-option></mat-select
+      ></mat-form-field
+    >
+  </section>
+
+  @if (formOpen()) {
+    <section class="card form-card">
+      <h3>{{ editing() ? 'Editar profissional' : 'Novo profissional' }}</h3>
+      <form class="entity-form" [formGroup]="form" (ngSubmit)="save()">
+        <mat-form-field appearance="outline" class="wide"
+          ><mat-label>Nome completo</mat-label><input matInput formControlName="name" /><mat-error
+            >Informe o nome.</mat-error
+          ></mat-form-field
+        >
+        <mat-form-field appearance="outline"
+          ><mat-label>CRO</mat-label><input matInput formControlName="cro" /><mat-error
+            >Informe o CRO.</mat-error
+          ></mat-form-field
+        >
+        <mat-form-field appearance="outline"
+          ><mat-label>UF do CRO</mat-label
+          ><mat-select formControlName="croState">
+            @for (state of states; track state) {
+              <mat-option [value]="state">{{ state }}</mat-option>
+            }
+          </mat-select></mat-form-field
+        >
+        <mat-form-field appearance="outline" class="wide"
+          ><mat-label>Especialidade</mat-label
+          ><input matInput formControlName="specialty" /><mat-error
+            >Informe a especialidade.</mat-error
+          ></mat-form-field
+        >
+        <mat-form-field appearance="outline"
+          ><mat-label>Telefone</mat-label><input matInput formControlName="phone"
+        /></mat-form-field>
+        <mat-form-field appearance="outline"
+          ><mat-label>E-mail</mat-label
+          ><input matInput type="email" formControlName="email" /><mat-error
+            >Informe um e-mail válido.</mat-error
+          ></mat-form-field
+        >
+        <div class="color-field">
+          <input
+            type="color"
+            formControlName="calendarColor"
+            aria-label="Cor da agenda"
+          /><mat-form-field appearance="outline"
+            ><mat-label>Duração padrão</mat-label
+            ><mat-select formControlName="defaultAppointmentMinutes"
+              ><mat-option [value]="15">15 minutos</mat-option
+              ><mat-option [value]="30">30 minutos</mat-option
+              ><mat-option [value]="45">45 minutos</mat-option
+              ><mat-option [value]="60">60 minutos</mat-option
+              ><mat-option [value]="90">90 minutos</mat-option></mat-select
+            ></mat-form-field
+          >
+        </div>
+        <div class="form-actions wide">
+          <button mat-button type="button" (click)="cancel()">Cancelar</button
+          ><button mat-flat-button type="submit" [disabled]="saving()">
+            {{ saving() ? 'Salvando…' : 'Salvar profissional' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+  <section class="card">
+    @if (loading()) {
+      <div class="state"><mat-spinner diameter="34" /><span>Carregando profissionais…</span></div>
+    } @else if (filtered().length === 0) {
+      <div class="state">
+        <mat-icon>medical_services</mat-icon><strong>Nenhum profissional encontrado</strong
+        ><span>Cadastre o primeiro dentista da clínica.</span>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Profissional</th>
+              <th>CRO</th>
+              <th>Agenda</th>
+              <th>Contato</th>
+              <th>Situação</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of filtered(); track item.id) {
+              <tr>
+                <td>
+                  <strong
+                    ><i class="color-dot" [style.background]="item.calendarColor"></i
+                    >{{ item.name }}</strong
+                  ><small>{{ item.specialty }}</small>
+                </td>
+                <td>{{ item.croState }} · {{ item.cro }}</td>
+                <td>{{ item.defaultAppointmentMinutes }} min</td>
+                <td>{{ item.phone || item.email || '—' }}</td>
+                <td>
+                  <span class="status" [class.inactive]="item.status === 'INACTIVE'">{{
+                    item.status === 'ACTIVE' ? 'Ativo' : 'Inativo'
+                  }}</span>
+                </td>
+                <td class="actions">
+                  <button mat-button type="button" (click)="startEdit(item)">Editar</button
+                  ><button
+                    mat-button
+                    type="button"
+                    [disabled]="item.status === 'INACTIVE' || saving()"
+                    (click)="inactivate(item)"
+                  >
+                    Inativar
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</main>

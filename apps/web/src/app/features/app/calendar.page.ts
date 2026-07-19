@@ -1,8 +1,20 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthStore } from '../../core/auth/auth.store';
 import { IconComponent } from '../../shared/components/icon.component';
+import {
+  AppointmentsRepository,
+  type Appointment,
+  type AppointmentStatus,
+} from './appointments.repository';
 
 interface CalendarDay {
   readonly date: number;
@@ -11,23 +23,6 @@ interface CalendarDay {
   readonly selected: boolean;
   readonly today: boolean;
   readonly appointmentCount: number;
-}
-
-type AppointmentStatus = 'SCHEDULED' | 'CONFIRMED' | 'COMPLETED' | 'CANCELED';
-
-interface Appointment {
-  readonly id: string;
-  readonly clinicId: string;
-  readonly date: string;
-  readonly startTime: string;
-  readonly durationMinutes: number;
-  readonly patientName: string;
-  readonly dentistName: string;
-  readonly procedureName: string;
-  readonly status: AppointmentStatus;
-  readonly notes: string | null;
-  readonly createdAt: string;
-  readonly updatedAt: string;
 }
 
 const STORAGE_PREFIX = 'odontogest.appointments';
@@ -42,6 +37,10 @@ const STORAGE_PREFIX = 'odontogest.appointments';
           <span class="eyebrow">ATENDIMENTOS</span>
           <h2>Agenda da clínica</h2>
           <p>Crie, acompanhe e organize os atendimentos do dia.</p>
+          <span class="sync-pill" [class.sync-pill--local]="syncState() === 'local'">
+            <og-icon [name]="syncState() === 'online' ? 'verified_user' : 'inventory_2'" />
+            {{ syncLabel() }}
+          </span>
         </div>
         <button mat-flat-button type="button" (click)="startNewAppointment()">
           <og-icon name="add" />Novo agendamento
@@ -248,6 +247,29 @@ const STORAGE_PREFIX = 'odontogest.appointments';
       margin: 0;
       color: #718198;
       font-size: 0.82rem;
+    }
+    .sync-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      width: fit-content;
+      margin-top: 0.65rem;
+      border: 1px solid #b9f0d3;
+      border-radius: 99px;
+      padding: 0.35rem 0.6rem;
+      color: #047857;
+      background: #ecfdf5;
+      font-size: 0.68rem;
+      font-weight: 800;
+    }
+    .sync-pill--local {
+      border-color: #fed7aa;
+      color: #b45309;
+      background: #fff7ed;
+    }
+    .sync-pill og-icon {
+      width: 0.95rem;
+      height: 0.95rem;
     }
     .page-heading button {
       border-radius: 0.75rem;
@@ -590,6 +612,7 @@ const STORAGE_PREFIX = 'odontogest.appointments';
 export class CalendarPage {
   private readonly formBuilder = inject(FormBuilder);
   private readonly auth = inject(AuthStore);
+  private readonly appointmentsRepository = inject(AppointmentsRepository);
   private readonly viewDate = signal(this.firstOfMonth(new Date()));
   private readonly selectedDate = signal(new Date());
   private readonly appointments = signal<readonly Appointment[]>(this.readStoredAppointments());
@@ -597,6 +620,12 @@ export class CalendarPage {
   protected readonly weekdays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
   protected readonly editingId = signal<string | null>(null);
   protected readonly formError = signal<string | null>(null);
+  protected readonly syncState = signal<'connecting' | 'online' | 'local'>('connecting');
+  protected readonly syncLabel = computed(() => {
+    if (this.syncState() === 'online') return 'Sincronizado no Firebase';
+    if (this.syncState() === 'connecting') return 'Conectando ao Firebase';
+    return 'Modo local temporário';
+  });
   protected readonly form = this.formBuilder.nonNullable.group({
     patientName: ['', [Validators.required, Validators.maxLength(180)]],
     dentistName: ['', [Validators.required, Validators.maxLength(160)]],
@@ -647,6 +676,49 @@ export class CalendarPage {
     });
   });
 
+  constructor() {
+    effect((onCleanup) => {
+      const clinicId = this.activeClinicId();
+      let disposed = false;
+      let unsubscribe: (() => void) | null = null;
+      this.syncState.set('connecting');
+
+      void this.appointmentsRepository
+        .subscribe(
+          clinicId,
+          (appointments) => {
+            if (disposed) return;
+            this.syncState.set('online');
+            this.setAppointments(appointments);
+          },
+          (error) => {
+            if (disposed) return;
+            console.warn('Using local appointment storage.', error);
+            this.syncState.set('local');
+            this.appointments.set(this.readStoredAppointments());
+          },
+        )
+        .then((nextUnsubscribe) => {
+          if (disposed) {
+            nextUnsubscribe();
+            return;
+          }
+          unsubscribe = nextUnsubscribe;
+        })
+        .catch((error) => {
+          if (disposed) return;
+          console.warn('Using local appointment storage.', error);
+          this.syncState.set('local');
+          this.appointments.set(this.readStoredAppointments());
+        });
+
+      onCleanup(() => {
+        disposed = true;
+        unsubscribe?.();
+      });
+    });
+  }
+
   protected changeMonth(delta: number): void {
     const current = this.viewDate();
     this.viewDate.set(new Date(current.getFullYear(), current.getMonth() + delta, 1));
@@ -694,7 +766,7 @@ export class CalendarPage {
     });
   }
 
-  protected saveAppointment(): void {
+  protected async saveAppointment(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       this.formError.set('Preencha paciente, profissional, procedimento, data e horário.');
@@ -704,9 +776,12 @@ export class CalendarPage {
     const value = this.form.getRawValue();
     const now = new Date().toISOString();
     const existingId = this.editingId();
+    const clinicId = this.activeClinicId();
+    const userId = await this.currentUserIdForWrite();
     const next: Appointment = {
       id: existingId ?? crypto.randomUUID(),
-      clinicId: this.activeClinicId(),
+      clinicId,
+      userId,
       date: value.date,
       startTime: value.startTime,
       durationMinutes: value.durationMinutes,
@@ -730,14 +805,15 @@ export class CalendarPage {
     this.setAppointments(updated);
     this.selectDay(this.fromDateInput(next.date));
     this.startNewAppointment();
+    await this.persistAppointment(next);
   }
 
   protected completeAppointment(id: string): void {
-    this.updateStatus(id, 'COMPLETED');
+    void this.updateStatus(id, 'COMPLETED');
   }
 
   protected cancelAppointment(id: string): void {
-    this.updateStatus(id, 'CANCELED');
+    void this.updateStatus(id, 'CANCELED');
   }
 
   protected statusLabel(status: AppointmentStatus): string {
@@ -749,13 +825,30 @@ export class CalendarPage {
     }[status];
   }
 
-  private updateStatus(id: string, status: AppointmentStatus): void {
+  private async updateStatus(id: string, status: AppointmentStatus): Promise<void> {
     const now = new Date().toISOString();
+    const appointment = this.appointments().find((item) => item.id === id);
+    if (!appointment) return;
     this.setAppointments(
       this.appointments().map((item) =>
         item.id === id ? { ...item, status, updatedAt: now } : item,
       ),
     );
+    try {
+      await this.appointmentsRepository.updateStatus({
+        id,
+        clinicId: appointment.clinicId,
+        status,
+        updatedAt: now,
+      });
+      this.syncState.set('online');
+    } catch (error) {
+      console.warn('Could not sync appointment status.', error);
+      this.syncState.set('local');
+      this.formError.set(
+        'Status salvo neste navegador. Ative/verifique o Firestore para sincronizar.',
+      );
+    }
   }
 
   private hasConflict(candidate: Appointment): boolean {
@@ -778,6 +871,27 @@ export class CalendarPage {
     );
     this.appointments.set(sorted);
     this.writeStoredAppointments(sorted);
+  }
+
+  private async persistAppointment(appointment: Appointment): Promise<void> {
+    try {
+      await this.appointmentsRepository.upsert(appointment);
+      this.syncState.set('online');
+    } catch (error) {
+      console.warn('Could not sync appointment.', error);
+      this.syncState.set('local');
+      this.formError.set(
+        'Agendamento salvo neste navegador. Ative/verifique o Firestore para sincronizar.',
+      );
+    }
+  }
+
+  private async currentUserIdForWrite(): Promise<string> {
+    try {
+      return await this.appointmentsRepository.currentUserId();
+    } catch {
+      return this.auth.user()?.id ?? 'local-user';
+    }
   }
 
   private readStoredAppointments(): readonly Appointment[] {

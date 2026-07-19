@@ -169,8 +169,8 @@ import { PatientsApiService } from '../patients/patients-api.service';
       border-radius: 0.8rem;
     }
     .metric__icon og-icon {
-      width: 1.1rem;
-      height: 1.1rem;
+      width: 1.55rem;
+      height: 1.55rem;
     }
     .metric small,
     .metric strong,
@@ -255,8 +255,8 @@ import { PatientsApiService } from '../patients/patients-api.service';
       background: #eef4ff;
     }
     .empty-state > span og-icon {
-      width: 1.25rem;
-      height: 1.25rem;
+      width: 1.6rem;
+      height: 1.6rem;
     }
     .empty-state strong {
       margin-top: 0.8rem;
@@ -300,8 +300,8 @@ import { PatientsApiService } from '../patients/patients-api.service';
       transform: translateY(-2px);
     }
     .quick-actions__grid og-icon {
-      width: 1.2rem;
-      height: 1.2rem;
+      width: 1.55rem;
+      height: 1.55rem;
       color: #2563eb;
     }
     .overview {
@@ -324,8 +324,8 @@ import { PatientsApiService } from '../patients/patients-api.service';
       background: #edf4ff;
     }
     .clinic-icon og-icon {
-      width: 1.1rem;
-      height: 1.1rem;
+      width: 1.45rem;
+      height: 1.45rem;
     }
     .clinic-row div {
       flex: 1;

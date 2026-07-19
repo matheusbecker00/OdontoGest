@@ -87,6 +87,7 @@ export class AppShellComponent implements OnDestroy {
   private updatePageTitle(): void {
     let active = this.route;
     while (active.firstChild) active = active.firstChild;
-    this.pageTitle.set(active.snapshot.data['title'] ?? 'OdontoGest');
+    const title = active.snapshot?.data?.['title'];
+    this.pageTitle.set(typeof title === 'string' && title.length > 0 ? title : 'OdontoGest');
   }
 }

@@ -15,6 +15,12 @@ import {
 import { environment } from '../../../environments/environment';
 import { getOdontoGestFirebaseApp } from '../firebase-app';
 
+export interface FirebaseAuthProfile {
+  readonly id: string;
+  readonly name: string | null;
+  readonly email: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class FirebaseAuthService {
   private readonly auth: Auth;
@@ -60,6 +66,18 @@ export class FirebaseAuthService {
     await this.ready;
     await this.auth.authStateReady();
     return this.auth.currentUser !== null;
+  }
+
+  async getCurrentUserProfile(): Promise<FirebaseAuthProfile | null> {
+    await this.ready;
+    await this.auth.authStateReady();
+    const user = this.auth.currentUser;
+    if (!user) return null;
+    return {
+      id: user.uid,
+      name: user.displayName,
+      email: user.email,
+    };
   }
 
   async sendVerificationAndSignOut(): Promise<void> {

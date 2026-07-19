@@ -86,13 +86,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/finance/finance.page').then((module) => module.FinancePage),
       },
+      {
+        path: 'estoque',
+        data: { title: 'Estoque' },
+        loadComponent: () =>
+          import('./features/inventory/inventory.page').then((module) => module.InventoryPage),
+      },
       ...[
-        {
-          path: 'estoque',
-          title: 'Estoque',
-          description: 'Materiais, movimentações e alertas de reposição.',
-          icon: 'inventory_2',
-        },
         {
           path: 'relatorios',
           title: 'Relatórios',

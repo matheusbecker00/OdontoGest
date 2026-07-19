@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import {
+  LucideArchive,
   LucideArrowRight,
   LucideBadge,
   LucideBanknote,
@@ -69,10 +70,12 @@ const ICON_ALIASES: Readonly<Record<string, string>> = {
   chevron_left: 'chevron-left',
   chevron_right: 'chevron-right',
   info: 'info',
+  archive: 'archive',
 };
 
 const ICONS: Readonly<Record<string, LucideIconData>> = Object.fromEntries(
   [
+    LucideArchive,
     LucideArrowRight,
     LucideBadge,
     LucideBanknote,

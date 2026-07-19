@@ -8,6 +8,12 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /users/{userId}/clinics/{clinicId}/finance/{entryId} {
+      allow read: if isOwnerUser(userId);
+      allow create, update: if isOwnerUser(userId) && isValidFinancialEntry(userId, clinicId);
+      allow delete: if false;
+    }
+
     function isOwnerUser(userId) {
       return request.auth != null && request.auth.uid == userId;
     }
@@ -43,6 +49,40 @@ service cloud.firestore {
         && request.resource.data.procedureName is string
         && request.resource.data.procedureName.size() > 0
         && request.resource.data.status in ['SCHEDULED', 'CONFIRMED', 'COMPLETED', 'CANCELED']
+        && (request.resource.data.notes == null || request.resource.data.notes is string)
+        && request.resource.data.createdAt is string
+        && request.resource.data.updatedAt is string;
+    }
+
+    function isValidFinancialEntry(userId, clinicId) {
+      return request.resource.data.keys().hasOnly([
+          'id',
+          'clinicId',
+          'userId',
+          'type',
+          'status',
+          'description',
+          'category',
+          'amountCents',
+          'dueDate',
+          'paidAt',
+          'notes',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.id is string
+        && request.resource.data.clinicId == clinicId
+        && request.resource.data.userId == userId
+        && request.resource.data.type in ['INCOME', 'EXPENSE']
+        && request.resource.data.status in ['OPEN', 'PAID', 'CANCELED']
+        && request.resource.data.description is string
+        && request.resource.data.description.size() > 0
+        && request.resource.data.category is string
+        && request.resource.data.category.size() > 0
+        && request.resource.data.amountCents is int
+        && request.resource.data.amountCents > 0
+        && request.resource.data.dueDate is string
+        && (request.resource.data.paidAt == null || request.resource.data.paidAt is string)
         && (request.resource.data.notes == null || request.resource.data.notes is string)
         && request.resource.data.createdAt is string
         && request.resource.data.updatedAt is string;

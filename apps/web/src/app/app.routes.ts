@@ -80,13 +80,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/procedures/procedures.page').then((module) => module.ProceduresPage),
       },
+      {
+        path: 'financeiro',
+        data: { title: 'Financeiro' },
+        loadComponent: () =>
+          import('./features/finance/finance.page').then((module) => module.FinancePage),
+      },
       ...[
-        {
-          path: 'financeiro',
-          title: 'Financeiro',
-          description: 'Receitas, despesas e controle do fluxo de caixa.',
-          icon: 'account_balance_wallet',
-        },
         {
           path: 'estoque',
           title: 'Estoque',

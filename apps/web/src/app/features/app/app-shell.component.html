@@ -1,7 +1,8 @@
-<mat-sidenav-container class="shell">
+<mat-sidenav-container class="shell" [autosize]="true">
   <mat-sidenav
     #drawer
     class="sidebar"
+    [class.sidebar--collapsed]="sidebarCollapsed() && !isMobile()"
     [mode]="isMobile() ? 'over' : 'side'"
     [opened]="!isMobile()"
     [fixedInViewport]="true"
@@ -14,16 +15,34 @@
     <nav aria-label="Navegação principal">
       <span class="nav-label">Menu principal</span>
       @for (item of navigation; track item.route) {
-        <a [routerLink]="item.route" routerLinkActive="active" (click)="closeMobile(drawer)">
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [matTooltip]="sidebarCollapsed() && !isMobile() ? item.label : ''"
+          matTooltipPosition="right"
+          (click)="closeMobile(drawer)"
+        >
           <og-icon [name]="item.icon" aria-hidden="true" />
           <span>{{ item.label }}</span>
         </a>
       }
       <span class="nav-label nav-label--secondary">Sistema</span>
-      <a routerLink="/app/configuracoes" routerLinkActive="active" (click)="closeMobile(drawer)">
+      <a
+        routerLink="/app/configuracoes"
+        routerLinkActive="active"
+        [matTooltip]="sidebarCollapsed() && !isMobile() ? 'Configurações' : ''"
+        matTooltipPosition="right"
+        (click)="closeMobile(drawer)"
+      >
         <og-icon name="settings" aria-hidden="true" /><span>Configurações</span>
       </a>
-      <a routerLink="/app/ajuda" routerLinkActive="active" (click)="closeMobile(drawer)">
+      <a
+        routerLink="/app/ajuda"
+        routerLinkActive="active"
+        [matTooltip]="sidebarCollapsed() && !isMobile() ? 'Ajuda e suporte' : ''"
+        matTooltipPosition="right"
+        (click)="closeMobile(drawer)"
+      >
         <og-icon name="help_outline" aria-hidden="true" /><span>Ajuda e suporte</span>
       </a>
     </nav>
@@ -43,11 +62,16 @@
   <mat-sidenav-content>
     <header class="topbar">
       <button
-        class="menu-button"
+        class="sidebar-toggle"
         mat-icon-button
         type="button"
-        aria-label="Abrir menu"
-        (click)="drawer.toggle()"
+        [attr.aria-label]="
+          isMobile() ? 'Abrir menu' : sidebarCollapsed() ? 'Expandir menu' : 'Recolher menu'
+        "
+        [matTooltip]="
+          isMobile() ? 'Abrir menu' : sidebarCollapsed() ? 'Expandir menu' : 'Recolher menu'
+        "
+        (click)="toggleSidebar(drawer)"
       >
         <og-icon name="menu" />
       </button>

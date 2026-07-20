@@ -13,6 +13,7 @@
   border: 0;
   color: #dbe5f4;
   background: linear-gradient(180deg, #0b1f3a 0%, #07182d 100%);
+  transition: width 180ms ease;
 }
 
 .brand {
@@ -82,6 +83,49 @@ nav {
       color: white;
       background: linear-gradient(90deg, rgb(37 99 235 / 35%), rgb(14 165 233 / 12%));
       box-shadow: inset 3px 0 #38bdf8;
+    }
+  }
+}
+
+.sidebar--collapsed {
+  width: 5.35rem;
+
+  .brand {
+    justify-content: center;
+    padding: 0;
+
+    > span:not(.brand__mark) {
+      display: none;
+    }
+  }
+
+  nav {
+    padding: 1rem 0.65rem;
+
+    a {
+      justify-content: center;
+      gap: 0;
+      padding: 0.7rem;
+
+      span {
+        display: none;
+      }
+    }
+  }
+
+  .nav-label {
+    display: none;
+  }
+
+  .sidebar__footer {
+    right: 0.65rem;
+    left: 0.65rem;
+    justify-content: center;
+    padding: 0.65rem;
+
+    .identity,
+    button {
+      display: none;
     }
   }
 }
@@ -177,9 +221,12 @@ nav {
   }
 }
 
-.menu-button,
 .mobile-brand {
   display: none;
+}
+
+.sidebar-toggle {
+  display: inline-flex;
 }
 
 .topbar__actions {
@@ -203,10 +250,6 @@ nav {
 }
 
 @media (width < 64rem) {
-  .menu-button {
-    display: inline-flex;
-  }
-
   .mobile-brand {
     display: block;
     color: #2563eb;

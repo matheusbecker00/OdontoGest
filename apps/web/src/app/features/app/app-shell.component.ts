@@ -20,6 +20,8 @@ interface NavigationItem {
   readonly route: string;
 }
 
+const SIDEBAR_COLLAPSED_KEY = 'og.sidebar-collapsed';
+
 @Component({
   selector: 'og-app-shell',
   imports: [
@@ -46,6 +48,7 @@ export class AppShellComponent implements OnDestroy {
   private readonly mediaListener = (event: MediaQueryListEvent) => this.isMobile.set(event.matches);
 
   protected readonly isMobile = signal(this.media?.matches ?? false);
+  protected readonly sidebarCollapsed = signal(this.readSidebarPreference());
   protected readonly pageTitle = signal('Dashboard');
   protected readonly today = new Intl.DateTimeFormat('pt-BR', {
     weekday: 'long',
@@ -79,6 +82,19 @@ export class AppShellComponent implements OnDestroy {
     if (this.isMobile()) void drawer.close();
   }
 
+  protected toggleSidebar(drawer: MatSidenav): void {
+    if (this.isMobile()) {
+      void drawer.toggle();
+      return;
+    }
+
+    this.sidebarCollapsed.update((value) => {
+      const next = !value;
+      this.writeSidebarPreference(next);
+      return next;
+    });
+  }
+
   protected async logout(): Promise<void> {
     await this.auth.logout();
     await this.router.navigateByUrl('/login');
@@ -89,5 +105,21 @@ export class AppShellComponent implements OnDestroy {
     while (active.firstChild) active = active.firstChild;
     const title = active.snapshot?.data?.['title'];
     this.pageTitle.set(typeof title === 'string' && title.length > 0 ? title : 'OdontoGest');
+  }
+
+  private readSidebarPreference(): boolean {
+    try {
+      return globalThis.localStorage?.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  }
+
+  private writeSidebarPreference(collapsed: boolean): void {
+    try {
+      globalThis.localStorage?.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
+    } catch {
+      // If storage is unavailable, the in-memory signal still updates for this session.
+    }
   }
 }

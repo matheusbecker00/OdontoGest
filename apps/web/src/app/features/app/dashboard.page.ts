@@ -174,7 +174,7 @@ import { PatientsApiService } from '../patients/patients-api.service';
     }
     .metric small,
     .metric strong,
-    .metric span {
+    .metric div > span {
       display: block;
     }
     .metric small {

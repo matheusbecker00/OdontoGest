@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -18,6 +25,7 @@ interface NavigationItem {
   readonly label: string;
   readonly icon: string;
   readonly route: string;
+  readonly permissions?: readonly string[];
 }
 
 const SIDEBAR_COLLAPSED_KEY = 'og.sidebar-collapsed';
@@ -57,14 +65,47 @@ export class AppShellComponent implements OnDestroy {
   }).format(new Date());
   protected readonly navigation: readonly NavigationItem[] = [
     { label: 'Dashboard', icon: 'grid_view', route: '/app/dashboard' },
-    { label: 'Agenda', icon: 'calendar_month', route: '/app/agenda' },
-    { label: 'Pacientes', icon: 'groups', route: '/app/pacientes' },
-    { label: 'Profissionais', icon: 'medical_services', route: '/app/profissionais' },
-    { label: 'Procedimentos', icon: 'dentistry', route: '/app/procedimentos' },
-    { label: 'Financeiro', icon: 'account_balance_wallet', route: '/app/financeiro' },
-    { label: 'Estoque', icon: 'inventory_2', route: '/app/estoque' },
-    { label: 'Relatórios', icon: 'monitoring', route: '/app/relatorios' },
+    {
+      label: 'Agenda',
+      icon: 'calendar_month',
+      route: '/app/agenda',
+      permissions: ['appointment.read'],
+    },
+    { label: 'Pacientes', icon: 'groups', route: '/app/pacientes', permissions: ['patient.read'] },
+    {
+      label: 'Profissionais',
+      icon: 'medical_services',
+      route: '/app/profissionais',
+      permissions: ['dentist.read'],
+    },
+    {
+      label: 'Procedimentos',
+      icon: 'dentistry',
+      route: '/app/procedimentos',
+      permissions: ['procedure.read'],
+    },
+    {
+      label: 'Financeiro',
+      icon: 'account_balance_wallet',
+      route: '/app/financeiro',
+      permissions: ['finance.read'],
+    },
+    {
+      label: 'Estoque',
+      icon: 'inventory_2',
+      route: '/app/estoque',
+      permissions: ['inventory.read'],
+    },
+    {
+      label: 'Relatórios',
+      icon: 'monitoring',
+      route: '/app/relatorios',
+      permissions: ['report.read'],
+    },
   ];
+  protected readonly visibleNavigation = computed(() =>
+    this.navigation.filter((item) => this.canShow(item)),
+  );
 
   constructor() {
     this.media?.addEventListener('change', this.mediaListener);
@@ -121,5 +162,9 @@ export class AppShellComponent implements OnDestroy {
     } catch {
       // If storage is unavailable, the in-memory signal still updates for this session.
     }
+  }
+
+  private canShow(item: NavigationItem): boolean {
+    return !item.permissions || this.auth.hasEveryPermission(item.permissions);
   }
 }

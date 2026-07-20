@@ -16,6 +16,7 @@ describe('AppShellComponent', () => {
           useValue: {
             user: signal({ id: 'user-1', name: 'Matheus Becker', email: 'matheus@example.com' }),
             clinics: signal([{ id: 'clinic-1', name: 'Clínica Teste', role: 'OWNER' }]),
+            hasEveryPermission: vi.fn(() => true),
             logout: vi.fn(),
           },
         },

@@ -56,6 +56,7 @@ export const routes: Routes = [
       {
         path: 'agenda',
         data: { title: 'Agenda' },
+        canActivate: [permissionGuard(['appointment.read'])],
         loadComponent: () =>
           import('./features/app/calendar.page').then((module) => module.CalendarPage),
       },
@@ -83,30 +84,35 @@ export const routes: Routes = [
       {
         path: 'financeiro',
         data: { title: 'Financeiro' },
+        canActivate: [permissionGuard(['finance.read'])],
         loadComponent: () =>
           import('./features/finance/finance.page').then((module) => module.FinancePage),
       },
       {
         path: 'estoque',
         data: { title: 'Estoque' },
+        canActivate: [permissionGuard(['inventory.read'])],
         loadComponent: () =>
           import('./features/inventory/inventory.page').then((module) => module.InventoryPage),
       },
       {
         path: 'relatorios',
         data: { title: 'Relatórios' },
+        canActivate: [permissionGuard(['report.read'])],
         loadComponent: () =>
           import('./features/reports/reports.page').then((module) => module.ReportsPage),
       },
       {
         path: 'configuracoes',
         data: { title: 'Configurações' },
+        canActivate: [permissionGuard(['settings.manage'])],
         loadComponent: () =>
           import('./features/settings/settings.page').then((module) => module.SettingsPage),
       },
       {
         path: 'equipe',
         data: { title: 'Equipe' },
+        canActivate: [permissionGuard(['team.manage'])],
         loadComponent: () => import('./features/team/team.page').then((module) => module.TeamPage),
       },
       {

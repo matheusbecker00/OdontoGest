@@ -14,7 +14,7 @@
 
     <nav aria-label="Navegação principal">
       <span class="nav-label">Menu principal</span>
-      @for (item of navigation; track item.route) {
+      @for (item of visibleNavigation(); track item.route) {
         <a
           [routerLink]="item.route"
           routerLinkActive="active"
@@ -28,7 +28,10 @@
       }
       <span class="nav-label nav-label--secondary">Sistema</span>
       <a
-        routerLink="/app/configuracoes"
+        [routerLink]="
+          auth.hasEveryPermission(['settings.manage']) ? '/app/configuracoes' : '/acesso-negado'
+        "
+        [style.display]="auth.hasEveryPermission(['settings.manage']) ? null : 'none'"
         routerLinkActive="active"
         [matTooltip]="sidebarCollapsed() && !isMobile() ? 'Configurações' : ''"
         matTooltipPosition="right"
@@ -37,7 +40,8 @@
         <og-icon name="settings" aria-hidden="true" /><span>Configurações</span>
       </a>
       <a
-        routerLink="/app/equipe"
+        [routerLink]="auth.hasEveryPermission(['team.manage']) ? '/app/equipe' : '/acesso-negado'"
+        [style.display]="auth.hasEveryPermission(['team.manage']) ? null : 'none'"
         routerLinkActive="active"
         [matTooltip]="sidebarCollapsed() && !isMobile() ? 'Equipe' : ''"
         matTooltipPosition="right"

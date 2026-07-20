@@ -20,6 +20,14 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /users/{userId}/clinics/{clinicId}/settings/{settingsId} {
+      allow read: if isOwnerUser(userId);
+      allow create, update: if isOwnerUser(userId)
+        && settingsId == 'profile'
+        && isValidClinicSettings(userId, clinicId);
+      allow delete: if false;
+    }
+
     function isOwnerUser(userId) {
       return request.auth != null && request.auth.uid == userId;
     }
@@ -128,6 +136,56 @@ service cloud.firestore {
         && request.resource.data.unitCostCents >= 0
         && (request.resource.data.supplier == null || request.resource.data.supplier is string)
         && request.resource.data.status in ['ACTIVE', 'ARCHIVED']
+        && (request.resource.data.notes == null || request.resource.data.notes is string)
+        && request.resource.data.createdAt is string
+        && request.resource.data.updatedAt is string;
+    }
+
+    function isValidClinicSettings(userId, clinicId) {
+      return request.resource.data.keys().hasOnly([
+          'clinicId',
+          'userId',
+          'clinicName',
+          'responsibleName',
+          'phone',
+          'email',
+          'address',
+          'timezone',
+          'openingTime',
+          'closingTime',
+          'appointmentIntervalMinutes',
+          'defaultAppointmentDurationMinutes',
+          'notifyLowStock',
+          'notifyOpenPayments',
+          'notes',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.clinicId == clinicId
+        && request.resource.data.userId == userId
+        && request.resource.data.clinicName is string
+        && request.resource.data.clinicName.size() > 0
+        && request.resource.data.responsibleName is string
+        && request.resource.data.responsibleName.size() > 0
+        && request.resource.data.phone is string
+        && request.resource.data.email is string
+        && request.resource.data.address is string
+        && request.resource.data.timezone in [
+          'America/Sao_Paulo',
+          'America/Cuiaba',
+          'America/Manaus',
+          'America/Rio_Branco'
+        ]
+        && request.resource.data.openingTime is string
+        && request.resource.data.closingTime is string
+        && request.resource.data.appointmentIntervalMinutes is int
+        && request.resource.data.appointmentIntervalMinutes >= 10
+        && request.resource.data.appointmentIntervalMinutes <= 120
+        && request.resource.data.defaultAppointmentDurationMinutes is int
+        && request.resource.data.defaultAppointmentDurationMinutes >= 10
+        && request.resource.data.defaultAppointmentDurationMinutes <= 480
+        && request.resource.data.notifyLowStock is bool
+        && request.resource.data.notifyOpenPayments is bool
         && (request.resource.data.notes == null || request.resource.data.notes is string)
         && request.resource.data.createdAt is string
         && request.resource.data.updatedAt is string;

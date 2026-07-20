@@ -98,13 +98,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/reports/reports.page').then((module) => module.ReportsPage),
       },
+      {
+        path: 'configuracoes',
+        data: { title: 'Configurações' },
+        loadComponent: () =>
+          import('./features/settings/settings.page').then((module) => module.SettingsPage),
+      },
       ...[
-        {
-          path: 'configuracoes',
-          title: 'Configurações',
-          description: 'Preferências da clínica, usuários e permissões.',
-          icon: 'settings',
-        },
         {
           path: 'ajuda',
           title: 'Ajuda e suporte',

@@ -3,6 +3,7 @@ import {
   collection,
   doc,
   getFirestore,
+  getDocs,
   onSnapshot,
   setDoc,
   updateDoc,
@@ -40,15 +41,10 @@ export class AppointmentsRepository {
     onNext: (appointments: readonly Appointment[]) => void,
     onError: (error: unknown) => void,
   ): Promise<Unsubscribe> {
-    const userId = await this.currentUserId();
-    const appointmentsRef = collection(
-      this.firestore,
-      'users',
-      userId,
-      'clinics',
-      clinicId,
-      'appointments',
-    );
+    await this.migrateLegacyAppointments(clinicId).catch((error: unknown) => {
+      console.warn('Could not migrate legacy appointments.', error);
+    });
+    const appointmentsRef = collection(this.firestore, 'clinics', clinicId, 'appointments');
 
     return onSnapshot(
       appointmentsRef,
@@ -68,7 +64,7 @@ export class AppointmentsRepository {
 
   async upsert(appointment: Appointment): Promise<void> {
     const userId = await this.currentUserId();
-    await setDoc(this.appointmentRef(userId, appointment.clinicId, appointment.id), {
+    await setDoc(this.appointmentRef(appointment.clinicId, appointment.id), {
       ...appointment,
       userId,
     });
@@ -80,8 +76,7 @@ export class AppointmentsRepository {
     status: AppointmentStatus;
     updatedAt: string;
   }): Promise<void> {
-    const userId = await this.currentUserId();
-    await updateDoc(this.appointmentRef(userId, input.clinicId, input.id), {
+    await updateDoc(this.appointmentRef(input.clinicId, input.id), {
       status: input.status,
       updatedAt: input.updatedAt,
     });
@@ -94,8 +89,30 @@ export class AppointmentsRepository {
     return profile.id;
   }
 
-  private appointmentRef(userId: string, clinicId: string, appointmentId: string) {
-    return doc(this.firestore, 'users', userId, 'clinics', clinicId, 'appointments', appointmentId);
+  private appointmentRef(clinicId: string, appointmentId: string) {
+    return doc(this.firestore, 'clinics', clinicId, 'appointments', appointmentId);
+  }
+
+  private async migrateLegacyAppointments(clinicId: string): Promise<void> {
+    const userId = await this.currentUserId();
+    const legacyRef = collection(
+      this.firestore,
+      'users',
+      userId,
+      'clinics',
+      clinicId,
+      'appointments',
+    );
+    const snapshot = await getDocs(legacyRef);
+    await Promise.all(
+      snapshot.docs.map((document) =>
+        setDoc(this.appointmentRef(clinicId, document.id), {
+          ...document.data(),
+          id: document.id,
+          clinicId,
+        }),
+      ),
+    );
   }
 
   private fromFirestore(id: string, data: Record<string, unknown>): Appointment {

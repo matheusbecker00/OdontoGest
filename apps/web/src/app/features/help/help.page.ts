@@ -43,8 +43,8 @@ interface FaqItem {
           <small>STATUS DO SISTEMA</small>
           <h3>Seu ambiente já está em produção</h3>
           <p>
-            Frontend publicado na Vercel, autenticação Firebase ativa, equipe, configurações, agenda
-            e financeiro compartilhados sincronizando com Firestore.
+            Frontend publicado na Vercel, autenticação Firebase ativa, equipe, configurações,
+            agenda, financeiro e estoque compartilhados sincronizando com Firestore.
           </p>
         </div>
       </section>
@@ -427,7 +427,7 @@ export class HelpPage {
     {
       question: 'Os dados já ficam salvos na nuvem?',
       answer:
-        'Sim. Equipe, configurações, agenda e financeiro da clínica já ficam compartilhados no Firestore. Estoque ainda mantém fallback local e está sendo migrado para o mesmo modelo compartilhado.',
+        'Sim. Equipe, configurações, agenda, financeiro e estoque da clínica já ficam compartilhados no Firestore. Alguns módulos ainda mantêm fallback local temporário caso a conexão falhe.',
     },
     {
       question: 'Posso usar com a Vercel Hobby e Firebase Spark?',

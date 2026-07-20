@@ -47,6 +47,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /clinics/{clinicId}/inventory/{itemId} {
+      allow read: if isClinicMember(clinicId);
+      allow create: if isClinicMember(clinicId)
+        && request.resource.data.userId == request.auth.uid
+        && isValidSharedInventoryItem(clinicId);
+      allow update: if isClinicMember(clinicId) && isValidSharedInventoryItem(clinicId);
+      allow delete: if false;
+    }
+
     match /users/{userId}/clinics/{clinicId}/appointments/{appointmentId} {
       allow read: if isOwnerUser(userId);
       allow create, update: if isOwnerUser(userId) && isValidAppointment(userId, clinicId);
@@ -268,6 +277,45 @@ service cloud.firestore {
         && request.resource.data.id is string
         && request.resource.data.clinicId == clinicId
         && request.resource.data.userId == userId
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.category is string
+        && request.resource.data.category.size() > 0
+        && request.resource.data.unit is string
+        && request.resource.data.unit.size() > 0
+        && request.resource.data.quantity is int
+        && request.resource.data.quantity >= 0
+        && request.resource.data.minimumQuantity is int
+        && request.resource.data.minimumQuantity >= 0
+        && request.resource.data.unitCostCents is int
+        && request.resource.data.unitCostCents >= 0
+        && (request.resource.data.supplier == null || request.resource.data.supplier is string)
+        && request.resource.data.status in ['ACTIVE', 'ARCHIVED']
+        && (request.resource.data.notes == null || request.resource.data.notes is string)
+        && request.resource.data.createdAt is string
+        && request.resource.data.updatedAt is string;
+    }
+
+    function isValidSharedInventoryItem(clinicId) {
+      return request.resource.data.keys().hasOnly([
+          'id',
+          'clinicId',
+          'userId',
+          'name',
+          'category',
+          'unit',
+          'quantity',
+          'minimumQuantity',
+          'unitCostCents',
+          'supplier',
+          'status',
+          'notes',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.id is string
+        && request.resource.data.clinicId == clinicId
+        && request.resource.data.userId is string
         && request.resource.data.name is string
         && request.resource.data.name.size() > 0
         && request.resource.data.category is string

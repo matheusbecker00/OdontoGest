@@ -2,6 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import {
   collection,
   doc,
+  getDoc,
+  getDocs,
   getFirestore,
   onSnapshot,
   setDoc,
@@ -41,7 +43,11 @@ export class InventoryRepository {
     onError: (error: unknown) => void,
   ): Promise<Unsubscribe> {
     const userId = await this.currentUserId();
-    const itemsRef = collection(this.firestore, 'users', userId, 'clinics', clinicId, 'inventory');
+    await this.migrateLegacyItems(userId, clinicId).catch((error: unknown) => {
+      console.warn('Could not migrate legacy inventory items.', error);
+    });
+
+    const itemsRef = collection(this.firestore, 'clinics', clinicId, 'inventory');
 
     return onSnapshot(
       itemsRef,
@@ -57,7 +63,7 @@ export class InventoryRepository {
 
   async upsert(item: InventoryItem): Promise<void> {
     const userId = await this.currentUserId();
-    await setDoc(this.itemRef(userId, item.clinicId, item.id), { ...item, userId });
+    await setDoc(this.itemRef(item.clinicId, item.id), { ...item, userId });
   }
 
   async currentUserId(): Promise<string> {
@@ -67,8 +73,25 @@ export class InventoryRepository {
     return profile.id;
   }
 
-  private itemRef(userId: string, clinicId: string, itemId: string) {
-    return doc(this.firestore, 'users', userId, 'clinics', clinicId, 'inventory', itemId);
+  private itemRef(clinicId: string, itemId: string) {
+    return doc(this.firestore, 'clinics', clinicId, 'inventory', itemId);
+  }
+
+  private async migrateLegacyItems(userId: string, clinicId: string): Promise<void> {
+    const legacyRef = collection(this.firestore, 'users', userId, 'clinics', clinicId, 'inventory');
+    const snapshot = await getDocs(legacyRef);
+    await Promise.all(
+      snapshot.docs.map(async (document) => {
+        const sharedRef = this.itemRef(clinicId, document.id);
+        const sharedSnapshot = await getDoc(sharedRef);
+        if (sharedSnapshot.exists()) return;
+        await setDoc(sharedRef, {
+          ...document.data(),
+          id: document.id,
+          clinicId,
+        });
+      }),
+    );
   }
 
   private fromFirestore(id: string, data: Record<string, unknown>): InventoryItem {

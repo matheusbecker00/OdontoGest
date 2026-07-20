@@ -25,6 +25,17 @@ interface CalendarDay {
   readonly appointmentCount: number;
 }
 
+interface WeekDay {
+  readonly value: Date;
+  readonly key: string;
+  readonly weekday: string;
+  readonly date: string;
+  readonly selected: boolean;
+  readonly today: boolean;
+}
+
+type CalendarViewMode = 'month' | 'week';
+
 const STORAGE_PREFIX = 'odontogest.appointments';
 
 @Component({
@@ -54,46 +65,113 @@ const STORAGE_PREFIX = 'odontogest.appointments';
               <button
                 mat-icon-button
                 type="button"
-                aria-label="Mês anterior"
-                (click)="changeMonth(-1)"
+                [attr.aria-label]="viewMode() === 'month' ? 'Mês anterior' : 'Semana anterior'"
+                (click)="changePeriod(-1)"
               >
                 <og-icon name="chevron_left" />
               </button>
               <button
                 mat-icon-button
                 type="button"
-                aria-label="Próximo mês"
-                (click)="changeMonth(1)"
+                [attr.aria-label]="viewMode() === 'month' ? 'Próximo mês' : 'Próxima semana'"
+                (click)="changePeriod(1)"
               >
                 <og-icon name="chevron_right" />
               </button>
-              <h3>{{ monthLabel() }}</h3>
+              <h3>{{ viewMode() === 'month' ? monthLabel() : weekLabel() }}</h3>
             </div>
-            <button mat-stroked-button type="button" (click)="goToday()">Hoje</button>
+            <div class="calendar-toolbar__actions">
+              <div class="view-toggle" aria-label="Alternar visualização">
+                <button
+                  type="button"
+                  [class.active]="viewMode() === 'month'"
+                  (click)="setViewMode('month')"
+                >
+                  Mês
+                </button>
+                <button
+                  type="button"
+                  [class.active]="viewMode() === 'week'"
+                  (click)="setViewMode('week')"
+                >
+                  Semana
+                </button>
+              </div>
+              <button mat-stroked-button type="button" (click)="goToday()">Hoje</button>
+            </div>
           </header>
 
-          <div class="calendar-grid weekday-row" aria-hidden="true">
-            @for (weekday of weekdays; track weekday) {
-              <span>{{ weekday }}</span>
-            }
-          </div>
-          <div class="calendar-grid days-grid">
-            @for (day of days(); track day.value.toISOString()) {
-              <button
-                type="button"
-                class="day"
-                [class.day--outside]="!day.currentMonth"
-                [class.day--selected]="day.selected"
-                [class.day--today]="day.today"
-                (click)="selectDay(day.value)"
-              >
-                <span>{{ day.date }}</span>
-                @if (day.appointmentCount > 0) {
-                  <strong>{{ day.appointmentCount }}</strong>
+          @if (viewMode() === 'month') {
+            <div class="calendar-grid weekday-row" aria-hidden="true">
+              @for (weekday of weekdays; track weekday) {
+                <span>{{ weekday }}</span>
+              }
+            </div>
+            <div class="calendar-grid days-grid">
+              @for (day of days(); track day.value.toISOString()) {
+                <button
+                  type="button"
+                  class="day"
+                  [class.day--outside]="!day.currentMonth"
+                  [class.day--selected]="day.selected"
+                  [class.day--today]="day.today"
+                  (click)="selectDay(day.value)"
+                >
+                  <span>{{ day.date }}</span>
+                  @if (day.appointmentCount > 0) {
+                    <strong>{{ day.appointmentCount }}</strong>
+                  }
+                </button>
+              }
+            </div>
+          } @else {
+            <div class="week-schedule" aria-label="Agenda semanal">
+              <div class="week-header">
+                <span class="time-gutter">Horário</span>
+                @for (day of weekDays(); track day.key) {
+                  <button
+                    type="button"
+                    class="week-day"
+                    [class.week-day--selected]="day.selected"
+                    [class.week-day--today]="day.today"
+                    (click)="selectDay(day.value)"
+                  >
+                    <small>{{ day.weekday }}</small>
+                    <strong>{{ day.date }}</strong>
+                  </button>
                 }
-              </button>
-            }
-          </div>
+              </div>
+
+              <div class="week-body">
+                @for (slot of timeSlots; track slot) {
+                  <div class="week-row">
+                    <time>{{ slot }}</time>
+                    @for (day of weekDays(); track day.key) {
+                      <button
+                        type="button"
+                        class="week-cell"
+                        [class.week-cell--selected]="day.selected"
+                        (click)="startAppointmentAt(day.value, slot)"
+                      >
+                        @for (
+                          appointment of appointmentsForSlot(day.key, slot);
+                          track appointment.id
+                        ) {
+                          <span
+                            class="week-appointment"
+                            [class.week-appointment--muted]="appointment.status === 'CANCELED'"
+                          >
+                            <strong>{{ appointment.patientName }}</strong>
+                            <small>{{ appointment.procedureName }}</small>
+                          </span>
+                        }
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
         </article>
 
         <aside class="agenda-side">
@@ -186,7 +264,7 @@ const STORAGE_PREFIX = 'odontogest.appointments';
               </label>
               <label>
                 Horário
-                <input formControlName="startTime" type="time" />
+                <input formControlName="startTime" type="time" step="1800" />
               </label>
               <label>
                 Duração
@@ -307,6 +385,32 @@ const STORAGE_PREFIX = 'odontogest.appointments';
       font-size: 1rem;
       text-transform: capitalize;
     }
+    .calendar-toolbar__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+    .view-toggle {
+      display: inline-flex;
+      overflow: hidden;
+      border: 1px solid #dbe3ed;
+      border-radius: 0.75rem;
+      background: #f8fafc;
+    }
+    .view-toggle button {
+      border: 0;
+      padding: 0.55rem 0.8rem;
+      color: #64748b;
+      background: transparent;
+      font: inherit;
+      font-size: 0.74rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .view-toggle button.active {
+      color: #fff;
+      background: #2563eb;
+    }
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -380,6 +484,118 @@ const STORAGE_PREFIX = 'odontogest.appointments';
       color: #fff;
       background: #2563eb;
       box-shadow: 0 5px 12px rgb(37 99 235 / 25%);
+    }
+    .week-schedule {
+      overflow: auto;
+      background: #fff;
+    }
+    .week-header,
+    .week-row {
+      display: grid;
+      grid-template-columns: 5.25rem repeat(7, minmax(8.5rem, 1fr));
+      min-width: 65rem;
+    }
+    .time-gutter,
+    .week-day,
+    .week-row time,
+    .week-cell {
+      border: 0;
+      border-right: 1px solid #edf1f5;
+      border-bottom: 1px solid #edf1f5;
+      background: #fff;
+    }
+    .time-gutter {
+      display: grid;
+      place-items: center;
+      color: #8a99ad;
+      background: #fafbfd;
+      font-size: 0.65rem;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+    .week-day {
+      display: grid;
+      gap: 0.15rem;
+      min-height: 4rem;
+      place-items: center;
+      color: #344861;
+      font: inherit;
+      cursor: pointer;
+    }
+    .week-day small {
+      color: #8a99ad;
+      font-size: 0.65rem;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+    .week-day strong {
+      font-size: 0.86rem;
+    }
+    .week-day--selected {
+      background: #f3f7ff;
+      box-shadow: inset 0 -2px 0 #2563eb;
+    }
+    .week-day--today strong {
+      display: grid;
+      min-width: 1.9rem;
+      height: 1.9rem;
+      place-items: center;
+      border-radius: 99px;
+      color: #fff;
+      background: #2563eb;
+    }
+    .week-row time {
+      display: grid;
+      min-height: 4.25rem;
+      place-items: start center;
+      padding-top: 0.7rem;
+      color: #718198;
+      background: #fafbfd;
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+    .week-cell {
+      display: grid;
+      align-content: start;
+      gap: 0.35rem;
+      min-height: 4.25rem;
+      padding: 0.35rem;
+      cursor: pointer;
+    }
+    .week-cell:hover,
+    .week-cell--selected {
+      background: #f8fbff;
+    }
+    .week-appointment {
+      display: grid;
+      gap: 0.1rem;
+      border-left: 3px solid #2563eb;
+      border-radius: 0.45rem;
+      padding: 0.35rem 0.45rem;
+      color: #12335f;
+      background: #eaf2ff;
+      text-align: left;
+    }
+    .week-appointment--muted {
+      border-left-color: #94a3b8;
+      color: #64748b;
+      background: #f1f5f9;
+      opacity: 0.75;
+    }
+    .week-appointment strong {
+      overflow: hidden;
+      font-size: 0.68rem;
+      font-weight: 850;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .week-appointment small {
+      overflow: hidden;
+      color: currentColor;
+      font-size: 0.62rem;
+      opacity: 0.78;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .agenda-side {
       display: grid;
@@ -590,8 +806,14 @@ const STORAGE_PREFIX = 'odontogest.appointments';
         overflow-x: auto;
       }
       .calendar-toolbar,
-      .calendar-grid {
+      .calendar-grid,
+      .week-header,
+      .week-row {
         min-width: 43rem;
+      }
+      .calendar-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
       }
       .day {
         min-height: 4.5rem;
@@ -618,6 +840,8 @@ export class CalendarPage {
   private readonly appointments = signal<readonly Appointment[]>(this.readStoredAppointments());
 
   protected readonly weekdays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+  protected readonly timeSlots = this.buildTimeSlots('07:00', '20:00', 30);
+  protected readonly viewMode = signal<CalendarViewMode>('month');
   protected readonly editingId = signal<string | null>(null);
   protected readonly formError = signal<string | null>(null);
   protected readonly syncState = signal<'connecting' | 'online' | 'local'>('connecting');
@@ -639,6 +863,21 @@ export class CalendarPage {
   protected readonly monthLabel = computed(() =>
     new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(this.viewDate()),
   );
+  protected readonly weekLabel = computed(() => {
+    const week = this.weekDays();
+    const first = week[0]?.value ?? this.selectedDate();
+    const last = week[week.length - 1]?.value ?? this.selectedDate();
+    const firstLabel = new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: 'short',
+    }).format(first);
+    const lastLabel = new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).format(last);
+    return `${firstLabel} – ${lastLabel}`;
+  });
   protected readonly selectedDateLabel = computed(() =>
     new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' }).format(
       this.selectedDate(),
@@ -672,6 +911,23 @@ export class CalendarPage {
         appointmentCount: this.appointments().filter(
           (appointment) => appointment.date === dateKey && appointment.status !== 'CANCELED',
         ).length,
+      };
+    });
+  });
+  protected readonly weekDays = computed<WeekDay[]>(() => {
+    const selected = this.selectedDate();
+    const today = new Date();
+    const start = this.startOfWeek(selected);
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(start);
+      date.setDate(start.getDate() + index);
+      return {
+        value: date,
+        key: this.toDateInput(date),
+        weekday: new Intl.DateTimeFormat('pt-BR', { weekday: 'short' }).format(date),
+        date: new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' }).format(date),
+        selected: this.isSameDate(date, selected),
+        today: this.isSameDate(date, today),
       };
     });
   });
@@ -724,6 +980,22 @@ export class CalendarPage {
     this.viewDate.set(new Date(current.getFullYear(), current.getMonth() + delta, 1));
   }
 
+  protected changePeriod(delta: number): void {
+    if (this.viewMode() === 'month') {
+      this.changeMonth(delta);
+      return;
+    }
+
+    const next = new Date(this.selectedDate());
+    next.setDate(next.getDate() + delta * 7);
+    this.selectDay(next);
+  }
+
+  protected setViewMode(mode: CalendarViewMode): void {
+    this.viewMode.set(mode);
+    if (mode === 'month') this.viewDate.set(this.firstOfMonth(this.selectedDate()));
+  }
+
   protected goToday(): void {
     const today = new Date();
     this.viewDate.set(this.firstOfMonth(today));
@@ -734,6 +1006,22 @@ export class CalendarPage {
     this.selectedDate.set(date);
     this.form.controls.date.setValue(this.toDateInput(date));
     if (date.getMonth() !== this.viewDate().getMonth()) this.viewDate.set(this.firstOfMonth(date));
+  }
+
+  protected startAppointmentAt(date: Date, startTime: string): void {
+    this.selectDay(date);
+    this.editingId.set(null);
+    this.formError.set(null);
+    this.form.reset({
+      patientName: '',
+      dentistName: '',
+      procedureName: 'Avaliação',
+      date: this.toDateInput(date),
+      startTime,
+      durationMinutes: 30,
+      status: 'SCHEDULED',
+      notes: '',
+    });
   }
 
   protected startNewAppointment(): void {
@@ -823,6 +1111,13 @@ export class CalendarPage {
       COMPLETED: 'Concluído',
       CANCELED: 'Cancelado',
     }[status];
+  }
+
+  protected appointmentsForSlot(date: string, startTime: string): readonly Appointment[] {
+    return this.appointments().filter(
+      (appointment) =>
+        appointment.date === date && this.slotForTime(appointment.startTime) === startTime,
+    );
   }
 
   private async updateStatus(id: string, status: AppointmentStatus): Promise<void> {
@@ -941,7 +1236,35 @@ export class CalendarPage {
     );
   }
 
+  private startOfWeek(date: Date): Date {
+    const start = new Date(date);
+    const dayOffset = (start.getDay() + 6) % 7;
+    start.setDate(start.getDate() - dayOffset);
+    start.setHours(0, 0, 0, 0);
+    return start;
+  }
+
   private firstOfMonth(date: Date): Date {
     return new Date(date.getFullYear(), date.getMonth(), 1);
+  }
+
+  private buildTimeSlots(start: string, end: string, stepMinutes: number): readonly string[] {
+    const [startHour, startMinute] = start.split(':').map(Number);
+    const [endHour, endMinute] = end.split(':').map(Number);
+    const startTotal = startHour * 60 + startMinute;
+    const endTotal = endHour * 60 + endMinute;
+    const slots: string[] = [];
+    for (let total = startTotal; total <= endTotal; total += stepMinutes) {
+      const hour = String(Math.floor(total / 60)).padStart(2, '0');
+      const minute = String(total % 60).padStart(2, '0');
+      slots.push(`${hour}:${minute}`);
+    }
+    return slots;
+  }
+
+  private slotForTime(value: string): string {
+    const [hour = 0, minute = 0] = value.split(':').map(Number);
+    const roundedMinute = minute < 30 ? '00' : '30';
+    return `${String(hour).padStart(2, '0')}:${roundedMinute}`;
   }
 }

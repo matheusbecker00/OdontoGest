@@ -8,8 +8,11 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { firstValueFrom } from 'rxjs';
 import { AuthStore } from '../../core/auth/auth.store';
 import { IconComponent } from '../../shared/components/icon.component';
+import { type Dentist, DentistsApiService } from '../dentists/dentists-api.service';
+import { type Patient, PatientsApiService } from '../patients/patients-api.service';
 import {
   AppointmentsRepository,
   type Appointment,
@@ -237,17 +240,40 @@ const STORAGE_PREFIX = 'odontogest.appointments';
               Paciente
               <input
                 formControlName="patientName"
+                list="appointment-patients"
                 autocomplete="off"
                 placeholder="Nome do paciente"
               />
+              <datalist id="appointment-patients">
+                @for (patient of patientOptions(); track patient.id) {
+                  <option [value]="patient.fullName">
+                    {{ patient.cpfMasked }}{{ patient.phone ? ' · ' + patient.phone : '' }}
+                  </option>
+                }
+              </datalist>
+              @if (patientOptions().length === 0) {
+                <small class="field-hint">Cadastre pacientes para aparecerem aqui.</small>
+              }
             </label>
             <label>
               Profissional
               <input
                 formControlName="dentistName"
+                list="appointment-dentists"
                 autocomplete="off"
                 placeholder="Dentista responsável"
+                (change)="applyDentistDefaults()"
               />
+              <datalist id="appointment-dentists">
+                @for (dentist of dentistOptions(); track dentist.id) {
+                  <option [value]="dentist.name">
+                    {{ dentist.specialty }} · {{ dentist.defaultAppointmentMinutes }} min
+                  </option>
+                }
+              </datalist>
+              @if (dentistOptions().length === 0) {
+                <small class="field-hint">Cadastre profissionais para aparecerem aqui.</small>
+              }
             </label>
             <label>
               Procedimento
@@ -755,6 +781,12 @@ const STORAGE_PREFIX = 'odontogest.appointments';
       font-size: 0.68rem;
       font-weight: 800;
     }
+    .field-hint {
+      color: #8a99ad;
+      font-size: 0.66rem;
+      font-weight: 650;
+      line-height: 1.45;
+    }
     .appointment-form input,
     .appointment-form select,
     .appointment-form textarea {
@@ -835,9 +867,13 @@ export class CalendarPage {
   private readonly formBuilder = inject(FormBuilder);
   private readonly auth = inject(AuthStore);
   private readonly appointmentsRepository = inject(AppointmentsRepository);
+  private readonly patientsApi = inject(PatientsApiService);
+  private readonly dentistsApi = inject(DentistsApiService);
   private readonly viewDate = signal(this.firstOfMonth(new Date()));
   private readonly selectedDate = signal(new Date());
   private readonly appointments = signal<readonly Appointment[]>(this.readStoredAppointments());
+  protected readonly patientOptions = signal<readonly Patient[]>([]);
+  protected readonly dentistOptions = signal<readonly Dentist[]>([]);
 
   protected readonly weekdays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
   protected readonly timeSlots = this.buildTimeSlots('07:00', '20:00', 30);
@@ -933,6 +969,8 @@ export class CalendarPage {
   });
 
   constructor() {
+    void this.loadAppointmentOptions();
+
     effect((onCleanup) => {
       const clinicId = this.activeClinicId();
       let disposed = false;
@@ -1014,11 +1052,11 @@ export class CalendarPage {
     this.formError.set(null);
     this.form.reset({
       patientName: '',
-      dentistName: '',
+      dentistName: this.defaultDentistName(),
       procedureName: 'Avaliação',
       date: this.toDateInput(date),
       startTime,
-      durationMinutes: 30,
+      durationMinutes: this.defaultDurationMinutes(),
       status: 'SCHEDULED',
       notes: '',
     });
@@ -1029,14 +1067,23 @@ export class CalendarPage {
     this.formError.set(null);
     this.form.reset({
       patientName: '',
-      dentistName: '',
+      dentistName: this.defaultDentistName(),
       procedureName: 'Avaliação',
       date: this.toDateInput(this.selectedDate()),
       startTime: '09:00',
-      durationMinutes: 30,
+      durationMinutes: this.defaultDurationMinutes(),
       status: 'SCHEDULED',
       notes: '',
     });
+  }
+
+  protected applyDentistDefaults(): void {
+    const dentistName = this.form.controls.dentistName.value.trim().toLocaleLowerCase('pt-BR');
+    const dentist = this.dentistOptions().find(
+      (candidate) => candidate.name.trim().toLocaleLowerCase('pt-BR') === dentistName,
+    );
+    if (!dentist) return;
+    this.form.controls.durationMinutes.setValue(dentist.defaultAppointmentMinutes);
   }
 
   protected editAppointment(appointment: Appointment): void {
@@ -1144,6 +1191,41 @@ export class CalendarPage {
         'Status salvo neste navegador. Ative/verifique o Firestore para sincronizar.',
       );
     }
+  }
+
+  private async loadAppointmentOptions(): Promise<void> {
+    const [patients, dentists] = await Promise.all([
+      firstValueFrom(
+        this.patientsApi.list({
+          page: 1,
+          pageSize: 500,
+          status: 'ACTIVE',
+        }),
+      )
+        .then((response) => response.items)
+        .catch((error: unknown) => {
+          console.warn('Could not load appointment patients.', error);
+          return [] as Patient[];
+        }),
+      firstValueFrom(this.dentistsApi.list())
+        .then((items) => items.filter((dentist) => dentist.status === 'ACTIVE'))
+        .catch((error: unknown) => {
+          console.warn('Could not load appointment dentists.', error);
+          return [] as Dentist[];
+        }),
+    ]);
+    this.patientOptions.set(patients);
+    this.dentistOptions.set(dentists);
+  }
+
+  private defaultDentistName(): string {
+    const dentists = this.dentistOptions();
+    return dentists.length === 1 ? dentists[0].name : '';
+  }
+
+  private defaultDurationMinutes(): number {
+    const dentists = this.dentistOptions();
+    return dentists.length === 1 ? dentists[0].defaultAppointmentMinutes : 30;
   }
 
   private hasConflict(candidate: Appointment): boolean {

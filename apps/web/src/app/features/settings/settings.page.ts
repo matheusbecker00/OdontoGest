@@ -33,7 +33,9 @@ const STORAGE_PREFIX = 'odontogest.settings';
 
       <section class="settings-grid">
         <article class="profile-card">
-          <span class="profile-card__icon"><og-icon name="domain" /></span>
+          <span class="profile-card__icon profile-card__icon--clinic">
+            <og-icon name="domain" />
+          </span>
           <div>
             <small>Clínica ativa</small>
             <strong>{{ form.controls.clinicName.value || clinicName() }}</strong>
@@ -43,7 +45,9 @@ const STORAGE_PREFIX = 'odontogest.settings';
           </div>
         </article>
         <article class="profile-card">
-          <span class="profile-card__icon"><og-icon name="settings" /></span>
+          <span class="profile-card__icon profile-card__icon--agenda">
+            <og-icon name="calendar_month" />
+          </span>
           <div>
             <small>Agenda padrão</small>
             <strong
@@ -55,7 +59,9 @@ const STORAGE_PREFIX = 'odontogest.settings';
           </div>
         </article>
         <article class="profile-card">
-          <span class="profile-card__icon"><og-icon name="notifications_none" /></span>
+          <span class="profile-card__icon profile-card__icon--alerts">
+            <og-icon name="notifications_none" />
+          </span>
           <div>
             <small>Alertas</small>
             <strong>{{ enabledAlerts() }}</strong>
@@ -266,16 +272,31 @@ const STORAGE_PREFIX = 'odontogest.settings';
     .profile-card__icon {
       display: grid;
       flex: 0 0 auto;
-      width: 2.75rem;
-      height: 2.75rem;
+      width: 3rem;
+      height: 3rem;
       place-items: center;
-      border-radius: 0.8rem;
+      border-radius: 0.9rem;
+      color: #2563eb;
+      background: #eaf2ff;
+      line-height: 1;
+    }
+    .profile-card__icon og-icon {
+      display: grid;
+      width: 1.65rem;
+      height: 1.65rem;
+      place-items: center;
+    }
+    .profile-card__icon--clinic {
       color: #2563eb;
       background: #eaf2ff;
     }
-    .profile-card__icon og-icon {
-      width: 1.45rem;
-      height: 1.45rem;
+    .profile-card__icon--agenda {
+      color: #0891b2;
+      background: #e7f8fd;
+    }
+    .profile-card__icon--alerts {
+      color: #ea580c;
+      background: #fff1e8;
     }
     .profile-card small,
     .profile-card strong,

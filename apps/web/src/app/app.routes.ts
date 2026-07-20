@@ -104,21 +104,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/settings/settings.page').then((module) => module.SettingsPage),
       },
-      ...[
-        {
-          path: 'ajuda',
-          title: 'Ajuda e suporte',
-          description: 'Orientações e canais de atendimento do OdontoGest.',
-          icon: 'help_outline',
-        },
-      ].map(({ path, title, description, icon }) => ({
-        path,
-        data: { title, description, icon },
-        loadComponent: () =>
-          import('./features/app/workspace-placeholder.page').then(
-            (module) => module.WorkspacePlaceholderPage,
-          ),
-      })),
+      {
+        path: 'ajuda',
+        data: { title: 'Ajuda e suporte' },
+        loadComponent: () => import('./features/help/help.page').then((module) => module.HelpPage),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

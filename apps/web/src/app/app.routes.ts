@@ -92,13 +92,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/inventory/inventory.page').then((module) => module.InventoryPage),
       },
+      {
+        path: 'relatorios',
+        data: { title: 'Relatórios' },
+        loadComponent: () =>
+          import('./features/reports/reports.page').then((module) => module.ReportsPage),
+      },
       ...[
-        {
-          path: 'relatorios',
-          title: 'Relatórios',
-          description: 'Indicadores operacionais e visão gerencial.',
-          icon: 'monitoring',
-        },
         {
           path: 'configuracoes',
           title: 'Configurações',

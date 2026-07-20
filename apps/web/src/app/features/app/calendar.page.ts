@@ -13,6 +13,7 @@ import { AuthStore } from '../../core/auth/auth.store';
 import { IconComponent } from '../../shared/components/icon.component';
 import { type Dentist, DentistsApiService } from '../dentists/dentists-api.service';
 import { type Patient, PatientsApiService } from '../patients/patients-api.service';
+import { type Procedure, ProceduresApiService } from '../procedures/procedures-api.service';
 import {
   AppointmentsRepository,
   type Appointment,
@@ -279,9 +280,21 @@ const STORAGE_PREFIX = 'odontogest.appointments';
               Procedimento
               <input
                 formControlName="procedureName"
+                list="appointment-procedures"
                 autocomplete="off"
                 placeholder="Ex.: Avaliação"
+                (change)="applyProcedureDefaults()"
               />
+              <datalist id="appointment-procedures">
+                @for (procedure of procedureOptions(); track procedure.id) {
+                  <option [value]="procedure.name">
+                    {{ procedure.category }} · {{ procedure.durationMinutes }} min
+                  </option>
+                }
+              </datalist>
+              @if (procedureOptions().length === 0) {
+                <small class="field-hint">Cadastre procedimentos para aparecerem aqui.</small>
+              }
             </label>
             <div class="form-grid">
               <label>
@@ -869,11 +882,13 @@ export class CalendarPage {
   private readonly appointmentsRepository = inject(AppointmentsRepository);
   private readonly patientsApi = inject(PatientsApiService);
   private readonly dentistsApi = inject(DentistsApiService);
+  private readonly proceduresApi = inject(ProceduresApiService);
   private readonly viewDate = signal(this.firstOfMonth(new Date()));
   private readonly selectedDate = signal(new Date());
   private readonly appointments = signal<readonly Appointment[]>(this.readStoredAppointments());
   protected readonly patientOptions = signal<readonly Patient[]>([]);
   protected readonly dentistOptions = signal<readonly Dentist[]>([]);
+  protected readonly procedureOptions = signal<readonly Procedure[]>([]);
 
   protected readonly weekdays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
   protected readonly timeSlots = this.buildTimeSlots('07:00', '20:00', 30);
@@ -1086,6 +1101,15 @@ export class CalendarPage {
     this.form.controls.durationMinutes.setValue(dentist.defaultAppointmentMinutes);
   }
 
+  protected applyProcedureDefaults(): void {
+    const procedureName = this.form.controls.procedureName.value.trim().toLocaleLowerCase('pt-BR');
+    const procedure = this.procedureOptions().find(
+      (candidate) => candidate.name.trim().toLocaleLowerCase('pt-BR') === procedureName,
+    );
+    if (!procedure) return;
+    this.form.controls.durationMinutes.setValue(procedure.durationMinutes);
+  }
+
   protected editAppointment(appointment: Appointment): void {
     this.editingId.set(appointment.id);
     this.formError.set(null);
@@ -1194,7 +1218,7 @@ export class CalendarPage {
   }
 
   private async loadAppointmentOptions(): Promise<void> {
-    const [patients, dentists] = await Promise.all([
+    const [patients, dentists, procedures] = await Promise.all([
       firstValueFrom(
         this.patientsApi.list({
           page: 1,
@@ -1213,9 +1237,16 @@ export class CalendarPage {
           console.warn('Could not load appointment dentists.', error);
           return [] as Dentist[];
         }),
+      firstValueFrom(this.proceduresApi.list())
+        .then((items) => items.filter((procedure) => procedure.status === 'ACTIVE'))
+        .catch((error: unknown) => {
+          console.warn('Could not load appointment procedures.', error);
+          return [] as Procedure[];
+        }),
     ]);
     this.patientOptions.set(patients);
     this.dentistOptions.set(dentists);
+    this.procedureOptions.set(procedures);
   }
 
   private defaultDentistName(): string {

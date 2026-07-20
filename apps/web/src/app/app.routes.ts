@@ -117,6 +117,11 @@ export const routes: Routes = [
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },
-  { path: '', pathMatch: 'full', redirectTo: 'login' },
-  { path: '**', redirectTo: 'login' },
+  {
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./features/landing/landing.page').then((module) => module.LandingPage),
+  },
+  { path: '**', redirectTo: '' },
 ];

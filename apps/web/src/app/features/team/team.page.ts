@@ -45,9 +45,9 @@ const STORAGE_PREFIX = 'odontogest.team';
           </div>
         </article>
         <article class="summary summary--orange">
-          <span><og-icon name="mail" /></span>
+          <span><og-icon name="password" /></span>
           <div>
-            <small>Convites pendentes</small><strong>{{ pendingInvites().length }}</strong>
+            <small>Acessos por código</small><strong>{{ codeMembers().length }}</strong>
           </div>
         </article>
         <article class="summary summary--green">
@@ -63,7 +63,7 @@ const STORAGE_PREFIX = 'odontogest.team';
           <header>
             <div>
               <h3>Membros da clínica</h3>
-              <p>Usuários já vinculados ao ambiente compartilhado da clínica.</p>
+              <p>Usuários com acesso por e-mail ou código numérico.</p>
             </div>
           </header>
 
@@ -74,7 +74,7 @@ const STORAGE_PREFIX = 'odontogest.team';
                   <span class="row__icon"><og-icon name="groups" /></span>
                   <div>
                     <strong>{{ member.name || member.email }}</strong>
-                    <small>{{ member.email || 'E-mail não informado' }}</small>
+                    <small>{{ memberAccessLabel(member) }}</small>
                   </div>
                   <em>{{ roleLabel(member.role) }}</em>
                   <strong class="status">{{
@@ -107,14 +107,33 @@ const STORAGE_PREFIX = 'odontogest.team';
         </article>
 
         <aside class="side">
-          <form class="invite-form" [formGroup]="form" (ngSubmit)="createInvite()">
+          <form class="invite-form" [formGroup]="form" (ngSubmit)="createUser()">
             <header>
-              <h3>Novo convite</h3>
+              <h3>Novo usuário</h3>
               <button type="button" (click)="resetForm()">Limpar</button>
             </header>
             <label>
-              E-mail
-              <input formControlName="email" type="email" placeholder="usuario@clinica.com" />
+              Nome
+              <input formControlName="name" type="text" placeholder="Ex.: Ana da recepção" />
+            </label>
+            <label>
+              E-mail ou código numérico
+              <input
+                formControlName="identifier"
+                type="text"
+                inputmode="email"
+                autocomplete="off"
+                placeholder="usuario@clinica.com ou 123456"
+              />
+            </label>
+            <label>
+              Senha
+              <input
+                formControlName="password"
+                type="password"
+                autocomplete="new-password"
+                placeholder="Mínimo de 6 dígitos"
+              />
             </label>
             <label>
               Papel
@@ -132,10 +151,10 @@ const STORAGE_PREFIX = 'odontogest.team';
               <p class="form-success">{{ formSuccess() }}</p>
             }
 
-            <button mat-flat-button type="submit">Criar convite</button>
+            <button mat-flat-button type="submit">Criar usuário</button>
             <small class="hint"
-              >Nesta fase o convite é registrado; envio automático de e-mail entra com
-              backend.</small
+              >A senha cria a credencial no Firebase Authentication e não é salva no
+              Firestore.</small
             >
           </form>
 
@@ -493,6 +512,9 @@ export class TeamPage {
   protected readonly pendingInvites = computed(() =>
     this.invites().filter((invite) => invite.status === 'PENDING'),
   );
+  protected readonly codeMembers = computed(() =>
+    this.members().filter((member) => member.status === 'ACTIVE' && member.accessCode != null),
+  );
   protected readonly adminCount = computed(
     () =>
       this.members().filter(
@@ -506,7 +528,9 @@ export class TeamPage {
     return 'Modo local temporário';
   });
   protected readonly form = this.formBuilder.nonNullable.group({
-    email: ['', [Validators.required, Validators.email, Validators.maxLength(180)]],
+    name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(120)]],
+    identifier: ['', [Validators.required, Validators.maxLength(180)]],
+    password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(128)]],
     role: ['RECEPTIONIST' as Exclude<TeamRole, 'OWNER'>, Validators.required],
   });
 
@@ -555,35 +579,42 @@ export class TeamPage {
     });
   }
 
-  protected async createInvite(): Promise<void> {
-    if (this.form.invalid) {
+  protected async createUser(): Promise<void> {
+    const value = this.form.getRawValue();
+    const identifierError = this.identifierError(value.identifier);
+    if (this.form.invalid || identifierError) {
       this.form.markAllAsTouched();
-      this.formError.set('Informe um e-mail válido e o papel do usuário.');
+      this.formError.set(
+        identifierError ?? 'Informe nome, e-mail ou código, senha de 6 dígitos e papel.',
+      );
       this.formSuccess.set(null);
       return;
     }
 
-    const value = this.form.getRawValue();
     try {
-      await this.teamRepository.createInvite({
+      await this.teamRepository.createMember({
         clinicId: this.activeClinicId(),
-        email: value.email,
+        identifier: value.identifier,
+        password: value.password,
+        name: value.name,
         role: value.role,
       });
-      this.form.reset({ email: '', role: 'RECEPTIONIST' });
+      this.form.reset({ name: '', identifier: '', password: '', role: 'RECEPTIONIST' });
       this.formError.set(null);
-      this.formSuccess.set('Convite registrado com sucesso.');
+      this.formSuccess.set('Usuário criado com sucesso. Ele já pode entrar no sistema.');
       this.syncState.set('online');
     } catch (error) {
-      console.warn('Could not create invite.', error);
+      console.warn('Could not create user.', error);
       this.syncState.set('local');
-      this.formError.set('Não foi possível sincronizar o convite agora.');
+      this.formError.set(
+        error instanceof Error ? error.message : 'Não foi possível criar o usuário agora.',
+      );
       this.formSuccess.set(null);
     }
   }
 
   protected resetForm(): void {
-    this.form.reset({ email: '', role: 'RECEPTIONIST' });
+    this.form.reset({ name: '', identifier: '', password: '', role: 'RECEPTIONIST' });
     this.formError.set(null);
     this.formSuccess.set(null);
   }
@@ -619,6 +650,23 @@ export class TeamPage {
       RECEPTIONIST: 'Recepção',
       DENTIST: 'Dentista',
     }[role];
+  }
+
+  protected memberAccessLabel(member: TeamMember): string {
+    if (member.accessCode) return `Código ${member.accessCode}`;
+    return member.email || 'E-mail não informado';
+  }
+
+  private identifierError(identifier: string): string | null {
+    const value = identifier.trim();
+    if (/^\d+$/.test(value)) {
+      return value.length >= 4 && value.length <= 12
+        ? null
+        : 'O código de acesso deve ter entre 4 e 12 números.';
+    }
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+      ? null
+      : 'Informe um e-mail válido ou um código apenas com números.';
   }
 
   private async updateMember(

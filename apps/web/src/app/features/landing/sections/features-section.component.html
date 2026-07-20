@@ -1,0 +1,22 @@
+<section class="section" id="recursos" aria-labelledby="features-title">
+  <div class="section__header">
+    <p class="eyebrow">Funcionalidades principais</p>
+    <h2 id="features-title">O essencial para operar uma clinica com previsibilidade.</h2>
+    <p>
+      Um conjunto enxuto de recursos para deixar a equipe alinhada, reduzir atrito operacional e
+      aumentar a clareza da gestao.
+    </p>
+  </div>
+
+  <div class="feature-grid">
+    @for (feature of features; track feature.title) {
+      <article class="feature-card">
+        <span class="feature-card__icon" aria-hidden="true">
+          <og-icon [name]="feature.icon" />
+        </span>
+        <h3>{{ feature.title }}</h3>
+        <p>{{ feature.description }}</p>
+      </article>
+    }
+  </div>
+</section>

@@ -11,6 +11,7 @@ import {
   LucideCalendarPlus,
   LucideChartBar,
   LucideChartNoAxesCombined,
+  LucideCheck,
   LucideChevronLeft,
   LucideChevronRight,
   LucideCircleQuestionMark,
@@ -32,6 +33,7 @@ import {
   LucideUserPlus,
   LucideUsers,
   LucideWalletCards,
+  LucideX,
   type LucideIconData,
 } from '@lucide/angular';
 
@@ -57,8 +59,10 @@ const ICON_ALIASES: Readonly<Record<string, string>> = {
   help_outline: 'circle-question-mark',
   logout: 'log-out',
   menu: 'menu',
+  close: 'x',
   notifications_none: 'bell',
   add: 'plus',
+  check: 'check',
   payments: 'banknote',
   pending_actions: 'clipboard-clock',
   event_available: 'calendar-check',
@@ -86,6 +90,7 @@ const ICONS: Readonly<Record<string, LucideIconData>> = Object.fromEntries(
     LucideCalendarPlus,
     LucideChartBar,
     LucideChartNoAxesCombined,
+    LucideCheck,
     LucideChevronLeft,
     LucideChevronRight,
     LucideCircleQuestionMark,
@@ -107,6 +112,7 @@ const ICONS: Readonly<Record<string, LucideIconData>> = Object.fromEntries(
     LucideUserPlus,
     LucideUsers,
     LucideWalletCards,
+    LucideX,
   ].map((icon) => [icon.icon.name, icon.icon]),
 );
 

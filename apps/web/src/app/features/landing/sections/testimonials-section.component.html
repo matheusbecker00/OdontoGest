@@ -1,0 +1,19 @@
+<section class="section" aria-labelledby="testimonials-title">
+  <div class="section__header">
+    <p class="eyebrow">Prova social</p>
+    <h2 id="testimonials-title">Espaco pronto para as vozes dos seus clientes.</h2>
+  </div>
+
+  <div class="testimonial-grid">
+    @for (placeholder of placeholders; track placeholder) {
+      <article class="testimonial-card">
+        <span class="placeholder-label">Conteudo placeholder</span>
+        <p>"{{ placeholder }}"</p>
+        <div>
+          <strong>Nome do cliente</strong>
+          <span>Clinica ou cargo</span>
+        </div>
+      </article>
+    }
+  </div>
+</section>

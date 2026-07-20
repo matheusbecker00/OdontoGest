@@ -247,6 +247,7 @@ service cloud.firestore {
           'clinicId',
           'name',
           'email',
+          'accessCode',
           'role',
           'status',
           'createdAt',
@@ -256,6 +257,7 @@ service cloud.firestore {
         && request.resource.data.clinicId == clinicId
         && request.resource.data.name is string
         && request.resource.data.email is string
+        && (request.resource.data.accessCode == null || request.resource.data.accessCode is string)
         && request.resource.data.role in ['OWNER', 'ADMIN', 'RECEPTIONIST', 'DENTIST']
         && request.resource.data.status in ['ACTIVE', 'INACTIVE']
         && request.resource.data.createdAt is string

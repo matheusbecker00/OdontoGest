@@ -36,7 +36,7 @@ export class LoginPage {
       : null,
   );
   protected readonly form = this.formBuilder.nonNullable.group({
-    email: ['', [Validators.required, Validators.email, Validators.maxLength(320)]],
+    identifier: ['', [Validators.required, Validators.maxLength(320)]],
     password: ['', [Validators.required, Validators.maxLength(128)]],
   });
 
@@ -49,8 +49,8 @@ export class LoginPage {
     this.pending.set(true);
     this.errorMessage.set(null);
     try {
-      const { email, password } = this.form.getRawValue();
-      await this.auth.login(email, password);
+      const { identifier, password } = this.form.getRawValue();
+      await this.auth.login(identifier, password);
       const candidate = this.route.snapshot.queryParamMap.get('returnUrl');
       const returnUrl =
         candidate?.startsWith('/') && !candidate.startsWith('//') ? candidate : '/app/dashboard';

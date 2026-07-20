@@ -21,6 +21,7 @@ export interface TeamMember {
   readonly clinicId: string;
   readonly name: string;
   readonly email: string;
+  readonly accessCode: string | null;
   readonly role: TeamRole;
   readonly status: TeamMemberStatus;
   readonly createdAt: string;
@@ -56,6 +57,7 @@ export class TeamRepository {
       clinicId,
       name: profile.name || profile.email?.split('@')[0] || clinicName,
       email: profile.email || '',
+      accessCode: null,
       role: 'OWNER',
       status: 'ACTIVE',
       createdAt: now,
@@ -99,6 +101,33 @@ export class TeamRepository {
       unsubscribeMembers();
       unsubscribeInvites();
     };
+  }
+
+  async createMember(input: {
+    readonly clinicId: string;
+    readonly identifier: string;
+    readonly password: string;
+    readonly name: string;
+    readonly role: Exclude<TeamRole, 'OWNER'>;
+  }): Promise<void> {
+    const account = await this.firebaseAuth.createSecondaryAccount({
+      identifier: input.identifier,
+      password: input.password,
+      displayName: input.name,
+    });
+    const now = new Date().toISOString();
+    const member: TeamMember = {
+      userId: account.userId,
+      clinicId: input.clinicId,
+      name: input.name.trim(),
+      email: account.email,
+      accessCode: account.accessCode,
+      role: input.role,
+      status: 'ACTIVE',
+      createdAt: now,
+      updatedAt: now,
+    };
+    await setDoc(this.memberRef(input.clinicId, account.userId), member);
   }
 
   async createInvite(input: {
@@ -165,6 +194,7 @@ export class TeamRepository {
       clinicId: this.stringField(data, 'clinicId'),
       name: this.stringField(data, 'name'),
       email: this.stringField(data, 'email'),
+      accessCode: this.optionalStringField(data, 'accessCode'),
       role: this.roleField(data),
       status: data['status'] === 'INACTIVE' ? 'INACTIVE' : 'ACTIVE',
       createdAt: this.stringField(data, 'createdAt'),
@@ -195,5 +225,10 @@ export class TeamRepository {
   private stringField(data: Record<string, unknown>, key: string): string {
     const value = data[key];
     return typeof value === 'string' ? value : '';
+  }
+
+  private optionalStringField(data: Record<string, unknown>, key: string): string | null {
+    const value = data[key];
+    return typeof value === 'string' && value.length > 0 ? value : null;
   }
 }

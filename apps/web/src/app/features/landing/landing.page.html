@@ -1,0 +1,72 @@
+<a class="skip-link" href="#conteudo">Ir para o conteudo</a>
+
+<header class="landing-header">
+  <nav class="nav-shell" aria-label="Navegacao principal">
+    <a class="brand" routerLink="/" aria-label="OdontoGest">
+      <span class="brand__icon" aria-hidden="true">
+        <og-icon name="dentistry" />
+      </span>
+      <span>OdontoGest</span>
+    </a>
+
+    <button
+      class="nav-toggle"
+      type="button"
+      aria-label="Abrir menu de navegacao"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="landing-menu"
+      (click)="toggleMenu()"
+    >
+      <og-icon [name]="menuOpen() ? 'close' : 'menu'" />
+    </button>
+
+    <div id="landing-menu" class="nav-menu" [class.nav-menu--open]="menuOpen()">
+      <a href="#solucao" (click)="closeMenu()">Solucao</a>
+      <a href="#recursos" (click)="closeMenu()">Recursos</a>
+      <a href="#precos" (click)="closeMenu()">Precos</a>
+      <a href="#faq" (click)="closeMenu()">FAQ</a>
+      <a class="nav-menu__login" routerLink="/login" (click)="closeMenu()">Entrar</a>
+      <a class="nav-menu__cta" routerLink="/cadastro" (click)="closeMenu()">Comecar gratis</a>
+    </div>
+  </nav>
+</header>
+
+<main id="conteudo">
+  <og-landing-hero-section />
+  <og-landing-problem-solution />
+  <og-landing-features-section />
+  <og-landing-testimonials-section />
+  <og-landing-pricing-section />
+  <og-landing-faq-section />
+</main>
+
+<footer class="landing-footer">
+  <div class="footer-shell">
+    <div class="footer-brand">
+      <a class="brand" routerLink="/" aria-label="OdontoGest">
+        <span class="brand__icon" aria-hidden="true">
+          <og-icon name="dentistry" />
+        </span>
+        <span>OdontoGest</span>
+      </a>
+      <p>Gestao simples e segura para clinicas odontologicas crescerem com previsibilidade.</p>
+    </div>
+
+    <div class="footer-links" aria-label="Links institucionais">
+      <a href="#recursos">Recursos</a>
+      <a href="#precos">Precos</a>
+      <a routerLink="/termos">Termos</a>
+      <a routerLink="/privacidade">Privacidade</a>
+    </div>
+
+    <div class="footer-links" aria-label="Redes sociais">
+      <span>Instagram placeholder</span>
+      <span>LinkedIn placeholder</span>
+      <span>YouTube placeholder</span>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <span>© 2026 OdontoGest. Todos os direitos reservados.</span>
+  </div>
+</footer>

@@ -37,6 +37,15 @@
         <og-icon name="settings" aria-hidden="true" /><span>Configurações</span>
       </a>
       <a
+        routerLink="/app/equipe"
+        routerLinkActive="active"
+        [matTooltip]="sidebarCollapsed() && !isMobile() ? 'Equipe' : ''"
+        matTooltipPosition="right"
+        (click)="closeMobile(drawer)"
+      >
+        <og-icon name="person_add" aria-hidden="true" /><span>Equipe</span>
+      </a>
+      <a
         routerLink="/app/ajuda"
         routerLinkActive="active"
         [matTooltip]="sidebarCollapsed() && !isMobile() ? 'Ajuda e suporte' : ''"

@@ -105,6 +105,11 @@ export const routes: Routes = [
           import('./features/settings/settings.page').then((module) => module.SettingsPage),
       },
       {
+        path: 'equipe',
+        data: { title: 'Equipe' },
+        loadComponent: () => import('./features/team/team.page').then((module) => module.TeamPage),
+      },
+      {
         path: 'ajuda',
         data: { title: 'Ajuda e suporte' },
         loadComponent: () => import('./features/help/help.page').then((module) => module.HelpPage),

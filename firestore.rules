@@ -2,6 +2,25 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    match /clinics/{clinicId}/members/{memberId} {
+      allow read: if isClinicMember(clinicId);
+      allow create: if isOwnerBootstrap(clinicId, memberId)
+        || (isClinicAdmin(clinicId) && isValidTeamMember(clinicId, memberId));
+      allow update: if (
+          isClinicAdmin(clinicId)
+          && memberId != request.auth.uid
+          && isValidTeamMember(clinicId, memberId)
+        )
+        || isOwnerSelfRefresh(clinicId, memberId);
+      allow delete: if false;
+    }
+
+    match /clinics/{clinicId}/invites/{inviteId} {
+      allow read: if isClinicMember(clinicId);
+      allow create, update: if isClinicAdmin(clinicId) && isValidTeamInvite(clinicId);
+      allow delete: if false;
+    }
+
     match /users/{userId}/clinics/{clinicId}/appointments/{appointmentId} {
       allow read: if isOwnerUser(userId);
       allow create, update: if isOwnerUser(userId) && isValidAppointment(userId, clinicId);
@@ -30,6 +49,37 @@ service cloud.firestore {
 
     function isOwnerUser(userId) {
       return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isClinicMember(clinicId) {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/clinics/$(clinicId)/members/$(request.auth.uid))
+        && get(/databases/$(database)/documents/clinics/$(clinicId)/members/$(request.auth.uid)).data.status == 'ACTIVE';
+    }
+
+    function isClinicAdmin(clinicId) {
+      return isClinicMember(clinicId)
+        && get(/databases/$(database)/documents/clinics/$(clinicId)/members/$(request.auth.uid)).data.role in [
+          'OWNER',
+          'ADMIN'
+        ];
+    }
+
+    function isOwnerBootstrap(clinicId, memberId) {
+      return request.auth != null
+        && memberId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.clinicId == clinicId
+        && request.resource.data.role == 'OWNER'
+        && isValidTeamMember(clinicId, memberId);
+    }
+
+    function isOwnerSelfRefresh(clinicId, memberId) {
+      return request.auth != null
+        && memberId == request.auth.uid
+        && resource.data.role == 'OWNER'
+        && request.resource.data.role == 'OWNER'
+        && isValidTeamMember(clinicId, memberId);
     }
 
     function isValidAppointment(userId, clinicId) {
@@ -188,6 +238,48 @@ service cloud.firestore {
         && request.resource.data.notifyOpenPayments is bool
         && (request.resource.data.notes == null || request.resource.data.notes is string)
         && request.resource.data.createdAt is string
+        && request.resource.data.updatedAt is string;
+    }
+
+    function isValidTeamMember(clinicId, memberId) {
+      return request.resource.data.keys().hasOnly([
+          'userId',
+          'clinicId',
+          'name',
+          'email',
+          'role',
+          'status',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.userId == memberId
+        && request.resource.data.clinicId == clinicId
+        && request.resource.data.name is string
+        && request.resource.data.email is string
+        && request.resource.data.role in ['OWNER', 'ADMIN', 'RECEPTIONIST', 'DENTIST']
+        && request.resource.data.status in ['ACTIVE', 'INACTIVE']
+        && request.resource.data.createdAt is string
+        && request.resource.data.updatedAt is string;
+    }
+
+    function isValidTeamInvite(clinicId) {
+      return request.resource.data.keys().hasOnly([
+          'id',
+          'clinicId',
+          'email',
+          'role',
+          'status',
+          'invitedByUserId',
+          'invitedAt',
+          'updatedAt'
+        ])
+        && request.resource.data.clinicId == clinicId
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 3
+        && request.resource.data.role in ['ADMIN', 'RECEPTIONIST', 'DENTIST']
+        && request.resource.data.status in ['PENDING', 'CANCELED']
+        && request.resource.data.invitedByUserId == request.auth.uid
+        && request.resource.data.invitedAt is string
         && request.resource.data.updatedAt is string;
     }
   }

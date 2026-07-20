@@ -15,6 +15,7 @@ export interface ClinicSettings {
   readonly userId: string;
   readonly clinicName: string;
   readonly responsibleName: string;
+  readonly cnpj: string;
   readonly phone: string;
   readonly email: string;
   readonly address: string;
@@ -40,9 +41,8 @@ export class SettingsRepository {
     onNext: (settings: ClinicSettings | null) => void,
     onError: (error: unknown) => void,
   ): Promise<Unsubscribe> {
-    const userId = await this.currentUserId();
     return onSnapshot(
-      this.settingsRef(userId, clinicId),
+      this.settingsRef(clinicId),
       (snapshot) => onNext(snapshot.exists() ? this.fromFirestore(snapshot.data()) : null),
       onError,
     );
@@ -50,7 +50,7 @@ export class SettingsRepository {
 
   async upsert(settings: ClinicSettings): Promise<void> {
     const userId = await this.currentUserId();
-    await setDoc(this.settingsRef(userId, settings.clinicId), { ...settings, userId });
+    await setDoc(this.settingsRef(settings.clinicId), { ...settings, userId });
   }
 
   async getCurrent(): Promise<{
@@ -68,8 +68,8 @@ export class SettingsRepository {
     return (await this.getCurrent()).userId;
   }
 
-  private settingsRef(userId: string, clinicId: string) {
-    return doc(this.firestore, 'users', userId, 'clinics', clinicId, 'settings', 'profile');
+  private settingsRef(clinicId: string) {
+    return doc(this.firestore, 'clinics', clinicId, 'settings', 'profile');
   }
 
   private fromFirestore(data: Record<string, unknown>): ClinicSettings {
@@ -78,6 +78,7 @@ export class SettingsRepository {
       userId: this.stringField(data, 'userId'),
       clinicName: this.stringField(data, 'clinicName'),
       responsibleName: this.stringField(data, 'responsibleName'),
+      cnpj: this.stringField(data, 'cnpj'),
       phone: this.stringField(data, 'phone'),
       email: this.stringField(data, 'email'),
       address: this.stringField(data, 'address'),

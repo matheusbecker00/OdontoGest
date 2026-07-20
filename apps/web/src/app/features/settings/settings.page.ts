@@ -82,6 +82,10 @@ const STORAGE_PREFIX = 'odontogest.settings';
               <input formControlName="responsibleName" placeholder="Nome do responsável" />
             </label>
             <label>
+              CNPJ
+              <input formControlName="cnpj" inputmode="numeric" placeholder="00.000.000/0000-00" />
+            </label>
+            <label>
               Telefone
               <input formControlName="phone" placeholder="(00) 00000-0000" />
             </label>
@@ -429,6 +433,7 @@ export class SettingsPage {
   protected readonly form = this.formBuilder.nonNullable.group({
     clinicName: ['', [Validators.required, Validators.maxLength(180)]],
     responsibleName: ['', [Validators.required, Validators.maxLength(160)]],
+    cnpj: ['', Validators.maxLength(18)],
     phone: ['', Validators.maxLength(40)],
     email: ['', [Validators.email, Validators.maxLength(180)]],
     address: ['', Validators.maxLength(240)],
@@ -503,6 +508,13 @@ export class SettingsPage {
     }
 
     const value = this.form.getRawValue();
+    const cnpjError = this.cnpjError(value.cnpj);
+    if (cnpjError) {
+      this.formError.set(cnpjError);
+      this.savedMessage.set(null);
+      return;
+    }
+
     const now = new Date().toISOString();
     const previous = this.savedSettings();
     const next: ClinicSettings = {
@@ -510,6 +522,7 @@ export class SettingsPage {
       userId: await this.currentUserIdForWrite(),
       clinicName: value.clinicName.trim(),
       responsibleName: value.responsibleName.trim(),
+      cnpj: value.cnpj.trim(),
       phone: value.phone.trim(),
       email: value.email.trim(),
       address: value.address.trim(),
@@ -547,6 +560,7 @@ export class SettingsPage {
     this.form.setValue({
       clinicName: settings.clinicName,
       responsibleName: settings.responsibleName,
+      cnpj: settings.cnpj ?? '',
       phone: settings.phone,
       email: settings.email,
       address: settings.address,
@@ -568,6 +582,7 @@ export class SettingsPage {
       userId: this.auth.user()?.id ?? 'local-user',
       clinicName: this.clinicName(),
       responsibleName: this.auth.user()?.name ?? '',
+      cnpj: '',
       phone: '',
       email: this.auth.user()?.email ?? '',
       address: '',
@@ -599,6 +614,15 @@ export class SettingsPage {
     } catch {
       this.formError.set('Não foi possível salvar neste navegador.');
     }
+  }
+
+  private cnpjError(cnpj: string): string | null {
+    const value = cnpj.trim();
+    if (!value) return null;
+    const digits = value.replace(/\D/g, '');
+    if (digits.length !== 14) return 'Informe um CNPJ com 14 números ou deixe o campo vazio.';
+    if (/^(\d)\1+$/.test(digits)) return 'Informe um CNPJ válido.';
+    return null;
   }
 
   private async currentUserIdForWrite(): Promise<string> {

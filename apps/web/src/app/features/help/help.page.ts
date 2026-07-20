@@ -43,8 +43,8 @@ interface FaqItem {
           <small>STATUS DO SISTEMA</small>
           <h3>Seu ambiente já está em produção</h3>
           <p>
-            Frontend publicado na Vercel, autenticação Firebase ativa e módulos operacionais
-            sincronizando com Firestore por usuário e clínica.
+            Frontend publicado na Vercel, autenticação Firebase ativa, equipe e configurações
+            compartilhadas sincronizando com Firestore.
           </p>
         </div>
       </section>
@@ -109,8 +109,8 @@ interface FaqItem {
             <div>
               <span><og-icon name="groups" /></span>
               <div>
-                <strong>Usuários e convites</strong>
-                <small>Secretária, dentista e administrador compartilhando a mesma clínica.</small>
+                <strong>Agenda compartilhada</strong>
+                <small>Consultas visíveis para toda a equipe ativa da clínica.</small>
               </div>
             </div>
             <div>
@@ -427,7 +427,7 @@ export class HelpPage {
     {
       question: 'Os dados já ficam salvos na nuvem?',
       answer:
-        'Sim. Agenda, financeiro, estoque e configurações sincronizam com Firestore por usuário e clínica. Alguns módulos ainda mantêm fallback local se a conexão falhar.',
+        'Sim. Equipe e configurações da clínica já ficam compartilhadas no Firestore. Agenda, financeiro e estoque ainda mantêm fallback local e estão sendo migrados para o mesmo modelo compartilhado.',
     },
     {
       question: 'Posso usar com a Vercel Hobby e Firebase Spark?',
@@ -437,7 +437,7 @@ export class HelpPage {
     {
       question: 'Já posso chamar outras pessoas da clínica?',
       answer:
-        'Ainda não. O próximo passo recomendado é implementar convites, perfis e permissões compartilhadas por clínica.',
+        'Sim. Em Equipe, o dono ou admin pode criar acesso por e-mail ou código numérico com senha, sem salvar senha no Firestore.',
     },
     {
       question: 'O financeiro já processa pagamentos?',

@@ -107,7 +107,7 @@ $og-breakpoints: (
 }
 
 :root {
-  --og-font-family: Inter, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --og-font-family: Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --og-color-primary: #{og-color(primary-500)};
   --og-color-text: #{og-color(ink-950)};
   --og-color-muted: #{og-color(ink-500)};

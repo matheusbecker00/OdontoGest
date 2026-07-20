@@ -239,8 +239,12 @@ nav {
 
 .today {
   margin-right: 0.75rem;
+  color: #475569;
+  font-family: var(--og-font-family);
   font-size: 0.78rem;
-  text-transform: capitalize;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-transform: none;
 }
 
 .content {

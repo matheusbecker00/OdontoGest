@@ -1,6 +1,7 @@
 :host {
   display: block;
   color: #0f172a;
+  font-family: var(--og-font-family);
 }
 
 .patients-page {
@@ -43,6 +44,7 @@ mat-card {
   margin-bottom: 1rem;
   border-color: #e4eaf1;
   border-radius: 1rem;
+  font-family: var(--og-font-family);
   box-shadow: 0 5px 18px rgb(15 23 42 / 4%);
 }
 
@@ -58,6 +60,14 @@ mat-card {
 .filters-card mat-form-field,
 .patient-form mat-form-field {
   width: 100%;
+  font-family: var(--og-font-family);
+}
+
+.filters-card,
+.patient-form {
+  --mat-form-field-container-text-font: var(--og-font-family);
+  --mat-form-field-outlined-label-text-font: var(--og-font-family);
+  --mat-select-trigger-text-font: var(--og-font-family);
 }
 
 .patient-form {
@@ -80,6 +90,21 @@ mat-card {
 table {
   width: 100%;
   min-width: 45rem;
+  color: #10213a;
+  font-family: var(--og-font-family);
+  font-size: 0.84rem;
+}
+
+th,
+td {
+  font-family: var(--og-font-family);
+}
+
+th {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
 td span,
@@ -87,8 +112,16 @@ td strong {
   display: block;
 }
 
+td strong {
+  color: #10213a;
+  font-size: 0.86rem;
+  font-weight: 750;
+}
+
 td span {
   color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.45;
 }
 
 .status {

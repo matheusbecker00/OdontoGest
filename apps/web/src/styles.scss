@@ -27,6 +27,38 @@ textarea {
   font: inherit;
 }
 
+body,
+mat-card,
+mat-form-field,
+mat-label,
+mat-select,
+mat-option,
+mat-table,
+table,
+th,
+td,
+.mat-mdc-card,
+.mat-mdc-form-field,
+.mat-mdc-floating-label,
+.mat-mdc-input-element,
+.mat-mdc-select,
+.mat-mdc-option,
+.mat-mdc-table,
+.mat-mdc-header-cell,
+.mat-mdc-cell,
+.mat-mdc-row,
+.mat-mdc-header-row,
+.mat-mdc-button-base,
+.mat-mdc-menu-item,
+.mat-mdc-tooltip,
+.mdc-button,
+.mdc-text-field,
+.mdc-list-item,
+.mdc-data-table__cell,
+.mdc-data-table__header-cell {
+  font-family: var(--og-font-family) !important;
+}
+
 :focus-visible {
   @include tokens.og-focus-ring;
 }

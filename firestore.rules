@@ -38,6 +38,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /clinics/{clinicId}/finance/{entryId} {
+      allow read: if isClinicMember(clinicId);
+      allow create: if isClinicMember(clinicId)
+        && request.resource.data.userId == request.auth.uid
+        && isValidSharedFinancialEntry(clinicId);
+      allow update: if isClinicMember(clinicId) && isValidSharedFinancialEntry(clinicId);
+      allow delete: if false;
+    }
+
     match /users/{userId}/clinics/{clinicId}/appointments/{appointmentId} {
       allow read: if isOwnerUser(userId);
       allow create, update: if isOwnerUser(userId) && isValidAppointment(userId, clinicId);
@@ -190,6 +199,40 @@ service cloud.firestore {
         && request.resource.data.id is string
         && request.resource.data.clinicId == clinicId
         && request.resource.data.userId == userId
+        && request.resource.data.type in ['INCOME', 'EXPENSE']
+        && request.resource.data.status in ['OPEN', 'PAID', 'CANCELED']
+        && request.resource.data.description is string
+        && request.resource.data.description.size() > 0
+        && request.resource.data.category is string
+        && request.resource.data.category.size() > 0
+        && request.resource.data.amountCents is int
+        && request.resource.data.amountCents > 0
+        && request.resource.data.dueDate is string
+        && (request.resource.data.paidAt == null || request.resource.data.paidAt is string)
+        && (request.resource.data.notes == null || request.resource.data.notes is string)
+        && request.resource.data.createdAt is string
+        && request.resource.data.updatedAt is string;
+    }
+
+    function isValidSharedFinancialEntry(clinicId) {
+      return request.resource.data.keys().hasOnly([
+          'id',
+          'clinicId',
+          'userId',
+          'type',
+          'status',
+          'description',
+          'category',
+          'amountCents',
+          'dueDate',
+          'paidAt',
+          'notes',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.id is string
+        && request.resource.data.clinicId == clinicId
+        && request.resource.data.userId is string
         && request.resource.data.type in ['INCOME', 'EXPENSE']
         && request.resource.data.status in ['OPEN', 'PAID', 'CANCELED']
         && request.resource.data.description is string

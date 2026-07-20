@@ -3,6 +3,7 @@ import {
   collection,
   doc,
   getFirestore,
+  getDocs,
   onSnapshot,
   setDoc,
   type Firestore,
@@ -40,8 +41,10 @@ export class FinanceRepository {
     onNext: (entries: readonly FinancialEntry[]) => void,
     onError: (error: unknown) => void,
   ): Promise<Unsubscribe> {
-    const userId = await this.currentUserId();
-    const entriesRef = collection(this.firestore, 'users', userId, 'clinics', clinicId, 'finance');
+    await this.migrateLegacyEntries(clinicId).catch((error: unknown) => {
+      console.warn('Could not migrate legacy finance entries.', error);
+    });
+    const entriesRef = collection(this.firestore, 'clinics', clinicId, 'finance');
 
     return onSnapshot(
       entriesRef,
@@ -57,7 +60,7 @@ export class FinanceRepository {
 
   async upsert(entry: FinancialEntry): Promise<void> {
     const userId = await this.currentUserId();
-    await setDoc(this.entryRef(userId, entry.clinicId, entry.id), { ...entry, userId });
+    await setDoc(this.entryRef(entry.clinicId, entry.id), { ...entry, userId });
   }
 
   async currentUserId(): Promise<string> {
@@ -67,8 +70,23 @@ export class FinanceRepository {
     return profile.id;
   }
 
-  private entryRef(userId: string, clinicId: string, entryId: string) {
-    return doc(this.firestore, 'users', userId, 'clinics', clinicId, 'finance', entryId);
+  private entryRef(clinicId: string, entryId: string) {
+    return doc(this.firestore, 'clinics', clinicId, 'finance', entryId);
+  }
+
+  private async migrateLegacyEntries(clinicId: string): Promise<void> {
+    const userId = await this.currentUserId();
+    const legacyRef = collection(this.firestore, 'users', userId, 'clinics', clinicId, 'finance');
+    const snapshot = await getDocs(legacyRef);
+    await Promise.all(
+      snapshot.docs.map((document) =>
+        setDoc(this.entryRef(clinicId, document.id), {
+          ...document.data(),
+          id: document.id,
+          clinicId,
+        }),
+      ),
+    );
   }
 
   private fromFirestore(id: string, data: Record<string, unknown>): FinancialEntry {

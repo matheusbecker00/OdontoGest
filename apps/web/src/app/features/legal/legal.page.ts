@@ -9,25 +9,91 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
       <article>
         <a routerLink="/cadastro">← Voltar ao cadastro</a>
         @if (document === 'terms') {
-          <h1>Termos de Uso — versão de validação</h1>
+          <h1>Termos de Uso</h1>
           <p class="notice">
-            Versão 2026-07-16. Este texto é preliminar e deverá passar por revisão jurídica antes do
-            uso comercial.
+            Versão 2026-07-21. Ao criar uma conta, iniciar o teste gratuito, contratar um plano ou
+            utilizar o OdontoGest, você declara que leu, entendeu e concorda com estes Termos.
           </p>
-          <h2>Uso permitido</h2>
+          <h2>1. Sobre o OdontoGest</h2>
           <p>
-            O OdontoGest está em desenvolvimento. Nesta etapa, utilize apenas dados fictícios e não
-            registre informações reais de pacientes ou dados clínicos.
+            O OdontoGest é uma plataforma online para apoio à gestão administrativa de clínicas e
+            consultórios odontológicos, incluindo funcionalidades como agenda, cadastros, pacientes,
+            dentistas, procedimentos, equipe, financeiro, estoque, relatórios e assinatura.
           </p>
-          <h2>Responsabilidade da conta</h2>
+          <h2>2. Conta, acesso e responsabilidade</h2>
           <p>
-            O responsável deve fornecer dados administrativos corretos, proteger suas credenciais e
-            comunicar qualquer suspeita de acesso indevido.
+            O responsável pela conta deve fornecer informações verdadeiras, manter seus dados
+            atualizados, proteger suas credenciais, controlar quem acessa a clínica e comunicar
+            imediatamente qualquer suspeita de uso indevido, perda de senha ou acesso não
+            autorizado.
           </p>
-          <h2>Disponibilidade</h2>
+          <h2>3. Teste gratuito e assinatura</h2>
           <p>
-            O ambiente de validação pode sofrer alterações, indisponibilidade ou reinicialização de
-            dados. Ele ainda não deve ser usado na operação de uma clínica real.
+            O OdontoGest pode oferecer 15 dias de teste gratuito por clínica. Após o fim do teste, o
+            acesso aos dados pode permanecer disponível para leitura, mas a criação, edição,
+            inativação ou gravação de registros poderá ser bloqueada até a contratação ou
+            regularização da assinatura.
+          </p>
+          <p>
+            Pagamentos e cobranças podem ser processados por provedores terceiros, como o Asaas. A
+            liberação do plano depende da confirmação do pagamento e da sincronização do status da
+            assinatura nos sistemas do OdontoGest.
+          </p>
+          <h2>4. Suspensão, atraso e cancelamento</h2>
+          <p>
+            Assinaturas vencidas, canceladas, contestadas ou com falha de pagamento podem colocar a
+            clínica em modo somente leitura. Nessa condição, os dados existentes podem ser
+            consultados, mas operações de gravação poderão ser impedidas até a regularização.
+          </p>
+          <h2>5. Dados inseridos na plataforma</h2>
+          <p>
+            A clínica é responsável pela licitude, qualidade, necessidade e atualização dos dados
+            que inserir no OdontoGest, inclusive dados pessoais, dados de pacientes, dados de
+            equipe, informações financeiras e dados relacionados à rotina odontológica.
+          </p>
+          <p>
+            O usuário deve utilizar a plataforma de acordo com a legislação aplicável, incluindo a
+            Lei Geral de Proteção de Dados Pessoais (LGPD), normas profissionais e obrigações
+            regulatórias pertinentes à atividade odontológica.
+          </p>
+          <h2>6. Uso adequado</h2>
+          <p>
+            É proibido utilizar o OdontoGest para fins ilícitos, envio de conteúdo abusivo,
+            tentativa de acesso não autorizado, violação de segurança, engenharia reversa indevida,
+            sobrecarga da infraestrutura ou qualquer uso que possa prejudicar a plataforma, outros
+            usuários ou terceiros.
+          </p>
+          <h2>7. Disponibilidade e evolução do serviço</h2>
+          <p>
+            O OdontoGest poderá receber melhorias, ajustes, correções, novas funcionalidades ou
+            alterações de regras operacionais. Embora sejam adotados esforços razoáveis para manter
+            a plataforma disponível, podem ocorrer indisponibilidades temporárias por manutenção,
+            atualizações, falhas técnicas, integrações de terceiros ou eventos fora do controle da
+            operação.
+          </p>
+          <h2>8. Suporte</h2>
+          <p>
+            O suporte inicial é prestado pelos canais informados no próprio sistema, incluindo
+            WhatsApp quando disponível. O atendimento poderá priorizar incidentes que impeçam login,
+            uso da assinatura, gravação de dados ou funcionamento essencial da plataforma.
+          </p>
+          <h2>9. Limitação de responsabilidade</h2>
+          <p>
+            O OdontoGest é uma ferramenta de apoio à gestão. A clínica continua responsável por suas
+            decisões administrativas, comerciais, financeiras, clínicas, profissionais e
+            regulatórias. A plataforma não substitui sistemas, rotinas, conferências, orientações
+            profissionais ou obrigações legais que sejam exigidas da clínica.
+          </p>
+          <h2>10. Alterações destes Termos</h2>
+          <p>
+            Estes Termos podem ser atualizados para refletir mudanças no serviço, em planos,
+            integrações, obrigações legais ou práticas operacionais. A versão publicada nesta página
+            será a versão vigente para uso da plataforma.
+          </p>
+          <h2>11. Contato</h2>
+          <p>
+            Para dúvidas sobre estes Termos, assinatura, acesso ou uso do OdontoGest, entre em
+            contato pelos canais de suporte disponibilizados dentro da plataforma.
           </p>
         } @else {
           <h1>Política de Privacidade — versão de validação</h1>

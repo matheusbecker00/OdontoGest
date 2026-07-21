@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 import { AuthStore } from '../../core/auth/auth.store';
+import { SubscriptionAccessService } from '../billing/subscription-access.service';
 import { AppShellComponent } from './app-shell.component';
 
 describe('AppShellComponent', () => {
@@ -21,6 +22,19 @@ describe('AppShellComponent', () => {
               (permissions: readonly string[]) => !permissions.includes('billing.manage'),
             ),
             logout: vi.fn(),
+          },
+        },
+        {
+          provide: SubscriptionAccessService,
+          useValue: {
+            showNotice: signal(false),
+            noticeLevel: signal('hidden'),
+            isReadOnly: signal(false),
+            noticeTitle: signal(''),
+            noticeDescription: signal(''),
+            noticeActionLabel: signal('Ver assinatura'),
+            openBillingAction: vi.fn(),
+            canWrite: vi.fn(() => true),
           },
         },
       ],

@@ -100,20 +100,26 @@
         <span class="top-avatar">{{ auth.user()?.name?.charAt(0) || 'M' }}</span>
       </div>
     </header>
-    @if (showBillingNotice()) {
+    @if (subscription.showNotice()) {
       <section
         class="billing-notice"
-        [class.billing-notice--warning]="billingNoticeLevel() === 'warning'"
-        [class.billing-notice--danger]="billingNoticeLevel() === 'danger'"
+        [class.billing-notice--warning]="subscription.noticeLevel() === 'warning'"
+        [class.billing-notice--danger]="subscription.noticeLevel() === 'danger'"
+        [class.billing-notice--readonly]="subscription.isReadOnly()"
         aria-live="polite"
       >
         <span class="billing-notice__icon"><og-icon name="credit_card" /></span>
         <div>
-          <strong>{{ billingNoticeTitle() }}</strong>
-          <p>{{ billingNoticeDescription() }}</p>
+          <strong>{{ subscription.noticeTitle() }}</strong>
+          <p>{{ subscription.noticeDescription() }}</p>
+          @if (subscription.isReadOnly()) {
+            <small
+              >Leitura de dados liberada · Escritas serão bloqueadas por etapa controlada.</small
+            >
+          }
         </div>
-        <button mat-stroked-button type="button" (click)="openBillingAction()">
-          {{ billingNoticeActionLabel() }}
+        <button mat-stroked-button type="button" (click)="subscription.openBillingAction()">
+          {{ subscription.noticeActionLabel() }}
         </button>
       </section>
     }

@@ -266,7 +266,8 @@ nav {
   }
 
   strong,
-  p {
+  p,
+  small {
     margin: 0;
   }
 
@@ -280,6 +281,17 @@ nav {
     color: #61728a;
     font-size: 0.74rem;
     line-height: 1.45;
+  }
+
+  small {
+    display: inline-block;
+    margin-top: 0.35rem;
+    border-radius: 99px;
+    padding: 0.22rem 0.5rem;
+    color: #7f1d1d;
+    background: #fee2e2;
+    font-size: 0.66rem;
+    font-weight: 800;
   }
 
   button {
@@ -306,6 +318,10 @@ nav {
     color: #dc2626;
     background: #fee2e2;
   }
+}
+
+.billing-notice--readonly {
+  border-style: dashed;
 }
 
 .today {

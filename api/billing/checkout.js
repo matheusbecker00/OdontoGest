@@ -1,5 +1,6 @@
 const { createPaymentLink } = require("../_lib/asaas");
 const { getPlan } = require("../_lib/billing-plans");
+const { syncClinicSubscription } = require("../_lib/dataconnect-subscription");
 const { firestore, verifyBearerToken } = require("../_lib/firebase-admin");
 
 function send(response, statusCode, payload) {
@@ -100,6 +101,16 @@ module.exports = async function handler(request, response) {
         },
         { merge: true },
       );
+    });
+    await syncClinicSubscription({
+      clinicId,
+      status: "CHECKOUT_STARTED",
+      planId: plan.id,
+      planName: plan.name,
+      provider: "ASAAS",
+      providerSubscriptionId: paymentLink.id || null,
+      checkoutUrl: paymentLink.url || null,
+      currentPeriodEnd: null,
     });
 
     return send(response, 200, {

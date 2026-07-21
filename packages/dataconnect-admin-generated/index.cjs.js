@@ -13,6 +13,17 @@ const PatientRegistrationStatus = {
 }
 exports.PatientRegistrationStatus = PatientRegistrationStatus;
 
+const SubscriptionStatus = {
+  NONE: "NONE",
+  CHECKOUT_STARTED: "CHECKOUT_STARTED",
+  PENDING: "PENDING",
+  ACTIVE: "ACTIVE",
+  TRIAL: "TRIAL",
+  PAST_DUE: "PAST_DUE",
+  CANCELED: "CANCELED",
+}
+exports.SubscriptionStatus = SubscriptionStatus;
+
 const UserStatus = {
   PENDING_ONBOARDING: "PENDING_ONBOARDING",
   ACTIVE: "ACTIVE",
@@ -48,6 +59,13 @@ function insertTenantAuditEvent(dcOrVarsOrOptions, varsOrOptions, options) {
   return dcInstance.executeMutation('InsertTenantAuditEvent', inputVars, inputOpts);
 }
 exports.insertTenantAuditEvent = insertTenantAuditEvent;
+
+function upsertClinicSubscription(dcOrVarsOrOptions, varsOrOptions, options) {
+  const { dc: dcInstance, vars: inputVars, options: inputOpts} = validateAdminArgs(connectorConfig, dcOrVarsOrOptions, varsOrOptions, options, true, true);
+  dcInstance.useGen(true);
+  return dcInstance.executeMutation('UpsertClinicSubscription', inputVars, inputOpts);
+}
+exports.upsertClinicSubscription = upsertClinicSubscription;
 
 function createPatient(dcOrVarsOrOptions, varsOrOptions, options) {
   const { dc: dcInstance, vars: inputVars, options: inputOpts} = validateAdminArgs(connectorConfig, dcOrVarsOrOptions, varsOrOptions, options, true, true);

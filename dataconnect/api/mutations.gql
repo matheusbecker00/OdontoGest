@@ -68,6 +68,31 @@ mutation InsertTenantAuditEvent(
   )
 }
 
+mutation UpsertClinicSubscription(
+  $clinicId: UUID!
+  $status: SubscriptionStatus!
+  $planId: String
+  $planName: String
+  $provider: String
+  $providerSubscriptionId: String
+  $checkoutUrl: String
+  $currentPeriodEnd: Timestamp
+) @auth(level: NO_ACCESS) @transaction {
+  clinicSubscription_upsert(
+    data: {
+      clinicId: $clinicId
+      status: $status
+      planId: $planId
+      planName: $planName
+      provider: $provider
+      providerSubscriptionId: $providerSubscriptionId
+      checkoutUrl: $checkoutUrl
+      currentPeriodEnd: $currentPeriodEnd
+      updatedAt_expr: "request.time"
+    }
+  )
+}
+
 mutation CreatePatient(
   $id: UUID!
   $clinicId: UUID!
@@ -100,6 +125,13 @@ mutation CreatePatient(
       limit: 1
     ) {
       id
+    }
+    clinicSubscriptions(where: { clinicId: { eq: $clinicId } }, limit: 1) {
+      status
+        @check(
+          expr: "this != 'PAST_DUE' && this != 'CANCELED'"
+          message: "Active subscription required"
+        )
     }
   }
   patient_insert(
@@ -166,6 +198,13 @@ mutation UpdatePatient(
     ) {
       id
     }
+    clinicSubscriptions(where: { clinicId: { eq: $clinicId } }, limit: 1) {
+      status
+        @check(
+          expr: "this != 'PAST_DUE' && this != 'CANCELED'"
+          message: "Active subscription required"
+        )
+    }
   }
   patient_updateMany(
     where: {
@@ -225,6 +264,13 @@ mutation InactivatePatient(
       limit: 1
     ) {
       id
+    }
+    clinicSubscriptions(where: { clinicId: { eq: $clinicId } }, limit: 1) {
+      status
+        @check(
+          expr: "this != 'PAST_DUE' && this != 'CANCELED'"
+          message: "Active subscription required"
+        )
     }
   }
   patient_updateMany(

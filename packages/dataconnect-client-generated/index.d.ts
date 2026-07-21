@@ -32,6 +32,11 @@ export interface ClinicSettings_Key {
   __typename?: 'ClinicSettings_Key';
 }
 
+export interface ClinicSubscription_Key {
+  clinicId: UUIDString;
+  __typename?: 'ClinicSubscription_Key';
+}
+
 export interface Clinic_Key {
   id: UUIDString;
   __typename?: 'Clinic_Key';

@@ -10,6 +10,7 @@
     "pnpm": ">=11.13.1"
   },
   "dependencies": {
+    "@odontogest/dataconnect-admin": "workspace:*",
     "firebase-admin": "13.10.0"
   },
   "scripts": {

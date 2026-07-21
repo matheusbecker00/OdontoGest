@@ -55,6 +55,16 @@ enum ProcedureStatus {
   INACTIVE
 }
 
+enum SubscriptionStatus {
+  NONE
+  CHECKOUT_STARTED
+  PENDING
+  ACTIVE
+  TRIAL
+  PAST_DUE
+  CANCELED
+}
+
 # O identificador principal é o UID imutável emitido pelo Firebase Authentication.
 type User
   @table(key: "id")
@@ -102,6 +112,25 @@ type ClinicSettings
   updatedAt: Timestamp! @default(expr: "request.time")
   createdBy: String @col(dataType: "varchar(128)")
   updatedBy: String @col(dataType: "varchar(128)")
+}
+
+type ClinicSubscription
+  @table(key: "clinicId")
+  @index(
+    fields: ["status", "updatedAt"]
+    name: "clinic_subscription_status_idx"
+  ) {
+  clinicId: UUID!
+  clinic: Clinic! @ref(fields: ["clinicId"])
+  status: SubscriptionStatus! @default(value: NONE)
+  planId: String @col(dataType: "varchar(80)")
+  planName: String @col(dataType: "varchar(120)")
+  provider: String @col(dataType: "varchar(40)")
+  providerSubscriptionId: String @col(dataType: "varchar(120)")
+  checkoutUrl: String @col(dataType: "varchar(1000)")
+  currentPeriodEnd: Timestamp
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
 }
 
 type Patient

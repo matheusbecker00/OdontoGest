@@ -1,4 +1,6 @@
 const { firestore } = require("../_lib/firebase-admin");
+const { getPlan } = require("../_lib/billing-plans");
+const { syncClinicSubscription } = require("../_lib/dataconnect-subscription");
 
 function send(response, statusCode, payload) {
   response.status(statusCode).json(payload);
@@ -18,6 +20,16 @@ function statusFromEvent(event) {
   if (event === "SUBSCRIPTION_DELETED" || event === "SUBSCRIPTION_INACTIVATED")
     return "CANCELED";
   return "PENDING";
+}
+
+function currentPeriodEndFromPayment(payment) {
+  return (
+    payment.nextDueDate ||
+    payment.dueDate ||
+    payment.confirmedDate ||
+    payment.paymentDate ||
+    null
+  );
 }
 
 module.exports = async function handler(request, response) {
@@ -46,6 +58,7 @@ module.exports = async function handler(request, response) {
 
     const now = new Date().toISOString();
     const nextStatus = statusFromEvent(payload.event);
+    const plan = getPlan(context.planId);
     const eventId =
       payload.id ||
       `${payload.event || "UNKNOWN"}-${payment.id || payment.subscription || Date.now()}`;
@@ -86,6 +99,16 @@ module.exports = async function handler(request, response) {
       };
       transaction.set(clinicEventRef, eventPayload, { merge: true });
       transaction.set(globalEventRef, eventPayload, { merge: true });
+    });
+    await syncClinicSubscription({
+      clinicId: context.clinicId,
+      status: nextStatus,
+      planId: context.planId,
+      planName: plan?.name || null,
+      provider: "ASAAS",
+      providerSubscriptionId: payment.subscription || payment.id || null,
+      checkoutUrl: null,
+      currentPeriodEnd: currentPeriodEndFromPayment(payment),
     });
 
     return send(response, 200, { ok: true });

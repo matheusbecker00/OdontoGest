@@ -16,6 +16,15 @@ export enum PatientRegistrationStatus {
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
 }
+export enum SubscriptionStatus {
+  NONE = "NONE",
+  CHECKOUT_STARTED = "CHECKOUT_STARTED",
+  PENDING = "PENDING",
+  ACTIVE = "ACTIVE",
+  TRIAL = "TRIAL",
+  PAST_DUE = "PAST_DUE",
+  CANCELED = "CANCELED",
+}
 export enum UserStatus {
   PENDING_ONBOARDING = "PENDING_ONBOARDING",
   ACTIVE = "ACTIVE",
@@ -36,6 +45,11 @@ export interface ClinicMembership_Key {
 export interface ClinicSettings_Key {
   id: UUIDString;
   __typename?: 'ClinicSettings_Key';
+}
+
+export interface ClinicSubscription_Key {
+  clinicId: UUIDString;
+  __typename?: 'ClinicSubscription_Key';
 }
 
 export interface Clinic_Key {
@@ -282,6 +296,21 @@ export interface UpdatePatientVariables {
   userAgentSummary?: string | null;
 }
 
+export interface UpsertClinicSubscriptionData {
+  clinicSubscription_upsert: ClinicSubscription_Key;
+}
+
+export interface UpsertClinicSubscriptionVariables {
+  clinicId: UUIDString;
+  status: SubscriptionStatus;
+  planId?: string | null;
+  planName?: string | null;
+  provider?: string | null;
+  providerSubscriptionId?: string | null;
+  checkoutUrl?: string | null;
+  currentPeriodEnd?: TimestampString | null;
+}
+
 export interface UpsertFirebaseUserData {
   user_upsert: User_Key;
 }
@@ -313,6 +342,11 @@ export function insertSecurityEvent(vars: InsertSecurityEventVariables, options?
 export function insertTenantAuditEvent(dc: DataConnect, vars: InsertTenantAuditEventVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<InsertTenantAuditEventData>>;
 /** Generated Node Admin SDK operation action function for the 'InsertTenantAuditEvent' Mutation. Allow users to pass in custom DataConnect instances. */
 export function insertTenantAuditEvent(vars: InsertTenantAuditEventVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<InsertTenantAuditEventData>>;
+
+/** Generated Node Admin SDK operation action function for the 'UpsertClinicSubscription' Mutation. Allow users to execute without passing in DataConnect. */
+export function upsertClinicSubscription(dc: DataConnect, vars: UpsertClinicSubscriptionVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<UpsertClinicSubscriptionData>>;
+/** Generated Node Admin SDK operation action function for the 'UpsertClinicSubscription' Mutation. Allow users to pass in custom DataConnect instances. */
+export function upsertClinicSubscription(vars: UpsertClinicSubscriptionVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<UpsertClinicSubscriptionData>>;
 
 /** Generated Node Admin SDK operation action function for the 'CreatePatient' Mutation. Allow users to execute without passing in DataConnect. */
 export function createPatient(dc: DataConnect, vars: CreatePatientVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<CreatePatientData>>;

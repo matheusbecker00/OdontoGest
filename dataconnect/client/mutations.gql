@@ -125,6 +125,13 @@ mutation CreateMyPatient(
     ) {
       id
     }
+    clinicSubscriptions(where: { clinicId: { eq: $clinicId } }, limit: 1) {
+      status
+        @check(
+          expr: "this != 'PAST_DUE' && this != 'CANCELED'"
+          message: "Active subscription required"
+        )
+    }
   }
   patient_insert(
     data: {
@@ -186,6 +193,13 @@ mutation UpdateMyPatient(
     ) {
       id
     }
+    clinicSubscriptions(where: { clinicId: { eq: $clinicId } }, limit: 1) {
+      status
+        @check(
+          expr: "this != 'PAST_DUE' && this != 'CANCELED'"
+          message: "Active subscription required"
+        )
+    }
   }
   patient_updateMany(
     where: {
@@ -241,6 +255,13 @@ mutation InactivateMyPatient(
       limit: 1
     ) {
       id
+    }
+    clinicSubscriptions(where: { clinicId: { eq: $clinicId } }, limit: 1) {
+      status
+        @check(
+          expr: "this != 'PAST_DUE' && this != 'CANCELED'"
+          message: "Active subscription required"
+        )
     }
   }
   patient_updateMany(
@@ -310,6 +331,13 @@ mutation CreateMyDentist(
             message: "Insufficient permission"
           )
       }
+    }
+    clinicSubscriptions(where: { clinicId: { eq: $clinicId } }, limit: 1) {
+      status
+        @check(
+          expr: "this != 'PAST_DUE' && this != 'CANCELED'"
+          message: "Active subscription required"
+        )
     }
   }
   dentist_insert(
@@ -384,6 +412,13 @@ mutation UpdateMyDentist(
           )
       }
     }
+    clinicSubscriptions(where: { clinicId: { eq: $clinicId } }, limit: 1) {
+      status
+        @check(
+          expr: "this != 'PAST_DUE' && this != 'CANCELED'"
+          message: "Active subscription required"
+        )
+    }
   }
   dentist_updateMany(
     where: {
@@ -447,6 +482,13 @@ mutation InactivateMyDentist(
             message: "Insufficient permission"
           )
       }
+    }
+    clinicSubscriptions(where: { clinicId: { eq: $clinicId } }, limit: 1) {
+      status
+        @check(
+          expr: "this != 'PAST_DUE' && this != 'CANCELED'"
+          message: "Active subscription required"
+        )
     }
   }
   dentist_updateMany(
@@ -513,6 +555,13 @@ mutation CreateMyProcedure(
             message: "Insufficient permission"
           )
       }
+    }
+    clinicSubscriptions(where: { clinicId: { eq: $clinicId } }, limit: 1) {
+      status
+        @check(
+          expr: "this != 'PAST_DUE' && this != 'CANCELED'"
+          message: "Active subscription required"
+        )
     }
   }
   procedure_insert(
@@ -581,6 +630,13 @@ mutation UpdateMyProcedure(
           )
       }
     }
+    clinicSubscriptions(where: { clinicId: { eq: $clinicId } }, limit: 1) {
+      status
+        @check(
+          expr: "this != 'PAST_DUE' && this != 'CANCELED'"
+          message: "Active subscription required"
+        )
+    }
   }
   procedure_updateMany(
     where: {
@@ -641,6 +697,13 @@ mutation InactivateMyProcedure(
             message: "Insufficient permission"
           )
       }
+    }
+    clinicSubscriptions(where: { clinicId: { eq: $clinicId } }, limit: 1) {
+      status
+        @check(
+          expr: "this != 'PAST_DUE' && this != 'CANCELED'"
+          message: "Active subscription required"
+        )
     }
   }
   procedure_updateMany(

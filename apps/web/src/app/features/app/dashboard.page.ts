@@ -13,10 +13,14 @@ import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthStore } from '../../core/auth/auth.store';
 import { IconComponent } from '../../shared/components/icon.component';
+import type { FinancialEntry } from '../finance/finance.repository';
+import type { InventoryItem } from '../inventory/inventory.repository';
 import { PatientsApiService } from '../patients/patients-api.service';
 import type { Appointment } from './appointments.repository';
 
 const APPOINTMENTS_STORAGE_PREFIX = 'odontogest.appointments';
+const FINANCE_STORAGE_PREFIX = 'odontogest.finance';
+const INVENTORY_STORAGE_PREFIX = 'odontogest.inventory';
 
 @Component({
   selector: 'og-dashboard-page',
@@ -50,12 +54,16 @@ const APPOINTMENTS_STORAGE_PREFIX = 'odontogest.appointments';
         <article class="metric metric--green">
           <span class="metric__icon"><og-icon name="payments" /></span>
           <div>
-            <small>Recebimentos hoje</small><strong>R$ 0</strong><span>Sem lançamentos</span>
+            <small>Vencimentos hoje</small><strong>{{ formatMoney(todayDueCents()) }}</strong
+            ><span>{{ todayDueLabel() }}</span>
           </div>
         </article>
         <article class="metric metric--orange">
           <span class="metric__icon"><og-icon name="pending_actions" /></span>
-          <div><small>Pendências</small><strong>0</strong><span>Tudo em dia</span></div>
+          <div>
+            <small>Pendências</small><strong>{{ pendingCount() }}</strong
+            ><span>{{ pendingLabel() }}</span>
+          </div>
         </article>
       </section>
 
@@ -519,6 +527,12 @@ export class DashboardPage implements OnInit {
   private readonly patients = inject(PatientsApiService);
   protected readonly patientTotal = signal(0);
   private readonly appointments = signal<readonly Appointment[]>(this.readStoredAppointments());
+  private readonly financeEntries = signal<readonly FinancialEntry[]>(
+    this.readStoredFinanceEntries(),
+  );
+  private readonly inventoryItems = signal<readonly InventoryItem[]>(
+    this.readStoredInventoryItems(),
+  );
   protected readonly todayAppointments = computed(() => {
     const today = this.toDateInput(new Date());
     return this.appointments()
@@ -530,6 +544,43 @@ export class DashboardPage implements OnInit {
     if (total === 0) return 'Nenhum atendimento';
     if (total === 1) return '1 atendimento hoje';
     return `${total} atendimentos hoje`;
+  });
+  protected readonly todayDueEntries = computed(() => {
+    const today = this.toDateInput(new Date());
+    return this.financeEntries().filter(
+      (entry) => entry.dueDate === today && entry.status !== 'CANCELED',
+    );
+  });
+  protected readonly todayDueCents = computed(() =>
+    this.todayDueEntries().reduce((total, entry) => total + entry.amountCents, 0),
+  );
+  protected readonly todayDueLabel = computed(() => {
+    const total = this.todayDueEntries().length;
+    if (total === 0) return 'Sem vencimentos';
+    if (total === 1) return '1 lançamento vence hoje';
+    return `${total} lançamentos vencem hoje`;
+  });
+  protected readonly pendingFinancialEntries = computed(() => {
+    const today = this.toDateInput(new Date());
+    return this.financeEntries().filter(
+      (entry) => entry.status === 'OPEN' && entry.dueDate <= today,
+    );
+  });
+  protected readonly lowStockItems = computed(() =>
+    this.inventoryItems().filter(
+      (item) => item.status === 'ACTIVE' && item.quantity <= item.minimumQuantity,
+    ),
+  );
+  protected readonly pendingCount = computed(
+    () => this.pendingFinancialEntries().length + this.lowStockItems().length,
+  );
+  protected readonly pendingLabel = computed(() => {
+    const finance = this.pendingFinancialEntries().length;
+    const stock = this.lowStockItems().length;
+    if (finance === 0 && stock === 0) return 'Tudo em dia';
+    if (finance > 0 && stock > 0) return `${finance} financeiro · ${stock} estoque`;
+    if (finance > 0) return finance === 1 ? '1 financeiro em aberto' : `${finance} financeiros`;
+    return stock === 1 ? '1 item em estoque baixo' : `${stock} itens em estoque baixo`;
   });
   protected readonly firstName = () => this.auth.user()?.name?.split(' ')[0] || 'bem-vindo';
   protected readonly clinicName = () => this.auth.clinics()[0]?.name || 'Clínica ativa';
@@ -573,6 +624,84 @@ export class DashboardPage implements OnInit {
         unsubscribe?.();
       });
     });
+
+    effect((onCleanup) => {
+      const clinicId = this.activeClinicId();
+      let disposed = false;
+      let unsubscribe: (() => void) | null = null;
+
+      void import('../finance/finance.repository')
+        .then(({ FinanceRepository }) =>
+          this.injector.get(FinanceRepository).subscribe(
+            clinicId,
+            (entries) => {
+              if (disposed) return;
+              this.setFinanceEntries(entries);
+            },
+            (error) => {
+              if (disposed) return;
+              console.warn('Could not load dashboard finance entries.', error);
+              this.financeEntries.set(this.readStoredFinanceEntries());
+            },
+          ),
+        )
+        .then((nextUnsubscribe) => {
+          if (disposed) {
+            nextUnsubscribe();
+            return;
+          }
+          unsubscribe = nextUnsubscribe;
+        })
+        .catch((error) => {
+          if (disposed) return;
+          console.warn('Could not subscribe dashboard finance entries.', error);
+          this.financeEntries.set(this.readStoredFinanceEntries());
+        });
+
+      onCleanup(() => {
+        disposed = true;
+        unsubscribe?.();
+      });
+    });
+
+    effect((onCleanup) => {
+      const clinicId = this.activeClinicId();
+      let disposed = false;
+      let unsubscribe: (() => void) | null = null;
+
+      void import('../inventory/inventory.repository')
+        .then(({ InventoryRepository }) =>
+          this.injector.get(InventoryRepository).subscribe(
+            clinicId,
+            (items) => {
+              if (disposed) return;
+              this.setInventoryItems(items);
+            },
+            (error) => {
+              if (disposed) return;
+              console.warn('Could not load dashboard inventory items.', error);
+              this.inventoryItems.set(this.readStoredInventoryItems());
+            },
+          ),
+        )
+        .then((nextUnsubscribe) => {
+          if (disposed) {
+            nextUnsubscribe();
+            return;
+          }
+          unsubscribe = nextUnsubscribe;
+        })
+        .catch((error) => {
+          if (disposed) return;
+          console.warn('Could not subscribe dashboard inventory items.', error);
+          this.inventoryItems.set(this.readStoredInventoryItems());
+        });
+
+      onCleanup(() => {
+        disposed = true;
+        unsubscribe?.();
+      });
+    });
   }
 
   ngOnInit(): void {
@@ -586,6 +715,12 @@ export class DashboardPage implements OnInit {
       COMPLETED: 'Concluído',
       CANCELED: 'Cancelado',
     }[status];
+  }
+
+  protected formatMoney(cents: number): string {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
+      cents / 100,
+    );
   }
 
   private async loadPatientTotal(): Promise<void> {
@@ -604,6 +739,22 @@ export class DashboardPage implements OnInit {
     );
     this.appointments.set(sorted);
     this.writeStoredAppointments(sorted);
+  }
+
+  private setFinanceEntries(entries: readonly FinancialEntry[]): void {
+    const sorted = [...entries].sort((first, second) =>
+      second.dueDate.localeCompare(first.dueDate),
+    );
+    this.financeEntries.set(sorted);
+    this.writeStoredFinanceEntries(sorted);
+  }
+
+  private setInventoryItems(items: readonly InventoryItem[]): void {
+    const sorted = [...items].sort((first, second) =>
+      first.name.localeCompare(second.name, 'pt-BR'),
+    );
+    this.inventoryItems.set(sorted);
+    this.writeStoredInventoryItems(sorted);
   }
 
   private readStoredAppointments(): readonly Appointment[] {
@@ -625,8 +776,52 @@ export class DashboardPage implements OnInit {
     }
   }
 
-  private storageKey(): string {
-    return `${APPOINTMENTS_STORAGE_PREFIX}.${this.activeClinicId()}`;
+  private readStoredFinanceEntries(): readonly FinancialEntry[] {
+    try {
+      const value = globalThis.localStorage?.getItem(this.storageKey(FINANCE_STORAGE_PREFIX));
+      if (!value) return [];
+      const parsed = JSON.parse(value) as FinancialEntry[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private writeStoredFinanceEntries(entries: readonly FinancialEntry[]): void {
+    try {
+      globalThis.localStorage?.setItem(
+        this.storageKey(FINANCE_STORAGE_PREFIX),
+        JSON.stringify(entries),
+      );
+    } catch {
+      // Dashboard should never block rendering because of local storage.
+    }
+  }
+
+  private readStoredInventoryItems(): readonly InventoryItem[] {
+    try {
+      const value = globalThis.localStorage?.getItem(this.storageKey(INVENTORY_STORAGE_PREFIX));
+      if (!value) return [];
+      const parsed = JSON.parse(value) as InventoryItem[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private writeStoredInventoryItems(items: readonly InventoryItem[]): void {
+    try {
+      globalThis.localStorage?.setItem(
+        this.storageKey(INVENTORY_STORAGE_PREFIX),
+        JSON.stringify(items),
+      );
+    } catch {
+      // Dashboard should never block rendering because of local storage.
+    }
+  }
+
+  private storageKey(prefix = APPOINTMENTS_STORAGE_PREFIX): string {
+    return `${prefix}.${this.activeClinicId()}`;
   }
 
   private activeClinicId(): string {

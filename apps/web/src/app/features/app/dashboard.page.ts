@@ -1,10 +1,22 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Injector,
+  OnInit,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthStore } from '../../core/auth/auth.store';
 import { IconComponent } from '../../shared/components/icon.component';
 import { PatientsApiService } from '../patients/patients-api.service';
+import type { Appointment } from './appointments.repository';
+
+const APPOINTMENTS_STORAGE_PREFIX = 'odontogest.appointments';
 
 @Component({
   selector: 'og-dashboard-page',
@@ -23,7 +35,10 @@ import { PatientsApiService } from '../patients/patients-api.service';
       <section class="metrics" aria-label="Indicadores da clínica">
         <article class="metric metric--blue">
           <span class="metric__icon"><og-icon name="calendar_today" /></span>
-          <div><small>Agenda hoje</small><strong>0</strong><span>Nenhum atendimento</span></div>
+          <div>
+            <small>Agenda hoje</small><strong>{{ todayAppointments().length }}</strong
+            ><span>{{ todayMetricLabel() }}</span>
+          </div>
         </article>
         <article class="metric metric--cyan">
           <span class="metric__icon"><og-icon name="groups" /></span>
@@ -53,12 +68,32 @@ import { PatientsApiService } from '../patients/patients-api.service';
             </div>
             <a routerLink="/app/agenda">Ver agenda completa</a>
           </header>
-          <div class="empty-state">
-            <span><og-icon name="event_available" /></span>
-            <strong>Nenhum atendimento agendado</strong>
-            <p>Sua agenda está livre hoje.</p>
-            <a mat-stroked-button routerLink="/app/agenda">Abrir calendário</a>
-          </div>
+          @if (todayAppointments().length > 0) {
+            <div class="today-list">
+              @for (appointment of todayAppointments(); track appointment.id) {
+                <article
+                  class="appointment-row"
+                  [class.appointment-row--muted]="appointment.status === 'CANCELED'"
+                >
+                  <time>{{ appointment.startTime }}</time>
+                  <div>
+                    <strong>{{ appointment.patientName }}</strong>
+                    <span>{{ appointment.procedureName }} · {{ appointment.dentistName }}</span>
+                  </div>
+                  <em [class]="'status status--' + appointment.status.toLowerCase()">{{
+                    statusLabel(appointment.status)
+                  }}</em>
+                </article>
+              }
+            </div>
+          } @else {
+            <div class="empty-state">
+              <span><og-icon name="event_available" /></span>
+              <strong>Nenhum atendimento agendado</strong>
+              <p>Sua agenda está livre hoje.</p>
+              <a mat-stroked-button routerLink="/app/agenda">Abrir calendário</a>
+            </div>
+          }
         </article>
 
         <aside class="panel quick-actions">
@@ -271,6 +306,69 @@ import { PatientsApiService } from '../patients/patients-api.service';
       border-color: #d9e2ed;
       border-radius: 0.7rem;
     }
+    .today-list {
+      display: grid;
+      gap: 0.65rem;
+      padding: 1rem;
+    }
+    .appointment-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 0.8rem;
+      border: 1px solid #e8edf3;
+      border-radius: 0.85rem;
+      padding: 0.8rem;
+      background: #fafbfd;
+    }
+    .appointment-row--muted {
+      opacity: 0.62;
+    }
+    .appointment-row time {
+      border-radius: 0.65rem;
+      padding: 0.42rem 0.55rem;
+      color: #1d4ed8;
+      background: #eaf2ff;
+      font-size: 0.74rem;
+      font-weight: 850;
+    }
+    .appointment-row strong,
+    .appointment-row span {
+      display: block;
+    }
+    .appointment-row strong {
+      color: #10213a;
+      font-size: 0.82rem;
+    }
+    .appointment-row span {
+      margin-top: 0.15rem;
+      color: #718198;
+      font-size: 0.72rem;
+    }
+    .appointment-row em {
+      border-radius: 99px;
+      padding: 0.26rem 0.58rem;
+      font-size: 0.64rem;
+      font-style: normal;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .status--scheduled {
+      color: #1d4ed8;
+      background: #eaf2ff;
+    }
+    .status--confirmed {
+      color: #047857;
+      background: #e6f8f1;
+    }
+    .status--completed {
+      color: #475569;
+      background: #edf1f5;
+    }
+    .status--canceled {
+      color: #b42318;
+      background: #fff0ed;
+    }
     .quick-actions__grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -396,6 +494,13 @@ import { PatientsApiService } from '../patients/patients-api.service';
       .dashboard-grid {
         grid-template-columns: 1fr;
       }
+      .appointment-row {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+      .appointment-row em {
+        grid-column: 2;
+        justify-self: start;
+      }
       .overview {
         grid-column: auto;
       }
@@ -410,13 +515,77 @@ import { PatientsApiService } from '../patients/patients-api.service';
 })
 export class DashboardPage implements OnInit {
   private readonly auth = inject(AuthStore);
+  private readonly injector = inject(Injector);
   private readonly patients = inject(PatientsApiService);
   protected readonly patientTotal = signal(0);
+  private readonly appointments = signal<readonly Appointment[]>(this.readStoredAppointments());
+  protected readonly todayAppointments = computed(() => {
+    const today = this.toDateInput(new Date());
+    return this.appointments()
+      .filter((appointment) => appointment.date === today && appointment.status !== 'CANCELED')
+      .sort((first, second) => first.startTime.localeCompare(second.startTime));
+  });
+  protected readonly todayMetricLabel = computed(() => {
+    const total = this.todayAppointments().length;
+    if (total === 0) return 'Nenhum atendimento';
+    if (total === 1) return '1 atendimento hoje';
+    return `${total} atendimentos hoje`;
+  });
   protected readonly firstName = () => this.auth.user()?.name?.split(' ')[0] || 'bem-vindo';
   protected readonly clinicName = () => this.auth.clinics()[0]?.name || 'Clínica ativa';
 
+  constructor() {
+    effect((onCleanup) => {
+      const clinicId = this.activeClinicId();
+      let disposed = false;
+      let unsubscribe: (() => void) | null = null;
+
+      void import('./appointments.repository')
+        .then(({ AppointmentsRepository }) =>
+          this.injector.get(AppointmentsRepository).subscribe(
+            clinicId,
+            (appointments) => {
+              if (disposed) return;
+              this.setAppointments(appointments);
+            },
+            (error) => {
+              if (disposed) return;
+              console.warn('Could not load dashboard appointments.', error);
+              this.appointments.set(this.readStoredAppointments());
+            },
+          ),
+        )
+        .then((nextUnsubscribe) => {
+          if (disposed) {
+            nextUnsubscribe();
+            return;
+          }
+          unsubscribe = nextUnsubscribe;
+        })
+        .catch((error) => {
+          if (disposed) return;
+          console.warn('Could not subscribe dashboard appointments.', error);
+          this.appointments.set(this.readStoredAppointments());
+        });
+
+      onCleanup(() => {
+        disposed = true;
+        unsubscribe?.();
+      });
+    });
+  }
+
   ngOnInit(): void {
     void this.loadPatientTotal();
+  }
+
+  protected statusLabel(status: Appointment['status']): string {
+    return {
+      SCHEDULED: 'Agendado',
+      CONFIRMED: 'Confirmado',
+      COMPLETED: 'Concluído',
+      CANCELED: 'Cancelado',
+    }[status];
   }
 
   private async loadPatientTotal(): Promise<void> {
@@ -426,5 +595,48 @@ export class DashboardPage implements OnInit {
     } catch {
       this.patientTotal.set(0);
     }
+  }
+
+  private setAppointments(appointments: readonly Appointment[]): void {
+    const sorted = [...appointments].sort(
+      (first, second) =>
+        first.date.localeCompare(second.date) || first.startTime.localeCompare(second.startTime),
+    );
+    this.appointments.set(sorted);
+    this.writeStoredAppointments(sorted);
+  }
+
+  private readStoredAppointments(): readonly Appointment[] {
+    try {
+      const value = globalThis.localStorage?.getItem(this.storageKey());
+      if (!value) return [];
+      const parsed = JSON.parse(value) as Appointment[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private writeStoredAppointments(appointments: readonly Appointment[]): void {
+    try {
+      globalThis.localStorage?.setItem(this.storageKey(), JSON.stringify(appointments));
+    } catch {
+      // Dashboard should never block rendering because of local storage.
+    }
+  }
+
+  private storageKey(): string {
+    return `${APPOINTMENTS_STORAGE_PREFIX}.${this.activeClinicId()}`;
+  }
+
+  private activeClinicId(): string {
+    return this.auth.tenantContext()?.activeClinicId ?? 'provisional-clinic';
+  }
+
+  private toDateInput(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

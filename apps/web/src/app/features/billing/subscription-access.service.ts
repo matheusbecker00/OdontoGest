@@ -29,8 +29,9 @@ export class SubscriptionAccessService {
   readonly isReadOnly = computed(
     () => this.status() === 'PAST_DUE' || this.status() === 'CANCELED',
   );
+  readonly blocksOperationalWrites = computed(() => this.isReadOnly());
   readonly blocksWrites = computed(
-    () => this.isReadOnly() && !this.isReadonlyExemptRoute(this.currentUrl()),
+    () => this.blocksOperationalWrites() && !this.isReadonlyExemptRoute(this.currentUrl()),
   );
   readonly isOperational = computed(() => this.status() === 'ACTIVE' || this.status() === 'TRIAL');
   readonly noticeLevel = computed<SubscriptionNoticeLevel>(() => {
@@ -119,6 +120,17 @@ export class SubscriptionAccessService {
 
   canWrite(): boolean {
     return !this.blocksWrites();
+  }
+
+  canMutateOperationalData(): boolean {
+    return !this.blocksOperationalWrites();
+  }
+
+  assertCanMutateOperationalData(): void {
+    if (this.canMutateOperationalData()) return;
+    throw new Error(
+      'Assinatura em modo somente leitura. Regularize o plano para criar ou editar registros.',
+    );
   }
 
   private isReadonlyExemptRoute(url: string): boolean {

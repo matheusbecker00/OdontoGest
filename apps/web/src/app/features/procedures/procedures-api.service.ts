@@ -5,9 +5,10 @@ import {
   listMyProcedures,
   updateMyProcedure,
 } from '@odontogest/dataconnect-client';
-import { from, map } from 'rxjs';
+import { defer, from, map } from 'rxjs';
 import { AuthStore } from '../../core/auth/auth.store';
 import { FirebaseDataService } from '../../core/firebase-data.service';
+import { SubscriptionAccessService } from '../billing/subscription-access.service';
 
 export type ProcedureStatus = 'ACTIVE' | 'INACTIVE';
 
@@ -29,6 +30,7 @@ export type ProcedureInput = Omit<Procedure, 'id' | 'status' | 'description'> & 
 export class ProceduresApiService {
   private readonly auth = inject(AuthStore);
   private readonly data = inject(FirebaseDataService);
+  private readonly subscription = inject(SubscriptionAccessService);
 
   list() {
     return from(
@@ -44,38 +46,41 @@ export class ProceduresApiService {
   }
 
   create(input: ProcedureInput) {
-    return from(
-      createMyProcedure(this.data.connection, {
+    return defer(() => {
+      this.subscription.assertCanMutateOperationalData();
+      return createMyProcedure(this.data.connection, {
         ...this.variables(input),
         id: crypto.randomUUID(),
         clinicId: this.activeClinicId(),
         auditId: crypto.randomUUID(),
         requestId: crypto.randomUUID(),
-      }),
-    );
+      });
+    });
   }
 
   update(id: string, input: ProcedureInput) {
-    return from(
-      updateMyProcedure(this.data.connection, {
+    return defer(() => {
+      this.subscription.assertCanMutateOperationalData();
+      return updateMyProcedure(this.data.connection, {
         ...this.variables(input),
         id,
         clinicId: this.activeClinicId(),
         auditId: crypto.randomUUID(),
         requestId: crypto.randomUUID(),
-      }),
-    );
+      });
+    });
   }
 
   inactivate(id: string) {
-    return from(
-      inactivateMyProcedure(this.data.connection, {
+    return defer(() => {
+      this.subscription.assertCanMutateOperationalData();
+      return inactivateMyProcedure(this.data.connection, {
         id,
         clinicId: this.activeClinicId(),
         auditId: crypto.randomUUID(),
         requestId: crypto.randomUUID(),
-      }),
-    );
+      });
+    });
   }
 
   private variables(input: ProcedureInput) {

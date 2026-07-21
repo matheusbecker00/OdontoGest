@@ -5,9 +5,14 @@ service cloud.firestore {
     match /clinics/{clinicId}/members/{memberId} {
       allow read: if isClinicMember(clinicId);
       allow create: if isOwnerBootstrap(clinicId, memberId)
-        || (isClinicAdmin(clinicId) && isValidTeamMember(clinicId, memberId));
+        || (
+          canMutateClinicData(clinicId)
+          && isClinicAdmin(clinicId)
+          && isValidTeamMember(clinicId, memberId)
+        );
       allow update: if (
-          isClinicAdmin(clinicId)
+          canMutateClinicData(clinicId)
+          && isClinicAdmin(clinicId)
           && memberId != request.auth.uid
           && isValidTeamMember(clinicId, memberId)
         )
@@ -17,13 +22,16 @@ service cloud.firestore {
 
     match /clinics/{clinicId}/invites/{inviteId} {
       allow read: if isClinicMember(clinicId);
-      allow create, update: if isClinicAdmin(clinicId) && isValidTeamInvite(clinicId);
+      allow create, update: if canMutateClinicData(clinicId)
+        && isClinicAdmin(clinicId)
+        && isValidTeamInvite(clinicId);
       allow delete: if false;
     }
 
     match /clinics/{clinicId}/settings/{settingsId} {
       allow read: if isClinicMember(clinicId);
-      allow create, update: if isClinicAdmin(clinicId)
+      allow create, update: if canMutateClinicData(clinicId)
+        && isClinicAdmin(clinicId)
         && settingsId == 'profile'
         && isValidSharedClinicSettings(clinicId);
       allow delete: if false;
@@ -41,55 +49,68 @@ service cloud.firestore {
 
     match /clinics/{clinicId}/appointments/{appointmentId} {
       allow read: if isClinicMember(clinicId);
-      allow create: if hasClinicRole(clinicId, ['OWNER', 'ADMIN', 'RECEPTIONIST', 'DENTIST'])
+      allow create: if canMutateClinicData(clinicId)
+        && hasClinicRole(clinicId, ['OWNER', 'ADMIN', 'RECEPTIONIST', 'DENTIST'])
         && request.resource.data.userId == request.auth.uid
         && isValidSharedAppointment(clinicId);
-      allow update: if hasClinicRole(clinicId, ['OWNER', 'ADMIN', 'RECEPTIONIST', 'DENTIST'])
+      allow update: if canMutateClinicData(clinicId)
+        && hasClinicRole(clinicId, ['OWNER', 'ADMIN', 'RECEPTIONIST', 'DENTIST'])
         && isValidSharedAppointment(clinicId);
       allow delete: if false;
     }
 
     match /clinics/{clinicId}/finance/{entryId} {
       allow read: if hasClinicRole(clinicId, ['OWNER', 'ADMIN']);
-      allow create: if hasClinicRole(clinicId, ['OWNER', 'ADMIN'])
+      allow create: if canMutateClinicData(clinicId)
+        && hasClinicRole(clinicId, ['OWNER', 'ADMIN'])
         && request.resource.data.userId == request.auth.uid
         && isValidSharedFinancialEntry(clinicId);
-      allow update: if hasClinicRole(clinicId, ['OWNER', 'ADMIN'])
+      allow update: if canMutateClinicData(clinicId)
+        && hasClinicRole(clinicId, ['OWNER', 'ADMIN'])
         && isValidSharedFinancialEntry(clinicId);
       allow delete: if false;
     }
 
     match /clinics/{clinicId}/inventory/{itemId} {
       allow read: if hasClinicRole(clinicId, ['OWNER', 'ADMIN']);
-      allow create: if hasClinicRole(clinicId, ['OWNER', 'ADMIN'])
+      allow create: if canMutateClinicData(clinicId)
+        && hasClinicRole(clinicId, ['OWNER', 'ADMIN'])
         && request.resource.data.userId == request.auth.uid
         && isValidSharedInventoryItem(clinicId);
-      allow update: if hasClinicRole(clinicId, ['OWNER', 'ADMIN'])
+      allow update: if canMutateClinicData(clinicId)
+        && hasClinicRole(clinicId, ['OWNER', 'ADMIN'])
         && isValidSharedInventoryItem(clinicId);
       allow delete: if false;
     }
 
     match /users/{userId}/clinics/{clinicId}/appointments/{appointmentId} {
       allow read: if isOwnerUser(userId);
-      allow create, update: if isOwnerUser(userId) && isValidAppointment(userId, clinicId);
+      allow create, update: if canMutateClinicData(clinicId)
+        && isOwnerUser(userId)
+        && isValidAppointment(userId, clinicId);
       allow delete: if false;
     }
 
     match /users/{userId}/clinics/{clinicId}/finance/{entryId} {
       allow read: if isOwnerUser(userId);
-      allow create, update: if isOwnerUser(userId) && isValidFinancialEntry(userId, clinicId);
+      allow create, update: if canMutateClinicData(clinicId)
+        && isOwnerUser(userId)
+        && isValidFinancialEntry(userId, clinicId);
       allow delete: if false;
     }
 
     match /users/{userId}/clinics/{clinicId}/inventory/{itemId} {
       allow read: if isOwnerUser(userId);
-      allow create, update: if isOwnerUser(userId) && isValidInventoryItem(userId, clinicId);
+      allow create, update: if canMutateClinicData(clinicId)
+        && isOwnerUser(userId)
+        && isValidInventoryItem(userId, clinicId);
       allow delete: if false;
     }
 
     match /users/{userId}/clinics/{clinicId}/settings/{settingsId} {
       allow read: if isOwnerUser(userId);
-      allow create, update: if isOwnerUser(userId)
+      allow create, update: if canMutateClinicData(clinicId)
+        && isOwnerUser(userId)
         && settingsId == 'profile'
         && isValidClinicSettings(userId, clinicId);
       allow delete: if false;
@@ -116,6 +137,18 @@ service cloud.firestore {
     function hasClinicRole(clinicId, roles) {
       return isClinicMember(clinicId)
         && get(/databases/$(database)/documents/clinics/$(clinicId)/members/$(request.auth.uid)).data.role in roles;
+    }
+
+    function canMutateClinicData(clinicId) {
+      return !isSubscriptionReadOnly(clinicId);
+    }
+
+    function isSubscriptionReadOnly(clinicId) {
+      return exists(/databases/$(database)/documents/clinics/$(clinicId)/billing/current)
+        && get(/databases/$(database)/documents/clinics/$(clinicId)/billing/current).data.status in [
+          'PAST_DUE',
+          'CANCELED'
+        ];
     }
 
     function isOwnerBootstrap(clinicId, memberId) {

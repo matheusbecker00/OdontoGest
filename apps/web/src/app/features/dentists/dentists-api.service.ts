@@ -5,9 +5,10 @@ import {
   listMyDentists,
   updateMyDentist,
 } from '@odontogest/dataconnect-client';
-import { from, map } from 'rxjs';
+import { defer, from, map } from 'rxjs';
 import { AuthStore } from '../../core/auth/auth.store';
 import { FirebaseDataService } from '../../core/firebase-data.service';
+import { SubscriptionAccessService } from '../billing/subscription-access.service';
 
 export type DentistStatus = 'ACTIVE' | 'INACTIVE';
 
@@ -33,6 +34,7 @@ export type DentistInput = Omit<Dentist, 'id' | 'status' | 'phone' | 'email'> & 
 export class DentistsApiService {
   private readonly auth = inject(AuthStore);
   private readonly data = inject(FirebaseDataService);
+  private readonly subscription = inject(SubscriptionAccessService);
 
   list() {
     return from(
@@ -49,38 +51,41 @@ export class DentistsApiService {
   }
 
   create(input: DentistInput) {
-    return from(
-      createMyDentist(this.data.connection, {
+    return defer(() => {
+      this.subscription.assertCanMutateOperationalData();
+      return createMyDentist(this.data.connection, {
         ...this.variables(input),
         id: crypto.randomUUID(),
         clinicId: this.activeClinicId(),
         auditId: crypto.randomUUID(),
         requestId: crypto.randomUUID(),
-      }),
-    );
+      });
+    });
   }
 
   update(id: string, input: DentistInput) {
-    return from(
-      updateMyDentist(this.data.connection, {
+    return defer(() => {
+      this.subscription.assertCanMutateOperationalData();
+      return updateMyDentist(this.data.connection, {
         ...this.variables(input),
         id,
         clinicId: this.activeClinicId(),
         auditId: crypto.randomUUID(),
         requestId: crypto.randomUUID(),
-      }),
-    );
+      });
+    });
   }
 
   inactivate(id: string) {
-    return from(
-      inactivateMyDentist(this.data.connection, {
+    return defer(() => {
+      this.subscription.assertCanMutateOperationalData();
+      return inactivateMyDentist(this.data.connection, {
         id,
         clinicId: this.activeClinicId(),
         auditId: crypto.randomUUID(),
         requestId: crypto.randomUUID(),
-      }),
-    );
+      });
+    });
   }
 
   private variables(input: DentistInput) {

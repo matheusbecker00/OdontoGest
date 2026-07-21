@@ -5,9 +5,10 @@ import {
   listMyPatients,
   updateMyPatient,
 } from '@odontogest/dataconnect-client';
-import { from, map } from 'rxjs';
+import { defer, from, map } from 'rxjs';
 import { AuthStore } from '../../core/auth/auth.store';
 import { FirebaseDataService } from '../../core/firebase-data.service';
+import { SubscriptionAccessService } from '../billing/subscription-access.service';
 
 export type PatientRegistrationStatus = 'ACTIVE' | 'INACTIVE';
 
@@ -52,6 +53,7 @@ export interface PatientListResponse {
 export class PatientsApiService {
   private readonly auth = inject(AuthStore);
   private readonly data = inject(FirebaseDataService);
+  private readonly subscription = inject(SubscriptionAccessService);
 
   list(input: {
     page: number;
@@ -86,9 +88,10 @@ export class PatientsApiService {
   }
 
   create(input: PatientInput & { cpf: string }) {
-    const cpf = input.cpf.replace(/\D/g, '');
-    return from(
-      createMyPatient(this.data.connection, {
+    return defer(() => {
+      this.subscription.assertCanMutateOperationalData();
+      const cpf = input.cpf.replace(/\D/g, '');
+      return createMyPatient(this.data.connection, {
         id: crypto.randomUUID(),
         clinicId: this.activeClinicId(),
         fullName: input.fullName.trim(),
@@ -101,13 +104,14 @@ export class PatientsApiService {
         administrativeNotes: input.administrativeNotes || null,
         auditId: crypto.randomUUID(),
         requestId: crypto.randomUUID(),
-      }),
-    );
+      });
+    });
   }
 
   update(id: string, input: PatientInput) {
-    return from(
-      updateMyPatient(this.data.connection, {
+    return defer(() => {
+      this.subscription.assertCanMutateOperationalData();
+      return updateMyPatient(this.data.connection, {
         id,
         clinicId: this.activeClinicId(),
         fullName: input.fullName.trim(),
@@ -119,19 +123,20 @@ export class PatientsApiService {
         administrativeNotes: input.administrativeNotes || null,
         auditId: crypto.randomUUID(),
         requestId: crypto.randomUUID(),
-      }),
-    );
+      });
+    });
   }
 
   inactivate(id: string) {
-    return from(
-      inactivateMyPatient(this.data.connection, {
+    return defer(() => {
+      this.subscription.assertCanMutateOperationalData();
+      return inactivateMyPatient(this.data.connection, {
         id,
         clinicId: this.activeClinicId(),
         auditId: crypto.randomUUID(),
         requestId: crypto.randomUUID(),
-      }),
-    );
+      });
+    });
   }
 
   private activeClinicId(): string {

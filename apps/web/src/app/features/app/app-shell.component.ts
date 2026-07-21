@@ -102,6 +102,12 @@ export class AppShellComponent implements OnDestroy {
       route: '/app/relatorios',
       permissions: ['report.read'],
     },
+    {
+      label: 'Assinatura',
+      icon: 'credit_card',
+      route: '/app/assinatura',
+      permissions: ['billing.manage'],
+    },
   ];
   protected readonly visibleNavigation = computed(() =>
     this.navigation.filter((item) => this.canShow(item)),

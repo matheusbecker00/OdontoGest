@@ -30,6 +30,7 @@ const ADMIN_PERMISSIONS = [
   'report.read',
   'settings.manage',
   'team.manage',
+  'billing.manage',
 ] as const;
 
 const ROLE_PERMISSIONS: Record<RoleCode, readonly string[]> = {

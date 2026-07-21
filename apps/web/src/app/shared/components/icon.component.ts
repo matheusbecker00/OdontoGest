@@ -69,6 +69,7 @@ const ICON_ALIASES: Readonly<Record<string, string>> = {
   person_add: 'user-plus',
   edit_calendar: 'calendar-plus',
   add_card: 'credit-card',
+  credit_card: 'credit-card',
   bar_chart: 'chart-bar',
   arrow_forward: 'arrow-right',
   chevron_left: 'chevron-left',

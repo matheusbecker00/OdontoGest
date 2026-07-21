@@ -128,6 +128,14 @@ export class FirebaseAuthService {
     };
   }
 
+  async getIdToken(): Promise<string> {
+    await this.ready;
+    await this.auth.authStateReady();
+    const user = this.auth.currentUser;
+    if (!user) throw new Error('Usuario autenticado nao encontrado.');
+    return user.getIdToken();
+  }
+
   async sendVerificationAndSignOut(): Promise<void> {
     await this.ready;
     const user = this.auth.currentUser;

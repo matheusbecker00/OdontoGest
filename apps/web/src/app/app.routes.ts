@@ -116,6 +116,13 @@ export const routes: Routes = [
         loadComponent: () => import('./features/team/team.page').then((module) => module.TeamPage),
       },
       {
+        path: 'assinatura',
+        data: { title: 'Assinatura' },
+        canActivate: [permissionGuard(['billing.manage'])],
+        loadComponent: () =>
+          import('./features/billing/billing.page').then((module) => module.BillingPage),
+      },
+      {
         path: 'ajuda',
         data: { title: 'Ajuda e suporte' },
         loadComponent: () => import('./features/help/help.page').then((module) => module.HelpPage),

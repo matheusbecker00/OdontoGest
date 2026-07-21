@@ -9,6 +9,9 @@
     "node": "24.x",
     "pnpm": ">=11.13.1"
   },
+  "dependencies": {
+    "firebase-admin": "13.10.0"
+  },
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",

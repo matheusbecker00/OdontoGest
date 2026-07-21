@@ -96,25 +96,110 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
             contato pelos canais de suporte disponibilizados dentro da plataforma.
           </p>
         } @else {
-          <h1>Política de Privacidade — versão de validação</h1>
+          <h1>Política de Privacidade</h1>
           <p class="notice">
-            Versão 2026-07-16. Este documento não representa declaração de conformidade integral com
-            a LGPD.
+            Versão 2026-07-21. Esta Política explica como o OdontoGest trata dados pessoais no uso
+            da plataforma, incluindo cadastro, trial, assinatura, suporte e rotinas administrativas
+            da clínica.
           </p>
-          <h2>Dados utilizados</h2>
+          <h2>1. Quem somos</h2>
           <p>
-            Nesta etapa coletamos nome do responsável, e-mail, nome da clínica, evidência de aceite,
-            informações reduzidas de sessão e eventos de segurança.
+            O OdontoGest é uma plataforma online para gestão administrativa de clínicas e
+            consultórios odontológicos. Para fins desta Política, “OdontoGest”, “nós” ou
+            “plataforma” se refere ao serviço disponibilizado em odontogest-web.vercel.app e seus
+            ambientes relacionados.
           </p>
-          <h2>Finalidades</h2>
+          <h2>2. Dados que podemos tratar</h2>
           <p>
-            Os dados são usados para autenticação, criação da clínica, controle de acesso, prevenção
-            de abuso e auditoria do ambiente.
+            Podemos tratar dados de cadastro e acesso, como nome, e-mail, identificador de usuário,
+            clínica vinculada, função, permissões, evidência de aceite dos Termos, data de criação
+            da conta, dados de sessão, registros de autenticação e eventos de segurança.
           </p>
-          <h2>Limites desta fase</h2>
           <p>
-            Não envie dados reais de pacientes, informações de saúde, imagens, exames ou dados
-            financeiros reais enquanto o ambiente não estiver aprovado para produção.
+            Também podemos tratar dados inseridos pela clínica durante o uso do sistema, incluindo
+            dados de pacientes, dentistas, equipe, agenda, procedimentos, financeiro, estoque,
+            relatórios, configurações da clínica e informações necessárias para suporte e auditoria.
+          </p>
+          <p>
+            Para assinatura e cobrança, podemos tratar status do plano, histórico de checkout, dados
+            de pagamento retornados por provedores terceiros, identificadores de cobrança, eventos
+            de webhook, plano contratado e informações de regularidade da assinatura.
+          </p>
+          <h2>3. Dados de saúde e dados sensíveis</h2>
+          <p>
+            A clínica pode inserir dados relacionados a pacientes e à rotina odontológica. Esses
+            dados podem incluir informações pessoais e, dependendo do uso feito pela clínica, dados
+            sensíveis ou dados de saúde. A clínica é responsável por garantir base legal adequada,
+            transparência com seus pacientes e cumprimento das obrigações aplicáveis à sua
+            atividade.
+          </p>
+          <h2>4. Finalidades do tratamento</h2>
+          <p>
+            Utilizamos dados para criar e autenticar contas, operar a plataforma, identificar a
+            clínica ativa, aplicar permissões, permitir cadastros e consultas, controlar trial e
+            assinatura, processar checkout, bloquear ou liberar gravações conforme status de
+            pagamento, prestar suporte, prevenir abuso, corrigir falhas, manter logs de auditoria e
+            melhorar a segurança do serviço.
+          </p>
+          <h2>5. Compartilhamento com terceiros</h2>
+          <p>
+            Podemos compartilhar dados com fornecedores necessários para operar a plataforma, como
+            serviços de hospedagem, autenticação, banco de dados, infraestrutura, monitoramento,
+            processamento de pagamento e comunicação de suporte. Esses fornecedores atuam conforme
+            suas próprias políticas e contratos aplicáveis.
+          </p>
+          <p>
+            Atualmente, a plataforma pode utilizar serviços como Firebase, Firebase Data Connect,
+            Vercel e Asaas para autenticação, armazenamento, backend, deploy, checkout, cobrança e
+            confirmação de pagamentos.
+          </p>
+          <h2>6. Segurança</h2>
+          <p>
+            Adotamos medidas técnicas e organizacionais razoáveis para proteger os dados, incluindo
+            autenticação, controle de acesso por clínica, regras de permissão, registros de
+            auditoria, bloqueios por status de assinatura e uso de provedores de infraestrutura
+            reconhecidos. Nenhum sistema, porém, é completamente imune a falhas, indisponibilidades
+            ou acessos indevidos.
+          </p>
+          <h2>7. Retenção e exclusão</h2>
+          <p>
+            Os dados podem ser mantidos enquanto a conta estiver ativa, enquanto forem necessários
+            para operação do serviço, cumprimento de obrigações legais, exercício regular de
+            direitos, prevenção de fraude, auditoria ou resolução de disputas. Solicitações de
+            exclusão serão avaliadas conforme obrigações legais, contratuais, técnicas e
+            regulatórias aplicáveis.
+          </p>
+          <h2>8. Direitos dos titulares</h2>
+          <p>
+            Nos termos da LGPD, titulares podem solicitar confirmação de tratamento, acesso,
+            correção, anonimização, bloqueio, eliminação, portabilidade, informação sobre
+            compartilhamento e revisão de decisões automatizadas quando aplicável. Algumas
+            solicitações relacionadas a pacientes podem precisar ser direcionadas à própria clínica,
+            que controla os dados inseridos na plataforma.
+          </p>
+          <h2>9. Responsabilidades da clínica</h2>
+          <p>
+            A clínica é responsável por orientar sua equipe, definir permissões de acesso, manter
+            dados corretos, obter autorizações quando necessárias, informar pacientes e cumprir
+            normas legais, profissionais e regulatórias aplicáveis ao tratamento de dados pessoais e
+            dados de saúde.
+          </p>
+          <h2>10. Cookies e tecnologias similares</h2>
+          <p>
+            Podemos utilizar recursos técnicos necessários para autenticação, manutenção da sessão,
+            segurança, funcionamento da aplicação, preferências e análise operacional básica. O
+            bloqueio desses recursos pode prejudicar ou impedir o uso da plataforma.
+          </p>
+          <h2>11. Alterações desta Política</h2>
+          <p>
+            Esta Política pode ser atualizada para refletir mudanças no produto, nas integrações, em
+            práticas operacionais ou em exigências legais. A versão publicada nesta página será a
+            versão vigente.
+          </p>
+          <h2>12. Contato</h2>
+          <p>
+            Para dúvidas ou solicitações sobre privacidade, dados pessoais, assinatura ou suporte,
+            entre em contato pelos canais disponibilizados na plataforma.
           </p>
         }
       </article>

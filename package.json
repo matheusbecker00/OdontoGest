@@ -29,7 +29,8 @@
     "firebase:sdk:generate": "firebase dataconnect:sdk:generate --project odongest",
     "firebase:emulators": "firebase emulators:start --only auth,dataconnect --project demo-odontogest",
     "firebase:emulators:exec": "firebase emulators:exec --only auth,dataconnect --project demo-odontogest",
-    "openapi:generate": "corepack pnpm --filter @odontogest/api openapi:generate && corepack pnpm --filter @odontogest/contracts generate"
+    "openapi:generate": "corepack pnpm --filter @odontogest/api openapi:generate && corepack pnpm --filter @odontogest/contracts generate",
+    "billing:admin": "node scripts/billing-admin.js"
   },
   "devDependencies": {
     "firebase-tools": "15.24.0",

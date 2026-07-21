@@ -15,6 +15,8 @@ function timestampFromAsaasDate(value) {
 
 function timestampFromInput(value) {
   if (value instanceof Date) return value.toISOString();
+  if (value && typeof value.toDate === "function")
+    return value.toDate().toISOString();
   return timestampFromAsaasDate(value);
 }
 

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
+import { environment } from '../../../environments/environment';
 import { IconComponent } from '../../shared/components/icon.component';
 
 interface QuickLink {
@@ -32,8 +33,8 @@ interface FaqItem {
           <h2>Central de suporte</h2>
           <p>Guia rápido para operar o OdontoGest e preparar a clínica para uso real.</p>
         </div>
-        <a mat-flat-button href="mailto:suporte@odontogest.app?subject=Suporte%20OdontoGest">
-          Falar com suporte
+        <a mat-flat-button [href]="supportWhatsAppUrl" target="_blank" rel="noopener">
+          <og-icon name="whatsapp" /> Falar no WhatsApp
         </a>
       </section>
 
@@ -138,11 +139,8 @@ interface FaqItem {
             </div>
           </header>
           <div class="support-actions">
-            <a
-              mat-stroked-button
-              href="mailto:suporte@odontogest.app?subject=Erro%20no%20OdontoGest&body=Descreva%20o%20que%20aconteceu%2C%20qual%20tela%20voc%C3%AA%20estava%20usando%20e%20se%20poss%C3%ADvel%20anexe%20um%20print."
-            >
-              Reportar erro
+            <a mat-stroked-button [href]="supportWhatsAppUrl" target="_blank" rel="noopener">
+              Chamar no WhatsApp
             </a>
             <a mat-stroked-button routerLink="/app/configuracoes">Revisar configurações</a>
             <a mat-stroked-button routerLink="/app/relatorios">Abrir relatórios</a>
@@ -373,6 +371,8 @@ interface FaqItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HelpPage {
+  protected readonly supportWhatsAppUrl = environment.supportWhatsAppUrl;
+
   protected readonly quickLinks: readonly QuickLink[] = [
     {
       title: 'Criar agenda',

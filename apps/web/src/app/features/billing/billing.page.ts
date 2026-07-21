@@ -7,6 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { environment } from '../../../environments/environment';
 import { AuthStore } from '../../core/auth/auth.store';
 import { IconComponent } from '../../shared/components/icon.component';
 import {
@@ -49,6 +50,9 @@ import {
           </span>
           @if (currentState().currentPeriodEnd) {
             <span>Valido ate {{ formatDate(currentState().currentPeriodEnd) }}</span>
+          }
+          @if (trialDaysRemaining() !== null) {
+            <span>{{ trialDaysRemaining() }} dia(s) restante(s) de trial</span>
           }
           @if (currentState().checkoutUrl && currentState().status === 'CHECKOUT_STARTED') {
             <a [href]="currentState().checkoutUrl" target="_blank" rel="noopener">
@@ -133,6 +137,9 @@ import {
           >
             {{ checkoutLabel(selectedPlan()) }}
           </button>
+          <a class="whatsapp-link" [href]="supportWhatsAppUrl" target="_blank" rel="noopener">
+            <og-icon name="whatsapp" /> Falar com suporte no WhatsApp
+          </a>
 
           <div class="trust-grid" aria-label="Garantias do checkout">
             <span><og-icon name="lock" /> Sem cartão salvo no OdontoGest</span>
@@ -477,6 +484,24 @@ import {
       padding: 0.85rem;
       background: #f8fafc;
     }
+    .whatsapp-link {
+      display: inline-flex;
+      min-height: 2.65rem;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      border: 1px solid #b9f0d3;
+      border-radius: 0.85rem;
+      color: #047857;
+      background: #ecfdf5;
+      font-size: 0.8rem;
+      font-weight: 850;
+      text-decoration: none;
+    }
+    .whatsapp-link og-icon {
+      width: 1rem;
+      height: 1rem;
+    }
     .trust-grid span {
       color: #52657e;
       font-size: 0.72rem;
@@ -649,6 +674,7 @@ export class BillingPage {
   private readonly billing = inject(BillingRepository);
 
   protected readonly plans = BILLING_PLANS;
+  protected readonly supportWhatsAppUrl = environment.supportWhatsAppUrl;
   protected readonly pageError = signal<string | null>(null);
   protected readonly billingEvents = signal<readonly BillingEvent[]>([]);
   protected readonly loadingPlanId = signal<string | null>(null);
@@ -669,6 +695,13 @@ export class BillingPage {
   protected readonly isAttentionStatus = computed(() =>
     ['NONE', 'PAST_DUE', 'CANCELED'].includes(this.currentState().status),
   );
+  protected readonly trialDaysRemaining = computed(() => {
+    const state = this.currentState();
+    if (state.status !== 'TRIAL' || !state.currentPeriodEnd) return null;
+    const end = new Date(state.currentPeriodEnd).getTime();
+    if (Number.isNaN(end)) return null;
+    return Math.max(0, Math.ceil((end - Date.now()) / 86_400_000));
+  });
 
   constructor() {
     effect((onCleanup) => {
@@ -746,7 +779,7 @@ export class BillingPage {
 
   protected async startCheckout(plan: BillingPlan): Promise<void> {
     if (!plan.checkoutEnabled) {
-      globalThis.location.href = 'mailto:comercial@odontogest.app?subject=Plano%20Enterprise';
+      globalThis.location.href = this.supportWhatsAppUrl;
       return;
     }
 

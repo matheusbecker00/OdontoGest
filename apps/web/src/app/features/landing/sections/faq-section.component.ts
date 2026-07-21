@@ -17,22 +17,22 @@ export class LandingFaqSectionComponent {
     {
       question: 'O OdontoGest substitui planilhas e agendas manuais?',
       answer:
-        'Sim. A ideia e concentrar agenda, cadastros, equipe e indicadores em uma rotina unica, reduzindo retrabalho e informacoes duplicadas.',
+        'Sim. A ideia é concentrar agenda, cadastros, equipe e indicadores em uma rotina única, reduzindo retrabalho e informações duplicadas.',
     },
     {
       question: 'Consigo testar antes de contratar?',
       answer:
-        'A landing direciona para cadastro gratuito. Ajuste as regras comerciais do teste conforme a oferta final do produto.',
+        'Sim. Você pode criar sua conta e usar o OdontoGest por 15 dias gratuitamente antes de escolher um plano.',
     },
     {
-      question: 'Serve para clinicas com mais de um profissional?',
+      question: 'Serve para clínicas com mais de um profissional?',
       answer:
-        'Sim. A estrutura foi pensada para equipes, com profissionais, permissoes e informacoes compartilhadas de forma organizada.',
+        'Sim. A estrutura foi pensada para equipes, com profissionais, permissões e informações compartilhadas de forma organizada.',
     },
     {
-      question: 'Posso personalizar textos, planos e imagens depois?',
+      question: 'Posso mudar de plano depois?',
       answer:
-        'Sim. Os conteudos estao separados por secao para facilitar troca de copy, precos, depoimentos e mockups reais.',
+        'Sim. Você pode começar pelo plano ideal para o momento atual e evoluir conforme a necessidade da clínica.',
     },
   ];
 }

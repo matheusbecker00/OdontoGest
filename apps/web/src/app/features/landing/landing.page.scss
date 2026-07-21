@@ -3,8 +3,11 @@
 :host {
   display: block;
   min-height: 100vh;
-  background: tokens.og-color(canvas);
+  background:
+    linear-gradient(180deg, rgba(248, 250, 252, 0.96) 0%, tokens.og-color(canvas) 44%),
+    tokens.og-color(canvas);
   color: tokens.og-color(ink-950);
+  font-family: var(--og-font-family);
 }
 
 .skip-link {
@@ -29,9 +32,10 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  border-bottom: 1px solid rgba(tokens.og-color(border), 0.8);
-  background: rgba(tokens.og-color(surface), 0.94);
-  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(tokens.og-color(border), 0.62);
+  background: rgba(tokens.og-color(surface), 0.78);
+  backdrop-filter: blur(22px) saturate(170%);
+  box-shadow: 0 16px 42px rgba(15, 23, 42, 0.04);
 }
 
 .nav-shell,
@@ -57,6 +61,14 @@
   font-size: 1rem;
   font-weight: 800;
   text-decoration: none;
+  transition:
+    color 0.22s ease,
+    transform 0.22s ease;
+
+  &:hover {
+    color: tokens.og-color(primary-600);
+    transform: translateY(-1px);
+  }
 }
 
 .brand__icon {
@@ -65,9 +77,10 @@
   height: 2.35rem;
   align-items: center;
   justify-content: center;
-  border-radius: 0.75rem;
-  background: linear-gradient(135deg, tokens.og-color(primary-500), tokens.og-color(primary-600));
+  border-radius: 1rem;
+  background: linear-gradient(135deg, tokens.og-color(primary-500), tokens.og-color(accent-500));
   color: tokens.og-color(surface);
+  box-shadow: 0 14px 28px rgba(tokens.og-color(primary-500), 0.24);
 }
 
 .nav-toggle {
@@ -76,11 +89,22 @@
   height: 2.75rem;
   align-items: center;
   justify-content: center;
-  border: 1px solid tokens.og-color(border);
-  border-radius: 0.75rem;
-  background: tokens.og-color(surface);
+  border: 1px solid rgba(tokens.og-color(border), 0.82);
+  border-radius: 1rem;
+  background: rgba(tokens.og-color(surface), 0.82);
   color: tokens.og-color(ink-500);
   cursor: pointer;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  transition:
+    border-color 0.22s ease,
+    color 0.22s ease,
+    transform 0.22s ease;
+
+  &:hover {
+    border-color: rgba(tokens.og-color(primary-500), 0.38);
+    color: tokens.og-color(primary-600);
+    transform: translateY(-1px);
+  }
 }
 
 .nav-menu {
@@ -91,22 +115,33 @@
   display: none;
   grid-template-columns: 1fr;
   gap: 0.35rem;
-  border: 1px solid tokens.og-color(border);
-  border-radius: 1rem;
-  background: tokens.og-color(surface);
+  border: 1px solid rgba(tokens.og-color(border), 0.78);
+  border-radius: 1.25rem;
+  background: rgba(tokens.og-color(surface), 0.92);
   padding: 0.75rem;
-  box-shadow: tokens.og-shadow(raised);
+  backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
 
   &--open {
     display: grid;
   }
 
   a {
-    border-radius: 0.7rem;
+    border-radius: 0.9rem;
     color: tokens.og-color(ink-500);
     font-weight: 700;
     padding: 0.75rem;
     text-decoration: none;
+    transition:
+      background 0.2s ease,
+      color 0.2s ease,
+      transform 0.2s ease;
+
+    &:hover {
+      background: rgba(tokens.og-color(primary-500), 0.08);
+      color: tokens.og-color(primary-600);
+      transform: translateX(2px);
+    }
   }
 }
 
@@ -115,20 +150,32 @@
 }
 
 .nav-menu__cta {
-  background: tokens.og-color(primary-500);
+  background: linear-gradient(135deg, tokens.og-color(primary-500), tokens.og-color(primary-600));
   color: tokens.og-color(surface) !important;
   text-align: center;
+  box-shadow: 0 16px 34px rgba(tokens.og-color(primary-500), 0.24);
+
+  &:hover {
+    background: linear-gradient(
+      135deg,
+      tokens.og-color(primary-600),
+      tokens.og-color(primary-700)
+    ) !important;
+    color: tokens.og-color(surface) !important;
+  }
 }
 
 .landing-footer {
-  border-top: 1px solid tokens.og-color(border);
-  background: tokens.og-color(surface);
+  border-top: 1px solid rgba(tokens.og-color(border), 0.72);
+  background:
+    linear-gradient(180deg, rgba(tokens.og-color(surface), 0.92), tokens.og-color(surface)),
+    tokens.og-color(surface);
 }
 
 .footer-shell {
   display: grid;
   gap: 2rem;
-  padding-block: 2.5rem;
+  padding-block: 3rem;
 }
 
 .footer-brand p {
@@ -148,6 +195,14 @@
   a {
     color: inherit;
     text-decoration: none;
+    transition:
+      color 0.2s ease,
+      transform 0.2s ease;
+
+    &:hover {
+      color: tokens.og-color(primary-600);
+      transform: translateX(2px);
+    }
   }
 }
 
@@ -176,6 +231,10 @@
 
   .nav-menu a {
     padding: 0.65rem 0.8rem;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
   }
 
   .nav-menu__cta {

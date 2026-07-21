@@ -2,13 +2,20 @@
 
 :host {
   display: block;
-  background: tokens.og-color(surface);
+  background:
+    linear-gradient(
+      180deg,
+      tokens.og-color(surface),
+      rgba(239, 246, 255, 0.5),
+      tokens.og-color(surface)
+    ),
+    tokens.og-color(surface);
 }
 
 .section {
   width: min(100% - 2rem, 1180px);
   margin-inline: auto;
-  padding-block: 4rem;
+  padding-block: clamp(4rem, 8vw, 6.5rem);
   scroll-margin-top: 5rem;
 }
 
@@ -29,6 +36,7 @@
   color: tokens.og-color(primary-500);
   font-size: 0.8rem;
   font-weight: 800;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 
@@ -38,12 +46,13 @@ h2 {
   font-size: clamp(2rem, 4vw, 3rem);
   letter-spacing: 0;
   line-height: 1.1;
+  text-wrap: balance;
 }
 
 .pricing-grid {
   display: grid;
-  gap: 1rem;
-  margin-top: 2rem;
+  gap: 1.15rem;
+  margin-top: 2.35rem;
 }
 
 .plan-card {
@@ -51,22 +60,44 @@ h2 {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  border: 1px solid tokens.og-color(border);
-  border-radius: 0.95rem;
-  background: tokens.og-color(surface);
-  padding: 1.25rem;
-  box-shadow: tokens.og-shadow(card);
+  overflow: hidden;
+  border: 1px solid rgba(tokens.og-color(border), 0.74);
+  border-radius: 1.35rem;
+  background: rgba(tokens.og-color(surface), 0.82);
+  padding: 1.45rem;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.06);
+  transition:
+    border-color 0.24s ease,
+    box-shadow 0.24s ease,
+    transform 0.24s ease;
+
+  &:hover {
+    border-color: rgba(tokens.og-color(primary-500), 0.24);
+    box-shadow: 0 30px 76px rgba(15, 23, 42, 0.12);
+    transform: translateY(-5px);
+  }
 }
 
 .plan-card--featured {
   border-color: rgba(tokens.og-color(primary-500), 0.5);
-  box-shadow: tokens.og-shadow(raised);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(tokens.og-color(surface), 0.9),
+      rgba(tokens.og-color(primary-50), 0.72)
+    ),
+    tokens.og-color(surface);
+  box-shadow: 0 34px 86px rgba(tokens.og-color(primary-500), 0.16);
 }
 
 .badge {
   width: fit-content;
   border-radius: 999px;
-  background: rgba(tokens.og-color(accent-500), 0.12);
+  background: linear-gradient(
+    135deg,
+    rgba(tokens.og-color(accent-500), 0.16),
+    rgba(tokens.og-color(primary-500), 0.1)
+  );
   color: tokens.og-color(accent-500);
   font-size: 0.76rem;
   font-weight: 900;
@@ -98,7 +129,8 @@ li,
 
 .price strong {
   color: tokens.og-color(ink-950);
-  font-size: 2rem;
+  font-size: 2.25rem;
+  letter-spacing: 0;
 }
 
 .price-note {
@@ -137,18 +169,54 @@ li og-icon {
   min-height: 2.8rem;
   align-items: center;
   justify-content: center;
-  border: 1px solid tokens.og-color(primary-500);
+  border: 1px solid rgba(tokens.og-color(primary-500), 0.72);
   border-radius: 999px;
   color: tokens.og-color(primary-500);
   font-weight: 900;
   margin-top: auto;
   padding: 0.75rem 1rem;
   text-decoration: none;
+  transition:
+    background 0.22s ease,
+    box-shadow 0.22s ease,
+    color 0.22s ease,
+    transform 0.22s ease;
+
+  &:hover {
+    background: rgba(tokens.og-color(primary-500), 0.08);
+    box-shadow: 0 18px 36px rgba(tokens.og-color(primary-500), 0.16);
+    transform: translateY(-2px);
+  }
 }
 
 .plan-card--featured .plan-cta {
-  background: tokens.og-color(primary-500);
+  background: linear-gradient(135deg, tokens.og-color(primary-500), tokens.og-color(primary-600));
   color: tokens.og-color(surface);
+  box-shadow: 0 20px 42px rgba(tokens.og-color(primary-500), 0.28);
+
+  &:hover {
+    background: linear-gradient(135deg, tokens.og-color(primary-600), tokens.og-color(primary-700));
+    box-shadow: 0 24px 52px rgba(tokens.og-color(primary-500), 0.36);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .section {
+    animation: section-rise both;
+    animation-range: entry 8% cover 28%;
+    animation-timeline: view();
+  }
+
+  @keyframes section-rise {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 @media (min-width: 860px) {

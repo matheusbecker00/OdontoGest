@@ -19,27 +19,27 @@ export class LandingFeaturesSectionComponent {
   protected readonly features: readonly Feature[] = [
     {
       icon: 'calendar_month',
-      title: 'Agenda com visao de ocupacao',
+      title: 'Agenda com visão de ocupação',
       description:
-        'Acompanhe horarios, retornos e capacidade do time sem depender de controles paralelos.',
+        'Acompanhe horários, retornos e capacidade do time sem depender de controles paralelos.',
     },
     {
       icon: 'groups',
       title: 'Pacientes e equipe organizados',
       description:
-        'Centralize cadastros, profissionais e informacoes importantes para um atendimento mais fluido.',
+        'Centralize cadastros, profissionais e informações importantes para um atendimento mais fluido.',
     },
     {
       icon: 'account_balance_wallet',
       title: 'Financeiro conectado',
       description:
-        'Visualize previsao de receita, recebimentos e pontos de atencao junto da operacao.',
+        'Visualize previsão de receita, recebimentos e pontos de atenção junto da operação.',
     },
     {
       icon: 'monitoring',
       title: 'Indicadores para decidir melhor',
       description:
-        'Transforme dados da clinica em sinais simples para melhorar rotina, vendas e recorrencia.',
+        'Transforme dados da clínica em sinais simples para melhorar rotina, vendas e recorrência.',
     },
   ];
 }

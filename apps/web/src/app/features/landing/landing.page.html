@@ -1,7 +1,7 @@
-<a class="skip-link" href="#conteudo">Ir para o conteudo</a>
+<a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
 
 <header class="landing-header">
-  <nav class="nav-shell" aria-label="Navegacao principal">
+  <nav class="nav-shell" aria-label="Navegação principal">
     <a class="brand" routerLink="/" aria-label="OdontoGest">
       <span class="brand__icon" aria-hidden="true">
         <og-icon name="dentistry" />
@@ -12,7 +12,7 @@
     <button
       class="nav-toggle"
       type="button"
-      aria-label="Abrir menu de navegacao"
+      aria-label="Abrir menu de navegação"
       [attr.aria-expanded]="menuOpen()"
       aria-controls="landing-menu"
       (click)="toggleMenu()"
@@ -21,12 +21,12 @@
     </button>
 
     <div id="landing-menu" class="nav-menu" [class.nav-menu--open]="menuOpen()">
-      <a href="#solucao" (click)="closeMenu()">Solucao</a>
+      <a href="#solucao" (click)="closeMenu()">Solução</a>
       <a href="#recursos" (click)="closeMenu()">Recursos</a>
-      <a href="#precos" (click)="closeMenu()">Precos</a>
+      <a href="#precos" (click)="closeMenu()">Preços</a>
       <a href="#faq" (click)="closeMenu()">FAQ</a>
       <a class="nav-menu__login" routerLink="/login" (click)="closeMenu()">Entrar</a>
-      <a class="nav-menu__cta" routerLink="/cadastro" (click)="closeMenu()">Comecar gratis</a>
+      <a class="nav-menu__cta" routerLink="/cadastro" (click)="closeMenu()">Teste grátis 15 dias</a>
     </div>
   </nav>
 </header>
@@ -49,24 +49,24 @@
         </span>
         <span>OdontoGest</span>
       </a>
-      <p>Gestao simples e segura para clinicas odontologicas crescerem com previsibilidade.</p>
+      <p>Gestão simples e segura para clínicas odontológicas crescerem com previsibilidade.</p>
     </div>
 
     <div class="footer-links" aria-label="Links institucionais">
       <a href="#recursos">Recursos</a>
-      <a href="#precos">Precos</a>
+      <a href="#precos">Preços</a>
       <a routerLink="/termos">Termos</a>
       <a routerLink="/privacidade">Privacidade</a>
     </div>
 
     <div class="footer-links" aria-label="Redes sociais">
-      <span>Instagram placeholder</span>
-      <span>LinkedIn placeholder</span>
-      <span>YouTube placeholder</span>
+      <a href="https://www.instagram.com/odontogestapp/" rel="noreferrer" target="_blank">
+        Instagram
+      </a>
     </div>
   </div>
 
   <div class="footer-bottom">
-    <span>© 2026 OdontoGest. Todos os direitos reservados.</span>
+    <span>&copy; 2026 OdontoGest. Todos os direitos reservados.</span>
   </div>
 </footer>

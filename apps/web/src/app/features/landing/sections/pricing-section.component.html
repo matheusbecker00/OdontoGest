@@ -1,10 +1,8 @@
 <section class="section" id="precos" aria-labelledby="pricing-title">
   <div class="section__header">
-    <p class="eyebrow">Planos e precos</p>
-    <h2 id="pricing-title">Escolha o plano que acompanha o momento da sua clinica.</h2>
-    <p>
-      Valores demonstrativos para a landing. Ajuste os precos e limites conforme sua oferta final.
-    </p>
+    <p class="eyebrow">Planos e preços</p>
+    <h2 id="pricing-title">Escolha o plano que acompanha o momento da sua clínica.</h2>
+    <p>Comece com 15 dias gratuitos e evolua conforme sua clínica cresce.</p>
   </div>
 
   <div class="pricing-grid">
@@ -18,7 +16,7 @@
         <div class="price">
           <strong>{{ plan.price }}</strong>
           @if (plan.price !== 'Sob consulta') {
-            <span>/mes</span>
+            <span>/mês</span>
           }
         </div>
         @if (plan.note) {
@@ -32,7 +30,7 @@
         </ul>
 
         <a class="plan-cta" routerLink="/cadastro">
-          {{ plan.price === 'Sob consulta' ? 'Falar com vendas' : 'Comecar agora' }}
+          {{ plan.price === 'Sob consulta' ? 'Falar com vendas' : 'Testar 15 dias grátis' }}
         </a>
       </article>
     }

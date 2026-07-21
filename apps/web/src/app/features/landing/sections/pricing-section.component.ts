@@ -24,30 +24,31 @@ export class LandingPricingSectionComponent {
     {
       name: 'Starter',
       price: 'R$ 49,90',
-      description: 'Para consultorios iniciando a organizacao digital.',
+      note: '15 dias gratuitos para começar.',
+      description: 'Para consultórios iniciando a organização digital.',
       features: ['Agenda e cadastros essenciais', 'Pacientes e procedimentos', 'Suporte por email'],
     },
     {
       name: 'Pro',
       price: 'R$ 49,90',
-      note: '*nos primeiros 3 meses',
-      description: 'Para clinicas que precisam de visao operacional e financeira.',
+      note: '15 dias gratuitos. Depois R$ 49,90 nos primeiros 3 meses e R$ 79,90/mês.',
+      description: 'Para clínicas que precisam de visão operacional e financeira.',
       featured: true,
       features: [
         'Tudo do Starter',
         'Financeiro e indicadores',
-        'Equipe com permissoes',
+        'Equipe com permissões',
         'Suporte prioritario',
       ],
     },
     {
       name: 'Enterprise',
       price: 'Sob consulta',
-      description: 'Para operacoes maiores com necessidades especificas.',
+      description: 'Para operações maiores com necessidades específicas.',
       features: [
         'Fluxos personalizados',
         'Acompanhamento dedicado',
-        'Condicoes comerciais sob medida',
+        'Condições comerciais sob medida',
       ],
     },
   ];

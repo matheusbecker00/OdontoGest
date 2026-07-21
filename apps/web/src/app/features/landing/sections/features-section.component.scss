@@ -2,13 +2,15 @@
 
 :host {
   display: block;
-  background: tokens.og-color(surface);
+  background:
+    linear-gradient(180deg, tokens.og-color(surface), rgba(248, 250, 252, 0.92)),
+    tokens.og-color(surface);
 }
 
 .section {
   width: min(100% - 2rem, 1180px);
   margin-inline: auto;
-  padding-block: 4rem;
+  padding-block: clamp(4rem, 8vw, 6.5rem);
   scroll-margin-top: 5rem;
 }
 
@@ -30,6 +32,7 @@
   color: tokens.og-color(primary-500);
   font-size: 0.8rem;
   font-weight: 800;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 
@@ -39,20 +42,33 @@ h2 {
   font-size: clamp(2rem, 4vw, 3rem);
   letter-spacing: 0;
   line-height: 1.1;
+  text-wrap: balance;
 }
 
 .feature-grid {
   display: grid;
-  gap: 1rem;
-  margin-top: 2rem;
+  gap: 1.15rem;
+  margin-top: 2.35rem;
 }
 
 .feature-card {
-  border: 1px solid tokens.og-color(border);
-  border-radius: 0.95rem;
-  background: tokens.og-color(surface);
-  padding: 1.25rem;
-  box-shadow: tokens.og-shadow(card);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(tokens.og-color(border), 0.72);
+  border-radius: 1.25rem;
+  background: rgba(tokens.og-color(surface), 0.78);
+  padding: 1.35rem;
+  box-shadow: 0 16px 42px rgba(15, 23, 42, 0.055);
+  transition:
+    border-color 0.24s ease,
+    box-shadow 0.24s ease,
+    transform 0.24s ease;
+
+  &:hover {
+    border-color: rgba(tokens.og-color(primary-500), 0.24);
+    box-shadow: 0 28px 68px rgba(15, 23, 42, 0.1);
+    transform: translateY(-5px);
+  }
 }
 
 .feature-card__icon {
@@ -61,9 +77,24 @@ h2 {
   height: 2.7rem;
   align-items: center;
   justify-content: center;
-  border-radius: 0.8rem;
-  background: rgba(tokens.og-color(primary-500), 0.1);
+  border-radius: 1rem;
+  background: linear-gradient(
+    135deg,
+    rgba(tokens.og-color(primary-500), 0.12),
+    rgba(tokens.og-color(accent-500), 0.12)
+  );
   color: tokens.og-color(primary-500);
+  box-shadow: inset 0 1px 0 rgba(tokens.og-color(surface), 0.8);
+  transition:
+    background 0.24s ease,
+    color 0.24s ease,
+    transform 0.24s ease;
+}
+
+.feature-card:hover .feature-card__icon {
+  background: linear-gradient(135deg, tokens.og-color(primary-500), tokens.og-color(accent-500));
+  color: tokens.og-color(surface);
+  transform: scale(1.04);
 }
 
 h3 {
@@ -76,6 +107,25 @@ h3 {
   margin: 0;
   color: tokens.og-color(ink-500);
   line-height: 1.65;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .section {
+    animation: section-rise both;
+    animation-range: entry 8% cover 28%;
+    animation-timeline: view();
+  }
+
+  @keyframes section-rise {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 @media (min-width: 720px) {

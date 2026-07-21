@@ -18,6 +18,16 @@ function toDate(value) {
   return null;
 }
 
+function providerRefId(value) {
+  const id = typeof value === "string" ? value.trim() : "";
+  return id ? id.replace(/\//g, "_") : null;
+}
+
+function providerRefDoc(db, value) {
+  const id = providerRefId(value);
+  return id ? db.doc(`billingProviderRefs/${id}`) : null;
+}
+
 module.exports = async function handler(request, response) {
   if (request.method !== "POST") {
     response.setHeader("Allow", "POST");
@@ -77,6 +87,7 @@ module.exports = async function handler(request, response) {
     const billingRef = db.doc(`clinics/${clinicId}/billing/current`);
     const eventId = `checkout-${paymentLink.id || Date.now()}`;
     const eventRef = db.doc(`clinics/${clinicId}/billingEvents/${eventId}`);
+    const providerRef = providerRefDoc(db, paymentLink.id);
     const currentBilling = (await billingRef.get()).data() || {};
     const currentPeriodEnd = toDate(currentBilling.currentPeriodEnd);
 
@@ -115,6 +126,25 @@ module.exports = async function handler(request, response) {
         },
         { merge: true },
       );
+      if (providerRef) {
+        transaction.set(
+          providerRef,
+          {
+            id: paymentLink.id,
+            type: "ASAAS_PAYMENT_LINK",
+            provider: "ASAAS",
+            clinicId,
+            planId: plan.id,
+            planName: plan.name,
+            providerPaymentLinkId: paymentLink.id || null,
+            checkoutUrl: paymentLink.url || null,
+            externalReference: `clinic:${clinicId}:plan:${plan.id}`,
+            createdAt: currentBilling.createdAt || now,
+            updatedAt: now,
+          },
+          { merge: true },
+        );
+      }
     });
     await syncClinicSubscription({
       clinicId,

@@ -34,6 +34,11 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    match /clinics/{clinicId}/billingEvents/{eventId} {
+      allow read: if isClinicMember(clinicId);
+      allow create, update, delete: if false;
+    }
+
     match /clinics/{clinicId}/appointments/{appointmentId} {
       allow read: if isClinicMember(clinicId);
       allow create: if hasClinicRole(clinicId, ['OWNER', 'ADMIN', 'RECEPTIONIST', 'DENTIST'])

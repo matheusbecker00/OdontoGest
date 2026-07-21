@@ -12,6 +12,7 @@ import { IconComponent } from '../../shared/components/icon.component';
 import {
   BILLING_PLANS,
   BillingRepository,
+  type BillingEvent,
   type BillingPlan,
   type BillingPlanId,
   type BillingState,
@@ -137,6 +138,52 @@ import {
           </div>
         </aside>
       </section>
+
+      <section class="history-panel">
+        <header>
+          <div>
+            <span class="eyebrow">HISTÓRICO</span>
+            <h3>Eventos de cobrança</h3>
+          </div>
+          <span>{{ billingEvents().length }} registro(s)</span>
+        </header>
+
+        @if (billingEvents().length > 0) {
+          <div class="history-list">
+            @for (event of billingEvents(); track event.id) {
+              <article class="history-item">
+                <span
+                  class="history-item__icon"
+                  [class.history-item__icon--danger]="isDangerEvent(event)"
+                >
+                  <og-icon [name]="eventIcon(event)" />
+                </span>
+                <div>
+                  <strong>{{ eventLabel(event) }}</strong>
+                  <small>
+                    {{ formatDateTime(event.receivedAt) }}
+                    @if (event.provider) {
+                      · {{ event.provider }}
+                    }
+                    @if (event.planName || event.planId) {
+                      · {{ event.planName || event.planId }}
+                    }
+                  </small>
+                </div>
+                <em [class]="'event-status event-status--' + event.status.toLowerCase()">
+                  {{ statusLabel(event.status) }}
+                </em>
+              </article>
+            }
+          </div>
+        } @else {
+          <div class="history-empty">
+            <span><og-icon name="credit_card" /></span>
+            <strong>Nenhum evento recebido ainda</strong>
+            <p>Quando o checkout ou o Asaas enviarem atualizações, elas aparecerão aqui.</p>
+          </div>
+        }
+      </section>
     </main>
   `,
   styles: `
@@ -150,6 +197,7 @@ import {
     }
     .billing-hero,
     .billing-layout,
+    .history-panel,
     .checkout-card,
     .plan-card {
       border: 1px solid #e4eaf1;
@@ -440,6 +488,120 @@ import {
       font-size: 0.74rem;
       font-weight: 650;
     }
+    .history-panel {
+      overflow: hidden;
+    }
+    .history-panel header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      border-bottom: 1px solid #edf1f5;
+      padding: 1rem 1.1rem;
+    }
+    .history-panel header h3 {
+      margin-top: 0.15rem;
+      font-size: 1.05rem;
+      letter-spacing: -0.04em;
+    }
+    .history-panel header > span {
+      border-radius: 99px;
+      padding: 0.3rem 0.65rem;
+      color: #52657e;
+      background: #f3f6fa;
+      font-size: 0.7rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .history-list {
+      display: grid;
+      gap: 0.65rem;
+      padding: 1rem;
+    }
+    .history-item {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 0.8rem;
+      border: 1px solid #e8edf3;
+      border-radius: 0.9rem;
+      padding: 0.8rem;
+      background: #fafbfd;
+    }
+    .history-item__icon,
+    .history-empty > span {
+      display: grid;
+      width: 2.45rem;
+      height: 2.45rem;
+      place-items: center;
+      border-radius: 0.78rem;
+      color: #2563eb;
+      background: #eaf2ff;
+    }
+    .history-item__icon--danger {
+      color: #dc2626;
+      background: #fee2e2;
+    }
+    .history-item__icon og-icon,
+    .history-empty og-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+    .history-item strong,
+    .history-item small {
+      display: block;
+    }
+    .history-item strong {
+      font-size: 0.84rem;
+    }
+    .history-item small {
+      margin-top: 0.16rem;
+      color: #718198;
+      font-size: 0.72rem;
+      line-height: 1.45;
+    }
+    .history-item em {
+      border-radius: 99px;
+      padding: 0.3rem 0.58rem;
+      font-size: 0.62rem;
+      font-style: normal;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+    .event-status--none,
+    .event-status--trial,
+    .event-status--checkout_started,
+    .event-status--pending {
+      color: #1d4ed8;
+      background: #eaf2ff;
+    }
+    .event-status--active {
+      color: #047857;
+      background: #e6f8f1;
+    }
+    .event-status--past_due,
+    .event-status--canceled {
+      color: #b42318;
+      background: #fff0ed;
+    }
+    .history-empty {
+      display: grid;
+      justify-items: center;
+      padding: 2rem 1rem;
+      color: #718198;
+      text-align: center;
+    }
+    .history-empty strong {
+      margin-top: 0.75rem;
+      color: #263a55;
+      font-size: 0.86rem;
+    }
+    .history-empty p {
+      max-width: 26rem;
+      margin-top: 0.25rem;
+      font-size: 0.74rem;
+      line-height: 1.5;
+    }
     @media (width < 86rem) {
       .plans-grid {
         grid-template-columns: 1fr;
@@ -466,6 +628,15 @@ import {
       .summary-list strong {
         text-align: left;
       }
+      .history-panel header,
+      .history-item {
+        align-items: flex-start;
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+      .history-item em {
+        grid-column: 2;
+        justify-self: start;
+      }
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -476,6 +647,7 @@ export class BillingPage {
 
   protected readonly plans = BILLING_PLANS;
   protected readonly pageError = signal<string | null>(null);
+  protected readonly billingEvents = signal<readonly BillingEvent[]>([]);
   protected readonly loadingPlanId = signal<string | null>(null);
   protected readonly selectedPlanId = signal<BillingPlanId>('pro');
   protected readonly currentState = signal<BillingState>({
@@ -522,6 +694,38 @@ export class BillingPage {
         .catch((error) => {
           console.warn('Could not subscribe billing state.', error);
           this.pageError.set('Não foi possível carregar a assinatura agora.');
+        });
+
+      onCleanup(() => {
+        disposed = true;
+        unsubscribe?.();
+      });
+    });
+
+    effect((onCleanup) => {
+      const clinicId = this.activeClinicId();
+      let disposed = false;
+      let unsubscribe: (() => void) | null = null;
+      void this.billing
+        .subscribeEvents(
+          clinicId,
+          (events) => {
+            if (disposed) return;
+            this.billingEvents.set(events);
+          },
+          (error) => {
+            console.warn('Could not subscribe billing events.', error);
+          },
+        )
+        .then((nextUnsubscribe) => {
+          if (disposed) {
+            nextUnsubscribe();
+            return;
+          }
+          unsubscribe = nextUnsubscribe;
+        })
+        .catch((error) => {
+          console.warn('Could not subscribe billing events.', error);
         });
 
       onCleanup(() => {
@@ -576,6 +780,41 @@ export class BillingPage {
       PAST_DUE: 'Pagamento em atraso',
       CANCELED: 'Assinatura cancelada',
     }[status];
+  }
+
+  protected eventLabel(event: BillingEvent): string {
+    const labels: Record<string, string> = {
+      CHECKOUT_STARTED: 'Checkout iniciado',
+      PAYMENT_CREATED: 'Cobrança criada',
+      PAYMENT_CONFIRMED: 'Pagamento confirmado',
+      PAYMENT_RECEIVED: 'Pagamento recebido',
+      PAYMENT_OVERDUE: 'Pagamento em atraso',
+      PAYMENT_DELETED: 'Pagamento removido',
+      PAYMENT_REFUNDED: 'Pagamento estornado',
+      SUBSCRIPTION_DELETED: 'Assinatura removida',
+      SUBSCRIPTION_INACTIVATED: 'Assinatura inativada',
+    };
+    return event.event ? (labels[event.event] ?? event.event) : 'Evento de cobrança';
+  }
+
+  protected eventIcon(event: BillingEvent): string {
+    if (event.status === 'ACTIVE') return 'check';
+    if (this.isDangerEvent(event)) return 'pending_actions';
+    return 'credit_card';
+  }
+
+  protected isDangerEvent(event: BillingEvent): boolean {
+    return event.status === 'PAST_DUE' || event.status === 'CANCELED';
+  }
+
+  protected formatDateTime(value: string): string {
+    if (!value) return 'Data não informada';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Data inválida';
+    return new Intl.DateTimeFormat('pt-BR', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    }).format(date);
   }
 
   private activeClinicId(): string {

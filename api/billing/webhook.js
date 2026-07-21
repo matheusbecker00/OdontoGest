@@ -45,13 +45,24 @@ module.exports = async function handler(request, response) {
     }
 
     const now = new Date().toISOString();
-    await firestore()
-      .doc(`clinics/${context.clinicId}/billing/current`)
-      .set(
+    const nextStatus = statusFromEvent(payload.event);
+    const eventId =
+      payload.id ||
+      `${payload.event || "UNKNOWN"}-${payment.id || payment.subscription || Date.now()}`;
+    const db = firestore();
+    const billingRef = db.doc(`clinics/${context.clinicId}/billing/current`);
+    const clinicEventRef = db.doc(
+      `clinics/${context.clinicId}/billingEvents/${eventId}`,
+    );
+    const globalEventRef = db.doc(`billingEvents/${eventId}`);
+
+    await db.runTransaction(async (transaction) => {
+      transaction.set(
+        billingRef,
         {
           clinicId: context.clinicId,
           planId: context.planId,
-          status: statusFromEvent(payload.event),
+          status: nextStatus,
           provider: "ASAAS",
           providerPaymentId: payment.id || null,
           providerSubscriptionId: payment.subscription || payment.id || null,
@@ -62,20 +73,20 @@ module.exports = async function handler(request, response) {
         { merge: true },
       );
 
-    if (payload.id) {
-      await firestore()
-        .doc(`billingEvents/${payload.id}`)
-        .set(
-          {
-            provider: "ASAAS",
-            event: payload.event || null,
-            clinicId: context.clinicId,
-            planId: context.planId,
-            receivedAt: now,
-          },
-          { merge: true },
-        );
-    }
+      const eventPayload = {
+        id: eventId,
+        provider: "ASAAS",
+        event: payload.event || null,
+        status: nextStatus,
+        clinicId: context.clinicId,
+        planId: context.planId,
+        providerPaymentId: payment.id || null,
+        providerSubscriptionId: payment.subscription || payment.id || null,
+        receivedAt: now,
+      };
+      transaction.set(clinicEventRef, eventPayload, { merge: true });
+      transaction.set(globalEventRef, eventPayload, { merge: true });
+    });
 
     return send(response, 200, { ok: true });
   } catch (error) {

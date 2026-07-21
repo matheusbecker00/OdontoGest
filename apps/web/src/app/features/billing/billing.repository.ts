@@ -1,8 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import {
+  collection,
   doc,
   getFirestore,
+  limit,
   onSnapshot,
+  orderBy,
+  query,
   type Firestore,
   type Unsubscribe,
 } from 'firebase/firestore';
@@ -32,6 +36,21 @@ export interface BillingState {
   readonly provider: 'ASAAS' | null;
   readonly checkoutUrl: string | null;
   readonly updatedAt: string;
+}
+
+export interface BillingEvent {
+  readonly id: string;
+  readonly provider: 'ASAAS' | null;
+  readonly event: string | null;
+  readonly status: BillingStatus;
+  readonly planId: BillingPlanId | null;
+  readonly planName: string | null;
+  readonly providerPaymentId: string | null;
+  readonly providerSubscriptionId: string | null;
+  readonly providerPaymentLinkId: string | null;
+  readonly checkoutUrl: string | null;
+  readonly actorUserId: string | null;
+  readonly receivedAt: string;
 }
 
 export const BILLING_PLANS: readonly BillingPlan[] = [
@@ -96,6 +115,25 @@ export class BillingRepository {
     );
   }
 
+  async subscribeEvents(
+    clinicId: string,
+    onNext: (events: readonly BillingEvent[]) => void,
+    onError: (error: unknown) => void,
+  ): Promise<Unsubscribe> {
+    return onSnapshot(
+      query(
+        collection(this.firestore, 'clinics', clinicId, 'billingEvents'),
+        orderBy('receivedAt', 'desc'),
+        limit(20),
+      ),
+      (snapshot) =>
+        onNext(
+          snapshot.docs.map((document) => this.eventFromFirestore(document.id, document.data())),
+        ),
+      onError,
+    );
+  }
+
   async startCheckout(clinicId: string, planId: BillingPlanId): Promise<string> {
     const token = await this.firebaseAuth.getIdToken();
     const response = await fetch('/api/billing/checkout', {
@@ -137,6 +175,26 @@ export class BillingRepository {
       provider: data['provider'] === 'ASAAS' ? 'ASAAS' : null,
       checkoutUrl: typeof data['checkoutUrl'] === 'string' ? data['checkoutUrl'] : null,
       updatedAt: this.stringField(data, 'updatedAt'),
+    };
+  }
+
+  private eventFromFirestore(id: string, data: Record<string, unknown>): BillingEvent {
+    return {
+      id,
+      provider: data['provider'] === 'ASAAS' ? 'ASAAS' : null,
+      event: typeof data['event'] === 'string' ? data['event'] : null,
+      status: this.statusField(data['status']),
+      planId: this.planIdField(data['planId']),
+      planName: typeof data['planName'] === 'string' ? data['planName'] : null,
+      providerPaymentId:
+        typeof data['providerPaymentId'] === 'string' ? data['providerPaymentId'] : null,
+      providerSubscriptionId:
+        typeof data['providerSubscriptionId'] === 'string' ? data['providerSubscriptionId'] : null,
+      providerPaymentLinkId:
+        typeof data['providerPaymentLinkId'] === 'string' ? data['providerPaymentLinkId'] : null,
+      checkoutUrl: typeof data['checkoutUrl'] === 'string' ? data['checkoutUrl'] : null,
+      actorUserId: typeof data['actorUserId'] === 'string' ? data['actorUserId'] : null,
+      receivedAt: this.stringField(data, 'receivedAt'),
     };
   }
 

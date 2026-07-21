@@ -61,9 +61,14 @@ module.exports = async function handler(request, response) {
     });
 
     const now = new Date().toISOString();
-    await firestore()
-      .doc(`clinics/${clinicId}/billing/current`)
-      .set(
+    const db = firestore();
+    const billingRef = db.doc(`clinics/${clinicId}/billing/current`);
+    const eventId = `checkout-${paymentLink.id || Date.now()}`;
+    const eventRef = db.doc(`clinics/${clinicId}/billingEvents/${eventId}`);
+
+    await db.runTransaction(async (transaction) => {
+      transaction.set(
+        billingRef,
         {
           clinicId,
           planId: plan.id,
@@ -78,6 +83,24 @@ module.exports = async function handler(request, response) {
         },
         { merge: true },
       );
+      transaction.set(
+        eventRef,
+        {
+          id: eventId,
+          provider: "ASAAS",
+          event: "CHECKOUT_STARTED",
+          status: "CHECKOUT_STARTED",
+          clinicId,
+          planId: plan.id,
+          planName: plan.name,
+          providerPaymentLinkId: paymentLink.id || null,
+          checkoutUrl: paymentLink.url || null,
+          actorUserId: decoded.uid,
+          receivedAt: now,
+        },
+        { merge: true },
+      );
+    });
 
     return send(response, 200, {
       checkoutUrl: paymentLink.url,

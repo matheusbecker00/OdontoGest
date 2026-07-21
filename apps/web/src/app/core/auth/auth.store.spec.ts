@@ -1,11 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
+import { BillingRepository } from '../../features/billing/billing.repository';
 import { FirebaseDataService } from '../firebase-data.service';
 import { AuthStore } from './auth.store';
 import { FirebaseAuthService } from './firebase-auth.service';
 
 describe('AuthStore', () => {
   const data = { createOwnerClinic: vi.fn(), getMyContext: vi.fn() };
+  const billing = { ensureTrial: vi.fn() };
   const firebase = {
     signIn: vi.fn(),
     createAccount: vi.fn(),
@@ -21,7 +23,8 @@ describe('AuthStore', () => {
     firebase.sendVerificationAndSignOut.mockResolvedValue(undefined);
     firebase.signOut.mockResolvedValue(undefined);
     firebase.waitUntilReady.mockResolvedValue(true);
-    data.createOwnerClinic.mockResolvedValue(undefined);
+    data.createOwnerClinic.mockResolvedValue('22222222-2222-4222-8222-222222222222');
+    billing.ensureTrial.mockResolvedValue(undefined);
     data.getMyContext.mockResolvedValue({
       users: [{ id: 'firebase-user-1', name: 'Marina', email: 'marina@example.test' }],
       clinicMemberships: [
@@ -40,6 +43,7 @@ describe('AuthStore', () => {
         AuthStore,
         { provide: FirebaseDataService, useValue: data },
         { provide: FirebaseAuthService, useValue: firebase },
+        { provide: BillingRepository, useValue: billing },
       ],
     });
   });
@@ -75,6 +79,7 @@ describe('AuthStore', () => {
       email: 'marina@example.test',
     });
     expect(data.getMyContext).toHaveBeenCalledOnce();
+    expect(billing.ensureTrial).toHaveBeenCalledWith('22222222-2222-4222-8222-222222222222');
     expect(store.isAuthenticated()).toBe(true);
   });
 });

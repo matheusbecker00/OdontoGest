@@ -35,6 +35,7 @@ export interface BillingState {
   readonly status: BillingStatus;
   readonly provider: 'ASAAS' | null;
   readonly checkoutUrl: string | null;
+  readonly currentPeriodEnd: string | null;
   readonly updatedAt: string;
 }
 
@@ -154,6 +155,22 @@ export class BillingRepository {
     return payload.checkoutUrl;
   }
 
+  async ensureTrial(clinicId: string): Promise<void> {
+    const token = await this.firebaseAuth.getIdToken();
+    const response = await fetch('/api/billing/trial', {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${token}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ clinicId }),
+    });
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => ({}))) as { error?: string };
+      throw new Error(payload.error || 'Não foi possível iniciar o trial.');
+    }
+  }
+
   private emptyState(clinicId: string): BillingState {
     return {
       clinicId,
@@ -162,6 +179,7 @@ export class BillingRepository {
       status: 'NONE',
       provider: null,
       checkoutUrl: null,
+      currentPeriodEnd: null,
       updatedAt: '',
     };
   }
@@ -174,6 +192,7 @@ export class BillingRepository {
       status: this.statusField(data['status']),
       provider: data['provider'] === 'ASAAS' ? 'ASAAS' : null,
       checkoutUrl: typeof data['checkoutUrl'] === 'string' ? data['checkoutUrl'] : null,
+      currentPeriodEnd: this.timestampField(data['currentPeriodEnd']),
       updatedAt: this.stringField(data, 'updatedAt'),
     };
   }
@@ -216,5 +235,19 @@ export class BillingRepository {
   private stringField(data: Record<string, unknown>, key: string): string {
     const value = data[key];
     return typeof value === 'string' ? value : '';
+  }
+
+  private timestampField(value: unknown): string | null {
+    if (!value) return null;
+    if (typeof value === 'string') return value;
+    if (value instanceof Date) return value.toISOString();
+    if (
+      typeof value === 'object' &&
+      'toDate' in value &&
+      typeof (value as { toDate?: unknown }).toDate === 'function'
+    ) {
+      return (value as { toDate: () => Date }).toDate().toISOString();
+    }
+    return null;
   }
 }

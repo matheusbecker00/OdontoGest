@@ -101,6 +101,7 @@ export class AuthStore {
         authorizationVersion: membership?.authorizationVersion ?? null,
         permissions: this.permissionsForRole(roleCode),
       });
+      await this.ensureBillingTrials(clinics);
     } catch (error) {
       console.warn('Using provisional auth context.', error);
       if (!(await this.loadFirestoreTeamContext())) {
@@ -192,11 +193,12 @@ export class AuthStore {
     );
     try {
       const data = await this.getDataService();
-      await data.createOwnerClinic({
+      const clinicId = await data.createOwnerClinic({
         responsibleName: normalized.responsibleName,
         clinicName: normalized.clinicName,
         email: normalized.email,
       });
+      await this.ensureBillingTrial(clinicId, true);
       await this.loadContext();
     } catch (error) {
       await this.firebase.signOut().catch(() => undefined);
@@ -242,6 +244,26 @@ export class AuthStore {
   private async getDataService() {
     const { FirebaseDataService } = await import('../firebase-data.service');
     return this.injector.get(FirebaseDataService);
+  }
+
+  private async ensureBillingTrials(clinics: readonly ClinicSummary[]): Promise<void> {
+    await Promise.all(
+      clinics.map((clinic) =>
+        this.ensureBillingTrial(clinic.id, false).catch((error) => {
+          console.warn('Could not ensure billing trial.', clinic.id, error);
+        }),
+      ),
+    );
+  }
+
+  private async ensureBillingTrial(clinicId: string, strict: boolean): Promise<void> {
+    const { BillingRepository } = await import('../../features/billing/billing.repository');
+    try {
+      await this.injector.get(BillingRepository).ensureTrial(clinicId);
+    } catch (error) {
+      if (strict) throw error;
+      console.warn('Could not ensure billing trial.', clinicId, error);
+    }
   }
 
   private permissionsForRole(roleCode: RoleCode | null): string[] {

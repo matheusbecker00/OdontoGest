@@ -108,3 +108,17 @@ query GetPatient($clinicId: UUID!, $id: UUID!) @auth(level: NO_ACCESS) {
     updatedAt
   }
 }
+
+query GetClinicSubscription($clinicId: UUID!) @auth(level: NO_ACCESS) {
+  clinicSubscription(key: { clinicId: $clinicId }) {
+    clinicId
+    status
+    planId
+    planName
+    provider
+    providerSubscriptionId
+    checkoutUrl
+    currentPeriodEnd
+    updatedAt
+  }
+}

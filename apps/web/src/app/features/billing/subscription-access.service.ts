@@ -13,6 +13,7 @@ const EMPTY_BILLING_STATE: BillingState = {
   status: 'NONE',
   provider: null,
   checkoutUrl: null,
+  currentPeriodEnd: null,
   updatedAt: '',
 };
 
@@ -26,16 +27,34 @@ export class SubscriptionAccessService {
   readonly canManageBilling = computed(() => this.auth.hasEveryPermission(['billing.manage']));
   readonly status = computed(() => this.billingState().status);
   readonly currentUrl = signal(this.router.url || '/');
-  readonly isReadOnly = computed(
-    () => this.status() === 'PAST_DUE' || this.status() === 'CANCELED',
-  );
+  readonly isTrialExpired = computed(() => {
+    const state = this.billingState();
+    if (
+      state.status !== 'TRIAL' &&
+      state.status !== 'CHECKOUT_STARTED' &&
+      state.status !== 'PENDING'
+    ) {
+      return false;
+    }
+    if (!state.currentPeriodEnd) return true;
+    return new Date(state.currentPeriodEnd).getTime() <= Date.now();
+  });
+  readonly isReadOnly = computed(() => {
+    const status = this.status();
+    return (
+      status === 'NONE' || status === 'PAST_DUE' || status === 'CANCELED' || this.isTrialExpired()
+    );
+  });
   readonly blocksOperationalWrites = computed(() => this.isReadOnly());
   readonly blocksWrites = computed(
     () => this.blocksOperationalWrites() && !this.isReadonlyExemptRoute(this.currentUrl()),
   );
-  readonly isOperational = computed(() => this.status() === 'ACTIVE' || this.status() === 'TRIAL');
+  readonly isOperational = computed(
+    () => this.status() === 'ACTIVE' || (this.status() === 'TRIAL' && !this.isTrialExpired()),
+  );
   readonly noticeLevel = computed<SubscriptionNoticeLevel>(() => {
     const status = this.status();
+    if (this.isTrialExpired()) return 'danger';
     if (status === 'CHECKOUT_STARTED' || status === 'PENDING') return 'warning';
     if (status === 'PAST_DUE' || status === 'CANCELED') return 'danger';
     if (status === 'NONE') return 'info';
@@ -147,17 +166,19 @@ export class SubscriptionAccessService {
       NONE: {
         title: 'Configure a assinatura da clínica',
         description:
-          'Escolha um plano para deixar a cobrança recorrente pronta antes da operação comercial.',
+          'O trial precisa estar ativo ou a assinatura regularizada para criar e editar registros.',
       },
       CHECKOUT_STARTED: {
-        title: 'Checkout de assinatura em andamento',
-        description:
-          'Existe um checkout aberto no Asaas. Conclua o pagamento para ativar o plano automaticamente.',
+        title: this.isTrialExpired() ? 'Trial encerrado' : 'Checkout de assinatura em andamento',
+        description: this.isTrialExpired()
+          ? 'Conclua o pagamento para voltar a criar e editar registros.'
+          : 'Existe um checkout aberto no Asaas. Conclua o pagamento para ativar o plano automaticamente.',
       },
       PENDING: {
-        title: 'Pagamento em processamento',
-        description:
-          'Estamos aguardando a confirmação do Asaas. O status será atualizado pelo webhook.',
+        title: this.isTrialExpired() ? 'Trial encerrado' : 'Pagamento em processamento',
+        description: this.isTrialExpired()
+          ? 'Aguardamos a confirmação do pagamento; enquanto isso, a clínica fica somente leitura.'
+          : 'Estamos aguardando a confirmação do Asaas. O status será atualizado pelo webhook.',
       },
       PAST_DUE: {
         title: 'Modo somente leitura ativo',

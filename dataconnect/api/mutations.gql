@@ -114,6 +114,10 @@ mutation CreatePatient(
       expr: "response.query.clinicMemberships.size() == 1"
       message: "Active clinic membership required"
     )
+    @check(
+      expr: "response.query.clinicSubscriptions.size() == 1 && (response.query.clinicSubscriptions[0].status == 'ACTIVE' || ((response.query.clinicSubscriptions[0].status == 'TRIAL' || response.query.clinicSubscriptions[0].status == 'CHECKOUT_STARTED' || response.query.clinicSubscriptions[0].status == 'PENDING') && response.query.clinicSubscriptions[0].currentPeriodEnd != null && response.query.clinicSubscriptions[0].currentPeriodEnd > request.time))"
+      message: "Active subscription required"
+    )
     @redact {
     clinicMemberships(
       where: {
@@ -128,10 +132,7 @@ mutation CreatePatient(
     }
     clinicSubscriptions(where: { clinicId: { eq: $clinicId } }, limit: 1) {
       status
-        @check(
-          expr: "this != 'PAST_DUE' && this != 'CANCELED'"
-          message: "Active subscription required"
-        )
+      currentPeriodEnd
     }
   }
   patient_insert(
@@ -186,6 +187,10 @@ mutation UpdatePatient(
       expr: "response.query.clinicMemberships.size() == 1"
       message: "Active clinic membership required"
     )
+    @check(
+      expr: "response.query.clinicSubscriptions.size() == 1 && (response.query.clinicSubscriptions[0].status == 'ACTIVE' || ((response.query.clinicSubscriptions[0].status == 'TRIAL' || response.query.clinicSubscriptions[0].status == 'CHECKOUT_STARTED' || response.query.clinicSubscriptions[0].status == 'PENDING') && response.query.clinicSubscriptions[0].currentPeriodEnd != null && response.query.clinicSubscriptions[0].currentPeriodEnd > request.time))"
+      message: "Active subscription required"
+    )
     @redact {
     clinicMemberships(
       where: {
@@ -200,10 +205,7 @@ mutation UpdatePatient(
     }
     clinicSubscriptions(where: { clinicId: { eq: $clinicId } }, limit: 1) {
       status
-        @check(
-          expr: "this != 'PAST_DUE' && this != 'CANCELED'"
-          message: "Active subscription required"
-        )
+      currentPeriodEnd
     }
   }
   patient_updateMany(
@@ -253,6 +255,10 @@ mutation InactivatePatient(
       expr: "response.query.clinicMemberships.size() == 1"
       message: "Active clinic membership required"
     )
+    @check(
+      expr: "response.query.clinicSubscriptions.size() == 1 && (response.query.clinicSubscriptions[0].status == 'ACTIVE' || ((response.query.clinicSubscriptions[0].status == 'TRIAL' || response.query.clinicSubscriptions[0].status == 'CHECKOUT_STARTED' || response.query.clinicSubscriptions[0].status == 'PENDING') && response.query.clinicSubscriptions[0].currentPeriodEnd != null && response.query.clinicSubscriptions[0].currentPeriodEnd > request.time))"
+      message: "Active subscription required"
+    )
     @redact {
     clinicMemberships(
       where: {
@@ -267,10 +273,7 @@ mutation InactivatePatient(
     }
     clinicSubscriptions(where: { clinicId: { eq: $clinicId } }, limit: 1) {
       status
-        @check(
-          expr: "this != 'PAST_DUE' && this != 'CANCELED'"
-          message: "Active subscription required"
-        )
+      currentPeriodEnd
     }
   }
   patient_updateMany(

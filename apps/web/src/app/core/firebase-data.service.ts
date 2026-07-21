@@ -18,15 +18,16 @@ export class FirebaseDataService {
     responsibleName: string;
     clinicName: string;
     email: string;
-  }): Promise<void> {
+  }): Promise<string> {
     const email = input.email.trim();
+    const clinicId = crypto.randomUUID();
     const [termsEvidenceDigest, privacyEvidenceDigest] = await Promise.all([
       this.digest(`TERMS_OF_USE:1.0.0:${email}`),
       this.digest(`PRIVACY_POLICY:1.0.0:${email}`),
     ]);
 
     await createOwnerClinic(this.connection, {
-      clinicId: crypto.randomUUID(),
+      clinicId,
       settingsId: crypto.randomUUID(),
       membershipId: crypto.randomUUID(),
       ownerRoleId: OWNER_ROLE_ID,
@@ -41,6 +42,7 @@ export class FirebaseDataService {
       privacyEvidenceDigest,
       requestId: crypto.randomUUID(),
     });
+    return clinicId;
   }
 
   async getMyContext(): Promise<GetMyContextData> {

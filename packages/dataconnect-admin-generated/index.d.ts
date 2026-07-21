@@ -84,6 +84,24 @@ export interface Dentist_Key {
   __typename?: 'Dentist_Key';
 }
 
+export interface GetClinicSubscriptionData {
+  clinicSubscription?: {
+    clinicId: UUIDString;
+    status: SubscriptionStatus;
+    planId?: string | null;
+    planName?: string | null;
+    provider?: string | null;
+    providerSubscriptionId?: string | null;
+    checkoutUrl?: string | null;
+    currentPeriodEnd?: TimestampString | null;
+    updatedAt: TimestampString;
+  } & ClinicSubscription_Key;
+}
+
+export interface GetClinicSubscriptionVariables {
+  clinicId: UUIDString;
+}
+
 export interface GetPatientData {
   patients: ({
     id: UUIDString;
@@ -387,4 +405,9 @@ export function listPatients(vars: ListPatientsVariables, options?: OperationOpt
 export function getPatient(dc: DataConnect, vars: GetPatientVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<GetPatientData>>;
 /** Generated Node Admin SDK operation action function for the 'GetPatient' Query. Allow users to pass in custom DataConnect instances. */
 export function getPatient(vars: GetPatientVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<GetPatientData>>;
+
+/** Generated Node Admin SDK operation action function for the 'GetClinicSubscription' Query. Allow users to execute without passing in DataConnect. */
+export function getClinicSubscription(dc: DataConnect, vars: GetClinicSubscriptionVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<GetClinicSubscriptionData>>;
+/** Generated Node Admin SDK operation action function for the 'GetClinicSubscription' Query. Allow users to pass in custom DataConnect instances. */
+export function getClinicSubscription(vars: GetClinicSubscriptionVariables, options?: OperationOptions): Promise<ExecuteOperationResponse<GetClinicSubscriptionData>>;
 

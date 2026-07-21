@@ -47,6 +47,9 @@ import {
               · {{ currentState().provider }}
             }
           </span>
+          @if (currentState().currentPeriodEnd) {
+            <span>Valido ate {{ formatDate(currentState().currentPeriodEnd) }}</span>
+          }
           @if (currentState().checkoutUrl && currentState().status === 'CHECKOUT_STARTED') {
             <a [href]="currentState().checkoutUrl" target="_blank" rel="noopener">
               Continuar checkout aberto
@@ -657,6 +660,7 @@ export class BillingPage {
     status: 'NONE',
     provider: null,
     checkoutUrl: null,
+    currentPeriodEnd: null,
     updatedAt: '',
   });
   protected readonly selectedPlan = computed(
@@ -815,6 +819,13 @@ export class BillingPage {
       dateStyle: 'short',
       timeStyle: 'short',
     }).format(date);
+  }
+
+  protected formatDate(value: string | null): string {
+    if (!value) return 'Data nao informada';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Data invalida';
+    return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(date);
   }
 
   private activeClinicId(): string {

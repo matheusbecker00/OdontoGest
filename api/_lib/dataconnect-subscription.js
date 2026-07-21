@@ -13,6 +13,11 @@ function timestampFromAsaasDate(value) {
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
+function timestampFromInput(value) {
+  if (value instanceof Date) return value.toISOString();
+  return timestampFromAsaasDate(value);
+}
+
 async function syncClinicSubscription(input) {
   await upsertClinicSubscription({
     clinicId: input.clinicId,
@@ -22,7 +27,7 @@ async function syncClinicSubscription(input) {
     provider: nullableString(input.provider),
     providerSubscriptionId: nullableString(input.providerSubscriptionId),
     checkoutUrl: nullableString(input.checkoutUrl),
-    currentPeriodEnd: timestampFromAsaasDate(input.currentPeriodEnd),
+    currentPeriodEnd: timestampFromInput(input.currentPeriodEnd),
   });
 }
 

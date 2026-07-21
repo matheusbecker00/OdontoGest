@@ -59,6 +59,7 @@ module.exports = async function handler(request, response) {
     const now = new Date().toISOString();
     const nextStatus = statusFromEvent(payload.event);
     const plan = getPlan(context.planId);
+    const currentPeriodEnd = currentPeriodEndFromPayment(payment);
     const eventId =
       payload.id ||
       `${payload.event || "UNKNOWN"}-${payment.id || payment.subscription || Date.now()}`;
@@ -79,6 +80,9 @@ module.exports = async function handler(request, response) {
           provider: "ASAAS",
           providerPaymentId: payment.id || null,
           providerSubscriptionId: payment.subscription || payment.id || null,
+          currentPeriodEnd: currentPeriodEnd
+            ? new Date(currentPeriodEnd)
+            : null,
           lastEvent: payload.event || null,
           lastEventId: payload.id || null,
           updatedAt: now,
@@ -108,7 +112,7 @@ module.exports = async function handler(request, response) {
       provider: "ASAAS",
       providerSubscriptionId: payment.subscription || payment.id || null,
       checkoutUrl: null,
-      currentPeriodEnd: currentPeriodEndFromPayment(payment),
+      currentPeriodEnd,
     });
 
     return send(response, 200, { ok: true });

@@ -7,6 +7,17 @@ function send(response, statusCode, payload) {
   response.status(statusCode).json(payload);
 }
 
+function toDate(value) {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  if (typeof value.toDate === "function") return value.toDate();
+  if (typeof value === "string") {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+  return null;
+}
+
 module.exports = async function handler(request, response) {
   if (request.method !== "POST") {
     response.setHeader("Allow", "POST");
@@ -66,6 +77,8 @@ module.exports = async function handler(request, response) {
     const billingRef = db.doc(`clinics/${clinicId}/billing/current`);
     const eventId = `checkout-${paymentLink.id || Date.now()}`;
     const eventRef = db.doc(`clinics/${clinicId}/billingEvents/${eventId}`);
+    const currentBilling = (await billingRef.get()).data() || {};
+    const currentPeriodEnd = toDate(currentBilling.currentPeriodEnd);
 
     await db.runTransaction(async (transaction) => {
       transaction.set(
@@ -78,6 +91,7 @@ module.exports = async function handler(request, response) {
           provider: "ASAAS",
           providerPaymentLinkId: paymentLink.id || null,
           checkoutUrl: paymentLink.url || null,
+          currentPeriodEnd,
           lastCheckoutByUserId: decoded.uid,
           updatedAt: now,
           createdAt: now,
@@ -110,7 +124,7 @@ module.exports = async function handler(request, response) {
       provider: "ASAAS",
       providerSubscriptionId: paymentLink.id || null,
       checkoutUrl: paymentLink.url || null,
-      currentPeriodEnd: null,
+      currentPeriodEnd,
     });
 
     return send(response, 200, {

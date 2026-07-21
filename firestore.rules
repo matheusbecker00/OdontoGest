@@ -144,11 +144,23 @@ service cloud.firestore {
     }
 
     function isSubscriptionReadOnly(clinicId) {
-      return exists(/databases/$(database)/documents/clinics/$(clinicId)/billing/current)
-        && get(/databases/$(database)/documents/clinics/$(clinicId)/billing/current).data.status in [
+      return !exists(/databases/$(database)/documents/clinics/$(clinicId)/billing/current)
+        || get(/databases/$(database)/documents/clinics/$(clinicId)/billing/current).data.status in [
+          'NONE',
           'PAST_DUE',
           'CANCELED'
-        ];
+        ]
+        || (
+          get(/databases/$(database)/documents/clinics/$(clinicId)/billing/current).data.status in [
+            'TRIAL',
+            'CHECKOUT_STARTED',
+            'PENDING'
+          ]
+          && (
+            !(get(/databases/$(database)/documents/clinics/$(clinicId)/billing/current).data.currentPeriodEnd is timestamp)
+            || get(/databases/$(database)/documents/clinics/$(clinicId)/billing/current).data.currentPeriodEnd <= request.time
+          )
+        );
     }
 
     function isOwnerBootstrap(clinicId, memberId) {

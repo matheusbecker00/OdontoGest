@@ -113,9 +113,7 @@
           <strong>{{ subscription.noticeTitle() }}</strong>
           <p>{{ subscription.noticeDescription() }}</p>
           @if (subscription.isReadOnly()) {
-            <small
-              >Leitura de dados liberada · Escritas serão bloqueadas por etapa controlada.</small
-            >
+            <small>Leitura de dados liberada · criação e edição bloqueadas.</small>
           }
         </div>
         <button mat-stroked-button type="button" (click)="subscription.openBillingAction()">
@@ -123,6 +121,17 @@
         </button>
       </section>
     }
-    <div class="content"><router-outlet /></div>
+    <div class="content" [class.content--readonly]="subscription.blocksWrites()">
+      @if (subscription.blocksWrites()) {
+        <section class="readonly-panel" aria-live="polite">
+          <span><og-icon name="lock" /></span>
+          <div>
+            <strong>Modo somente leitura ativo</strong>
+            <p>Regularize a assinatura para voltar a criar ou editar registros.</p>
+          </div>
+        </section>
+      }
+      <router-outlet />
+    </div>
   </mat-sidenav-content>
 </mat-sidenav-container>

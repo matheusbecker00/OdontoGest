@@ -1,5 +1,6 @@
 import { computed, effect, inject, Injectable, Injector, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
 import { AuthStore } from '../../core/auth/auth.store';
 import type { BillingState, BillingStatus } from './billing.repository';
 
@@ -24,8 +25,12 @@ export class SubscriptionAccessService {
   readonly billingState = signal<BillingState>(EMPTY_BILLING_STATE);
   readonly canManageBilling = computed(() => this.auth.hasEveryPermission(['billing.manage']));
   readonly status = computed(() => this.billingState().status);
+  readonly currentUrl = signal(this.router.url || '/');
   readonly isReadOnly = computed(
     () => this.status() === 'PAST_DUE' || this.status() === 'CANCELED',
+  );
+  readonly blocksWrites = computed(
+    () => this.isReadOnly() && !this.isReadonlyExemptRoute(this.currentUrl()),
   );
   readonly isOperational = computed(() => this.status() === 'ACTIVE' || this.status() === 'TRIAL');
   readonly noticeLevel = computed<SubscriptionNoticeLevel>(() => {
@@ -46,6 +51,12 @@ export class SubscriptionAccessService {
   });
 
   constructor() {
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        this.currentUrl.set(event.urlAfterRedirects);
+      });
+
     effect((onCleanup) => {
       const clinicId = this.auth.tenantContext()?.activeClinicId;
       if (!clinicId) {
@@ -107,7 +118,16 @@ export class SubscriptionAccessService {
   }
 
   canWrite(): boolean {
-    return !this.isReadOnly();
+    return !this.blocksWrites();
+  }
+
+  private isReadonlyExemptRoute(url: string): boolean {
+    const path = url.split('?')[0] ?? url;
+    return (
+      path === '/app/dashboard' ||
+      path.startsWith('/app/assinatura') ||
+      path.startsWith('/app/ajuda')
+    );
   }
 
   private noticeCopy(status: BillingStatus): { title: string; description: string } {
@@ -128,14 +148,14 @@ export class SubscriptionAccessService {
           'Estamos aguardando a confirmação do Asaas. O status será atualizado pelo webhook.',
       },
       PAST_DUE: {
-        title: 'Modo somente leitura preparado',
+        title: 'Modo somente leitura ativo',
         description:
-          'A assinatura está com pendência. A clínica continua consultando dados; novas alterações podem ser restringidas na próxima etapa.',
+          'A assinatura está com pendência. A clínica continua consultando dados, mas novas alterações ficam bloqueadas até a regularização.',
       },
       CANCELED: {
-        title: 'Modo somente leitura preparado',
+        title: 'Modo somente leitura ativo',
         description:
-          'A assinatura foi cancelada. Reative um plano para manter o acesso comercial completo.',
+          'A assinatura foi cancelada. Reative um plano para voltar a criar e editar registros.',
       },
     };
 

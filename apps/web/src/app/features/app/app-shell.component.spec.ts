@@ -30,6 +30,7 @@ describe('AppShellComponent', () => {
             showNotice: signal(false),
             noticeLevel: signal('hidden'),
             isReadOnly: signal(false),
+            blocksWrites: signal(false),
             noticeTitle: signal(''),
             noticeDescription: signal(''),
             noticeActionLabel: signal('Ver assinatura'),

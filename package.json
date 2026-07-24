@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@odontogest/dataconnect-admin": "workspace:*",
-    "firebase-admin": "13.10.0"
+    "firebase-admin": "14.2.0"
   },
   "scripts": {
     "build": "turbo run build",
@@ -34,8 +34,8 @@
   },
   "devDependencies": {
     "firebase-tools": "15.24.0",
-    "markdownlint-cli2": "0.20.0",
-    "prettier": "3.9.5",
+    "markdownlint-cli2": "0.23.1",
+    "prettier": "3.9.6",
     "turbo": "2.10.5"
   }
 }

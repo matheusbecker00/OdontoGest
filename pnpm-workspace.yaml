@@ -17,8 +17,8 @@ allowBuilds:
   unrs-resolver: true
 
 catalog:
-  prettier: 3.9.5
-  typescript: 5.9.3
+  prettier: 3.9.6
+  typescript: 7.0.2
 
 overrides:
   "@hono/node-server": 1.19.14
